@@ -1,6 +1,6 @@
 /**
  * ZephyrToast - A Toast Notification Library
- * Version: 1.0.0
+ * Version: 1.0.1
  *
  * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
  * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
@@ -93,15 +93,15 @@ class ZephyrToast {
    */
   initializeContainer() {
     // Get or create the container
-    this.container = document.getElementById("toast-container");
+    this.container = document.getElementById("zephyr-toast-container");
     if (!this.container) {
       this.container = document.createElement("div");
-      this.container.id = "toast-container";
+      this.container.id = "zephyr-toast-container";
       document.body.appendChild(this.container);
     }
 
     // Set position class
-    this.container.className = `toast-container position-${this.options.position}`;
+    this.container.className = `zephyr-toast-container position-${this.options.position}`;
   }
 
   /**
@@ -110,15 +110,40 @@ class ZephyrToast {
   injectCSS() {
     if (document.getElementById("toast-notification-css")) return;
 
-    const css = `
-        @import url('./animate.min.css');
-        @import url('./zephyr-toast.css');
-      `;
+    // Loop through all scripts in the document to find the ZephyrToast script
+    const scripts = document.scripts;
+    let scriptPath = "";
 
-    const style = document.createElement("style");
-    style.id = "toast-notification-css";
-    style.textContent = css;
-    document.head.appendChild(style);
+    for (let i = 0; i < scripts.length; i++) {
+      const script = scripts[i];
+      if (script.src && script.src.includes("zephyr-toast.js")) {
+        // Match based on the script file name
+        scriptPath = script.src;
+        break;
+      }
+    }
+
+    // If the path is found, extract the directory
+    if (scriptPath) {
+      const scriptDir = scriptPath.substring(0, scriptPath.lastIndexOf("/"));
+
+      // Construct the correct paths for the CSS files
+      const animateCSSPath = `${scriptDir}/animate.min.css`;
+      const zephyrToastCSSPath = `${scriptDir}/zephyr-toast.css`;
+
+      // Create the style element with dynamically constructed paths
+      const css = `
+          @import url('${animateCSSPath}');
+          @import url('${zephyrToastCSSPath}');
+          `;
+
+      const style = document.createElement("style");
+      style.id = "toast-notification-css";
+      style.textContent = css;
+      document.head.appendChild(style);
+    } else {
+      console.error("ZephyrToast script not found.");
+    }
   }
 
   /**
@@ -334,6 +359,6 @@ class ZephyrToast {
    */
   updatePosition(position) {
     this.options.position = position;
-    this.container.className = `toast-container position-${position}`;
+    this.container.className = `zephyr-toast-container position-${position}`;
   }
 }
