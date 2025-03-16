@@ -1,3 +1,5 @@
+# [Try ZephyrToast Toast Notification Generator](https://sarwaralamini.github.io/zephyr-toast)
+
 # ZephyrToast
 
 ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library, inspired by Bootstrap 5 styling and free from dependencies. It offers elegant, customizable notifications that gently appear and disappear, delivering a seamless user experience.
