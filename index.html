@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZephyrToast - Toast Notification Generator</title>
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/themes/prism.css"
+      rel="stylesheet"
+    />
+    <style>
+      .code-container {
+        font-family: "Courier New", Courier, monospace;
+        /* Monospace font for code */
+        background-color: #f5f4ef;
+        color: #000;
+        font-weight: bold;
+        border-radius: 6px;
+        position: relative;
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+
+      .card {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .toast-preview-container {
+        height: 300px;
+        border: 1px dashed #ccc;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .hero-section {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        color: white;
+        padding: 60px 0;
+      }
+
+      .hero-section h1 {
+        font-weight: 700;
+      }
+
+      .features-section {
+        padding: 80px 0;
+        background-color: #f9fbfd;
+      }
+
+      .feature-card {
+        height: 100%;
+        transition: transform 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #6a11cb;
+      }
+
+      .color-preview {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Header -->
+    <div class="hero-section">
+      <div class="container text-center">
+        <h1>ZephyrToast Generator</h1>
+        <p class="lead">
+          Create beautiful, customizable toast notifications with ease
+        </p>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features-section">
+      <div class="container">
+        <h2 class="text-center mb-5">Features</h2>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="card feature-card h-100 p-4">
+              <div class="text-center">
+                <i class="fas fa-feather feature-icon"></i>
+                <h5>Lightweight</h5>
+                <p>
+                  Zero dependencies, pure vanilla JavaScript that won't bloat
+                  your application.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card feature-card h-100 p-4">
+              <div class="text-center">
+                <i class="fas fa-paint-brush feature-icon"></i>
+                <h5>Customizable</h5>
+                <p>
+                  Easily customize appearances, animations, and behaviors to
+                  match your design.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card feature-card h-100 p-4">
+              <div class="text-center">
+                <i class="fas fa-wind feature-icon"></i>
+                <h5>Smooth Animations</h5>
+                <p>
+                  Beautiful entrance and exit animations that enhance user
+                  experience.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+      <div class="row g-4">
+        <!-- Left Column - Configuration -->
+        <div class="col-lg-7">
+          <div class="card bg-light-subtle p-4 mb-4">
+            <h3 class="card-title mb-4">Toast Configuration</h3>
+
+            <div class="row g-3">
+              <!-- Basic Options -->
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="toast-type" class="form-label">Toast Type</label>
+                  <select class="form-select" id="toast-type">
+                    <option value="success">Success</option>
+                    <option value="info" selected>Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="error">Error</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="toast-position" class="form-label"
+                    >Position</label
+                  >
+                  <select class="form-select" id="toast-position">
+                    <option value="top-right" selected>Top Right</option>
+                    <option value="top-left">Top Left</option>
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                    <option value="top-center">Top Center</option>
+                    <option value="bottom-center">Bottom Center</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="toast-duration" class="form-label"
+                    >Duration (ms)</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="toast-duration"
+                    value="5000"
+                    min="0"
+                    step="500"
+                  />
+                  <div class="form-text">Set to 0 for persistent toast</div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="toast-newest-on-top" class="form-label"
+                    >Stack Order</label
+                  >
+                  <select class="form-select" id="toast-newest-on-top">
+                    <option value="true" selected>Newest on Top</option>
+                    <option value="false">Newest on Bottom</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Content Options -->
+              <div class="col-12">
+                <div class="mb-3">
+                  <label for="toast-title" class="form-label"
+                    >Title (optional)</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="toast-title"
+                    placeholder="Toast Title"
+                  />
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="mb-3">
+                  <label for="toast-message" class="form-label"
+                    >Message *</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="toast-message"
+                    rows="2"
+                    placeholder="Your toast message"
+                  >
+This is a sample notification message.</textarea
+                  >
+                </div>
+              </div>
+
+              <!-- Animation Options -->
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="toast-animation-in" class="form-label"
+                    >Animation In</label
+                  >
+                  <select class="form-select" id="toast-animation-in">
+                    <option value="fadeIn">fadeIn</option>
+                    <option value="slideInLeft">slideInLeft</option>
+                    <option value="slideInRight">slideInRight</option>
+                    <option value="slideInDown">slideInDown</option>
+                    <option value="slideInUp">slideInUp</option>
+                    <option value="bounceIn">bounceIn</option>
+                    <option value="zoomIn" selected>zoomIn</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="toast-animation-out" class="form-label"
+                    >Animation Out</label
+                  >
+                  <select class="form-select" id="toast-animation-out">
+                    <option value="fadeOut">fadeOut</option>
+                    <option value="slideOutLeft">slideOutLeft</option>
+                    <option value="slideOutRight">slideOutRight</option>
+                    <option value="slideOutUp">slideOutUp</option>
+                    <option value="slideOutDown">slideOutDown</option>
+                    <option value="bounceOut">bounceOut</option>
+                    <option value="zoomOut" selected>zoomOut</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- UI Options -->
+              <div class="col-md-6">
+                <div class="mb-3 form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="toast-show-progress"
+                    checked
+                  />
+                  <label class="form-check-label" for="toast-show-progress"
+                    >Show Progress Bar</label
+                  >
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="mb-3 form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="toast-show-close"
+                    checked
+                  />
+                  <label class="form-check-label" for="toast-show-close"
+                    >Show Close Button</label
+                  >
+                </div>
+              </div>
+
+              <!-- Icon Options -->
+
+              <div class="col-12">
+                <div class="mb-3">
+                  <label class="form-label d-block">Icon Options</label>
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="icon-type"
+                      id="icon-default"
+                      value="default"
+                      checked
+                    />
+                    <label class="form-check-label" for="icon-default"
+                      >Default</label
+                    >
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="icon-type"
+                      id="icon-custom"
+                      value="custom"
+                    />
+                    <label class="form-check-label" for="icon-custom"
+                      >Custom</label
+                    >
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="icon-type"
+                      id="icon-none"
+                      value="none"
+                    />
+                    <label class="form-check-label" for="icon-none">None</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 icon-custom-container d-none">
+                <div class="mb-3">
+                  <label for="toast-custom-icon" class="form-label"
+                    >Select Predefined Icon</label
+                  >
+                  <select class="form-select" id="toast-custom-icon">
+                    <option value="fa-solid fa-bell">Bell</option>
+                    <option value="fa-solid fa-check">Check</option>
+                    <option value="fa-solid fa-circle-info">Info</option>
+                    <option value="fa-solid fa-triangle-exclamation">
+                      Warning
+                    </option>
+                    <option value="fa-solid fa-circle-xmark">Error</option>
+                    <option value="fa-solid fa-message">Message</option>
+                    <option value="fa-solid fa-envelope">Envelope</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="toast-custom-icon-url" class="form-label"
+                    >Custom Icon URL</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="toast-custom-icon-url"
+                    placeholder="Enter URL for custom icon"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Callback Options Card -->
+          <div class="card p-4 d-none">
+            <h4 class="card-title mb-3">Callback Options</h4>
+            <div class="mb-3 form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="toast-include-onclick"
+              />
+              <label class="form-check-label" for="toast-include-onclick"
+                >Include onClick Callback</label
+              >
+            </div>
+            <div class="mb-3 form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="toast-include-onclose"
+              />
+              <label class="form-check-label" for="toast-include-onclose"
+                >Include onClose Callback</label
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Preview & Code -->
+        <div class="col-lg-5">
+          <!-- Generated Code Card -->
+          <div class="card bg-light-subtle p-4">
+            <h3 class="card-title mb-3">
+              Generated Code
+              <button
+                class="btn btn-sm btn-outline-primary copy-btn"
+                id="copy-code"
+              >
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </h3>
+            <div class="code-container p-3 mb-3">
+              <pre><code id="generated-code">// Click "Generate Toast" to see code</code></pre>
+            </div>
+            <button id="generate-toast" class="btn btn-primary w-100">
+              Generate Toast
+            </button>
+            <p class="text-muted small">
+              <i class="fas fa-info-circle"></i> Make sure to include the
+              ZephyrToast library in your project.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+      <div class="container text-center">
+        <p>
+          ZephyrToast - A Toast Notification Library | Created by Md.Sarwar Alam
+        </p>
+        <p class="mb-1">
+          <a
+            href="https://github.com/sarwaralamini/zephyr-toast"
+            class="text-white text-decoration-none"
+            target="_blank"
+            ><i class="fab fa-github me-1"></i> GitHub</a
+          >
+        </p>
+        <p class="small text-light">Released under the MIT License</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap 5 and Popper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/prism.js"></script>
+
+    <!-- ZephyrToast JS -->
+    <script src="zephyr-toast.js"></script>
+
+    <!-- Generator Script -->
+    <script>
+      // Initialize toast instance with default options
+      const toast = new ZephyrToast();
+
+      // DOM Elements
+      const generateBtn = document.getElementById("generate-toast");
+      const copyBtn = document.getElementById("copy-code");
+      const codeOutput = document.getElementById("generated-code");
+
+      // Custom Icon Options
+      document.querySelectorAll('input[name="icon-type"]').forEach((radio) => {
+        radio.addEventListener("change", function () {
+          const customIconContainer = document.querySelector(
+            ".icon-custom-container"
+          );
+          if (this.value === "custom") {
+            customIconContainer.classList.remove("d-none");
+          } else {
+            customIconContainer.classList.add("d-none");
+          }
+        });
+      });
+
+      // Generate Toast
+      generateBtn.addEventListener("click", function () {
+        // Get form values
+        const type = document.getElementById("toast-type").value;
+        const position = document.getElementById("toast-position").value;
+        const duration = parseInt(
+          document.getElementById("toast-duration").value
+        );
+        const newestOnTop =
+          document.getElementById("toast-newest-on-top").value === "true";
+        const title = document.getElementById("toast-title").value;
+        const message =
+          document.getElementById("toast-message").value ||
+          "This is a sample notification.";
+        const animationIn = document.getElementById("toast-animation-in").value;
+        const animationOut = document.getElementById(
+          "toast-animation-out"
+        ).value;
+        const showProgress = document.getElementById(
+          "toast-show-progress"
+        ).checked;
+        const showClose = document.getElementById("toast-show-close").checked;
+        const includeOnClick = document.getElementById(
+          "toast-include-onclick"
+        ).checked;
+        const includeOnClose = document.getElementById(
+          "toast-include-onclose"
+        ).checked;
+
+        // Handle icon options
+        const iconType = document.querySelector(
+          'input[name="icon-type"]:checked'
+        ).value;
+        let iconOption = null;
+
+        if (iconType === "custom") {
+          const customIconUrl = document.getElementById(
+            "toast-custom-icon-url"
+          ).value;
+          const customIcon = document.getElementById("toast-custom-icon").value;
+
+          // If URL is provided, use it, otherwise fallback to the dropdown selection
+          iconOption = customIconUrl ? customIconUrl : customIcon;
+        } else if (iconType === "none") {
+          iconOption = false;
+        } else {
+          iconOption = null; // Default is the predefined icon, no URL needed
+        }
+
+        // Create options object
+        const options = {
+          position: position,
+          type: type,
+          duration: duration,
+          title: title,
+          showProgress: showProgress,
+          showClose: showClose,
+          newestOnTop: newestOnTop,
+          animation: {
+            in: animationIn,
+            out: animationOut,
+          },
+        };
+
+        // Add conditional options
+        if (iconType !== "default") {
+          options.icon = iconOption;
+        }
+
+        console.log(options);
+        // Generate code
+        let code = "// Initialize ZephyrToast (once in your application)\n";
+        code += "const toast = new ZephyrToast();\n\n";
+
+        // Method selection based on type
+        if (
+          type === "success" ||
+          type === "info" ||
+          type === "warning" ||
+          type === "error"
+        ) {
+          code += `// Show ${type} toast\n`;
+          code += `toast.${type}("${escapeString(message)}"`;
+        } else {
+          code += "// Show toast with custom options\n";
+          code += `toast.show("${escapeString(message)}"`;
+        }
+
+        const jsonString = JSON.stringify(options, null, 4); // `null` and `4` for pretty-printing
+
+        code += `, ${jsonString}`;
+
+        code += ");";
+
+        // Display the code
+        codeOutput.textContent = code;
+
+        // Show preview
+        //Generate in page notification
+
+        try {
+          if (type === "success") {
+            toast.success(message, options);
+          }
+
+          if (type === "info") {
+            toast.info(message, options);
+          }
+
+          if (type === "warning") {
+            toast.warning(message, options);
+          }
+
+          if (type === "error") {
+            toast.error(message, options);
+          }
+        } catch (error) {
+          previewContainer.innerHTML = `
+                    <div class="alert alert-danger m-3">
+                    <h5>Toast Error</h5>
+                    <p>There was an error showing the toast: ${error.message}</p>
+                    </div>
+                `;
+        }
+      });
+
+      // Copy code to clipboard
+      copyBtn.addEventListener("click", function () {
+        const codeText = codeOutput.textContent;
+        navigator.clipboard.writeText(codeText).then(() => {
+          // Change button text temporarily
+          const originalText = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+          }, 2000);
+        });
+      });
+
+      // Helper function to escape strings for JavaScript
+      function escapeString(str) {
+        return str
+          .replace(/\\/g, "\\\\")
+          .replace(/"/g, '\\"')
+          .replace(/\n/g, "\\n");
+      }
+    </script>
+  </body>
+</html>

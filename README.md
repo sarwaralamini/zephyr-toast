@@ -6,7 +6,7 @@ ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library
 
 - 🌈 Multiple notification types: Success, Info, Warning, Error
 - 📍 Flexible positioning: Top-right, Top-left, Bottom-right, Bottom-left, Top-center, Bottom-center
-- ✨ Beautiful animations powered by Animate.css
+- ✨ Beautiful animations powered by zephyr-toast-animate.css
 - ⏱️ Progress bar with customizable duration
 - 🎨 Bootstrap 5 inspired styling with no dependencies
 - 🔧 Highly customizable: titles, animations, close buttons, and more
@@ -32,32 +32,34 @@ cd zephyr-toast
 
 ```javascript
 // Initialize ZephyrToast
-const Toast = new ZephyrToast();
+const toast = new ZephyrToast();
 ```
 
 3. Create toast notifications:
 
 ```javascript
 // Show a success toast
-Toast.success("Operation completed successfully!");
+toast.success("Operation completed successfully!");
 
 // Show an error toast
-Toast.error("Something went wrong. Please try again.");
+toast.error("Something went wrong. Please try again.");
 
 // Show a warning toast
 Toast.warning("Your session will expire in 5 minutes.");
 
 // Show an info toast
-Toast.info("3 new messages in your inbox.");
+toast.info("3 new messages in your inbox.");
 ```
 
 ## Demo
 
 Open `zephyr-toast-demo.html` in your browser to see ZephyrToast in action and explore all available options.
 
+Additionally, you can open the [Toast Notification Generator](https://sarwaralamini.github.io/zephyr-toast) to easily create your own toast notifications.
+
 ## Dependencies
 
-- [Animate.css](https://animate.style/) - For animations (Provides elegant animations for your toast notifications (No additional setup required - already integrated within zephyr-toast.js))
+- [zephyr-toast-animate.css](https://github.com/sarwaralamini/zephyr-toast) - Custom animation system with prefixed classes (zephyr\_) providing elegant animations for your toast notifications (No additional setup required - already integrated within zephyr-toast.js)
 
 ## Configuration
 
@@ -65,9 +67,9 @@ ZephyrToast is highly customizable. Here's an example with all options:
 
 ```javascript
 // Initialize ZephyrToast
-const Toast = new ZephyrToast();
+const toast = new ZephyrToast();
 
-Toast.success("Profile updated successfully!", {
+toast.success("Profile updated successfully!", {
   position: "top-center",
   duration: 5000,
   title: "Success",
@@ -82,6 +84,117 @@ Toast.success("Profile updated successfully!", {
   onClick: () => console.log("Toast clicked"),
 });
 ```
+
+# ZephyrToast Custom Icons
+
+ZephyrToast now supports custom icons in your toast notifications. This feature allows you to replace the default icons with your own images, SVGs, or FontAwesome icons to better match your application's design.
+
+## Icon Usage Examples
+
+### Icon Basic Usage
+
+You can customize icons when creating any toast notification:
+
+```javascript
+// Initialize ZephyrToast
+const toast = new ZephyrToast();
+
+// Create a toast with custom icon
+toast.success("Success message", {
+  icon: "https://example.com/custom-icon.png",
+});
+```
+
+## Supported Icon Types
+
+### SVG Icons
+
+You can use inline SVG content:
+
+```javascript
+toast.info("Info message", {
+  icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 14A6 6 0 1 1 8 2a6 6 0 0 1 0 12z"/></svg>',
+});
+```
+
+### Image URLs (PNG, JPG, JPEG, GIF)
+
+You can use direct image URLs:
+
+```javascript
+toast.warning("Warning message", {
+  icon: "https://example.com/warning-icon.png",
+});
+
+toast.error("Error message", {
+  icon: "https://mysite.com/images/error-icon.jpg",
+});
+```
+
+### FontAwesome Icons
+
+You can use FontAwesome icon classes (requires FontAwesome to be loaded in your project):
+
+```javascript
+toast.success("Success message", {
+  icon: "fas fa-check-circle",
+});
+
+toast.info("Info message", {
+  icon: "far fa-bell",
+});
+```
+
+## Advanced Customization for Icon
+
+For more control, you can pass an object with specific properties:
+
+### Custom Image with Size Control
+
+```javascript
+toast.success("Profile updated", {
+  icon: {
+    url: "https://example.com/profile-icon.png",
+    width: "24px",
+    height: "24px",
+  },
+});
+```
+
+### FontAwesome with Specific Class
+
+```javascript
+toast.warning("Warning", {
+  icon: {
+    fontAwesome: "fas fa-exclamation-triangle fa-lg",
+  },
+});
+```
+
+### Custom SVG with Advanced Options
+
+```javascript
+toast.info("New message", {
+  icon: {
+    svg: "<svg>...</svg>",
+  },
+});
+```
+
+## Icon Default Behavior
+
+If no custom icon is provided, ZephyrToast will use its default icons based on the notification type:
+
+- Success: Checkmark circle
+- Info: Information circle
+- Warning: Warning triangle
+- Error: X circle
+
+## Icon Compatibility Notes
+
+- Image files (PNG, JPG, JPEG, GIF) will be displayed at 16×16px by default unless dimensions are specified
+- FontAwesome icons require the FontAwesome library to be loaded in your project
+- SVG icons will inherit the color defined by the toast type (using currentColor)
 
 ## Author
 

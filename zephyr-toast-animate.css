@@ -1,0 +1,280 @@
+/*!
+ * ZephyrToast - A Toast Notification Library
+ * Version: 1.0.1
+ *
+ * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
+ * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
+ * customizable notifications that gently appear and disappear, delivering a seamless
+ * user experience.
+ *
+ * Author: Md.Sarwar Alam
+ * GitHub: https://github.com/sarwaralamini
+ * Library: https://github.com/sarwaralamini/zephyr-toast
+ *
+ * Released under the MIT License
+ */
+
+/* Base animation class */
+.zephyr_animate__animated {
+    animation-duration: 0.75s;
+    animation-fill-mode: both;
+}
+
+/* Fade Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.zephyr_animate__fadeIn {
+    animation-name: fadeIn;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.zephyr_animate__fadeOut {
+    animation-name: fadeOut;
+}
+
+/* Slide Left Animations */
+@keyframes slideInLeft {
+    from {
+        transform: translate3d(-100%, 0, 0);
+        visibility: visible;
+    }
+
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.zephyr_animate__slideInLeft {
+    animation-name: slideInLeft;
+}
+
+@keyframes slideOutLeft {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+
+    to {
+        visibility: hidden;
+        transform: translate3d(-100%, 0, 0);
+    }
+}
+
+.zephyr_animate__slideOutLeft {
+    animation-name: slideOutLeft;
+}
+
+/* Slide Right Animations */
+@keyframes slideInRight {
+    from {
+        transform: translate3d(100%, 0, 0);
+        visibility: visible;
+    }
+
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.zephyr_animate__slideInRight {
+    animation-name: slideInRight;
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+
+    to {
+        visibility: hidden;
+        transform: translate3d(100%, 0, 0);
+    }
+}
+
+.zephyr_animate__slideOutRight {
+    animation-name: slideOutRight;
+}
+
+/* Slide Down/Up Animations */
+@keyframes slideInDown {
+    from {
+        transform: translate3d(0, -100%, 0);
+        visibility: visible;
+    }
+
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.zephyr_animate__slideInDown {
+    animation-name: slideInDown;
+}
+
+@keyframes slideOutUp {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+
+    to {
+        visibility: hidden;
+        transform: translate3d(0, -100%, 0);
+    }
+}
+
+.zephyr_animate__slideOutUp {
+    animation-name: slideOutUp;
+}
+
+/* Slide Up/Down Animations */
+@keyframes slideInUp {
+    from {
+        transform: translate3d(0, 100%, 0);
+        visibility: visible;
+    }
+
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.zephyr_animate__slideInUp {
+    animation-name: slideInUp;
+}
+
+@keyframes slideOutDown {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+
+    to {
+        visibility: hidden;
+        transform: translate3d(0, 100%, 0);
+    }
+}
+
+.zephyr_animate__slideOutDown {
+    animation-name: slideOutDown;
+}
+
+/* Bounce Animations */
+@keyframes bounceIn {
+
+    from,
+    20%,
+    40%,
+    60%,
+    80%,
+    to {
+        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+
+    0% {
+        opacity: 0;
+        transform: scale3d(0.3, 0.3, 0.3);
+    }
+
+    20% {
+        transform: scale3d(1.1, 1.1, 1.1);
+    }
+
+    40% {
+        transform: scale3d(0.9, 0.9, 0.9);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale3d(1.03, 1.03, 1.03);
+    }
+
+    80% {
+        transform: scale3d(0.97, 0.97, 0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale3d(1, 1, 1);
+    }
+}
+
+.zephyr_animate__bounceIn {
+    animation-name: bounceIn;
+    animation-duration: 0.75s;
+}
+
+@keyframes bounceOut {
+    20% {
+        transform: scale3d(0.9, 0.9, 0.9);
+    }
+
+    50%,
+    55% {
+        opacity: 1;
+        transform: scale3d(1.1, 1.1, 1.1);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale3d(0.3, 0.3, 0.3);
+    }
+}
+
+.zephyr_animate__bounceOut {
+    animation-name: bounceOut;
+    animation-duration: 0.75s;
+}
+
+/* Zoom Animations */
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale3d(0.3, 0.3, 0.3);
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    to {
+        transform: scale3d(1, 1, 1);
+    }
+}
+
+.zephyr_animate__zoomIn {
+    animation-name: zoomIn;
+}
+
+@keyframes zoomOut {
+    from {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+        transform: scale3d(0.3, 0.3, 0.3);
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.zephyr_animate__zoomOut {
+    animation-name: zoomOut;
+}

@@ -30,6 +30,7 @@ class ZephyrToast {
         in: "fadeIn",
         out: "fadeOut",
       },
+      icon: null,
       onClose: null,
       onClick: null,
     };
@@ -42,18 +43,20 @@ class ZephyrToast {
 
     // Animation classes
     this.animations = {
-      fadeIn: "animate__fadeIn",
-      fadeOut: "animate__fadeOut",
-      slideInLeft: "animate__slideInLeft",
-      slideOutLeft: "animate__slideOutLeft",
-      slideInRight: "animate__slideInRight",
-      slideOutRight: "animate__slideOutRight",
-      slideInDown: "animate__slideInDown",
-      slideOutUp: "animate__slideOutUp",
-      slideInUp: "animate__slideInUp",
-      slideOutDown: "animate__slideOutDown",
-      bounceIn: "animate__bounceIn",
-      bounceOut: "animate__bounceOut",
+      fadeIn: "zephyr_animate__fadeIn",
+      fadeOut: "zephyr_animate__fadeOut",
+      slideInLeft: "zephyr_animate__slideInLeft",
+      slideOutLeft: "zephyr_animate__slideOutLeft",
+      slideInRight: "zephyr_animate__slideInRight",
+      slideOutRight: "zephyr_animate__slideOutRight",
+      slideInDown: "zephyr_animate__slideInDown",
+      slideOutUp: "zephyr_animate__slideOutUp",
+      slideInUp: "zephyr_animate__slideInUp",
+      slideOutDown: "zephyr_animate__slideOutDown",
+      bounceIn: "zephyr_animate__bounceIn",
+      bounceOut: "zephyr_animate__bounceOut",
+      zoomIn: "zephyr_animate__zoomIn",
+      zoomOut: "zephyr_animate__zoomOut",
     };
 
     // Toast class types
@@ -101,14 +104,14 @@ class ZephyrToast {
     }
 
     // Set position class
-    this.container.className = `zephyr-toast-container position-${this.options.position}`;
+    this.container.className = `zephyr-toast-container zephyr-position-${this.options.position}`;
   }
 
   /**
    * Inject necessary CSS for toast notifications
    */
   injectCSS() {
-    if (document.getElementById("toast-notification-css")) return;
+    if (document.getElementById("zephyr-toast-notification-css")) return;
 
     // Loop through all scripts in the document to find the ZephyrToast script
     const scripts = document.scripts;
@@ -128,7 +131,7 @@ class ZephyrToast {
       const scriptDir = scriptPath.substring(0, scriptPath.lastIndexOf("/"));
 
       // Construct the correct paths for the CSS files
-      const animateCSSPath = `${scriptDir}/animate.min.css`;
+      const animateCSSPath = `${scriptDir}/zephyr-toast-animate.css`;
       const zephyrToastCSSPath = `${scriptDir}/zephyr-toast.css`;
 
       // Create the style element with dynamically constructed paths
@@ -138,7 +141,7 @@ class ZephyrToast {
           `;
 
       const style = document.createElement("style");
-      style.id = "toast-notification-css";
+      style.id = "zephyr-toast-notification-css";
       style.textContent = css;
       document.head.appendChild(style);
     } else {
@@ -163,7 +166,7 @@ class ZephyrToast {
 
     // Create toast element
     const toast = document.createElement("div");
-    toast.className = `toast-notification animate__animated ${
+    toast.className = `zephyr-toast-notification zephyr_animate__animated ${
       this.animations[toastOptions.animation.in]
     }`;
     toast.style.backgroundColor = this.types[toastOptions.type].bgColor;
@@ -172,29 +175,67 @@ class ZephyrToast {
 
     // Create toast body
     const toastBody = document.createElement("div");
-    toastBody.className = "toast-notification-body";
+    toastBody.className = "zephyr-toast-notification-body";
 
     // Add icon
     const iconDiv = document.createElement("div");
-    iconDiv.className = "toast-notification-icon";
-    iconDiv.innerHTML = this.types[toastOptions.type].icon;
+    iconDiv.className = "zephyr-toast-notification-icon";
+
+    // Check if a custom icon is provided
+    if (toastOptions.icon) {
+      // Handle different icon types
+      if (typeof toastOptions.icon === "string") {
+        // Check if it's a URL (image)
+        if (toastOptions.icon.match(/\.(jpeg|jpg|gif|png)$/) !== null) {
+          iconDiv.innerHTML = `<img src="${toastOptions.icon}" alt="icon" style="width: 16px; height: 16px;" />`;
+        }
+        // Check if it's a FontAwesome icon class
+        else if (toastOptions.icon.includes("fa-")) {
+          iconDiv.innerHTML = `<i class="${toastOptions.icon}"></i>`;
+        }
+        // Assume it's SVG content
+        else {
+          iconDiv.innerHTML = toastOptions.icon;
+        }
+      }
+      // If it's an object with specific properties
+      else if (typeof toastOptions.icon === "object") {
+        if (toastOptions.icon.url) {
+          // Image URL
+          iconDiv.innerHTML = `<img src="${
+            toastOptions.icon.url
+          }" alt="icon" style="width: ${
+            toastOptions.icon.width || "16px"
+          }; height: ${toastOptions.icon.height || "16px"};" />`;
+        } else if (toastOptions.icon.fontAwesome) {
+          // FontAwesome with specific class
+          iconDiv.innerHTML = `<i class="${toastOptions.icon.fontAwesome}"></i>`;
+        } else if (toastOptions.icon.svg) {
+          // SVG content
+          iconDiv.innerHTML = toastOptions.icon.svg;
+        }
+      }
+    } else {
+      // Use default icon based on type
+      iconDiv.innerHTML = this.types[toastOptions.type].icon;
+    }
     toastBody.appendChild(iconDiv);
 
     // Add content
     const contentDiv = document.createElement("div");
-    contentDiv.className = "toast-notification-content";
+    contentDiv.className = "zephyr-toast-notification-content";
 
     // Add title if provided
     if (toastOptions.title) {
       const titleDiv = document.createElement("div");
-      titleDiv.className = "toast-notification-title";
+      titleDiv.className = "zephyr-toast-notification-title";
       titleDiv.textContent = toastOptions.title;
       contentDiv.appendChild(titleDiv);
     }
 
     // Add message
     const messageDiv = document.createElement("div");
-    messageDiv.className = "toast-notification-message";
+    messageDiv.className = "zephyr-toast-notification-message";
     messageDiv.textContent = toastOptions.message;
     contentDiv.appendChild(messageDiv);
 
@@ -205,7 +246,7 @@ class ZephyrToast {
     if (toastOptions.showClose) {
       const closeButton = document.createElement("button");
       closeButton.type = "button";
-      closeButton.className = "toast-notification-close";
+      closeButton.className = "zephyr-toast-notification-close";
       closeButton.innerHTML = "&times;";
       closeButton.style.color = this.types[toastOptions.type].textColor;
       closeButton.addEventListener("click", () => this.removeToast(toast));
@@ -215,10 +256,10 @@ class ZephyrToast {
     // Add progress bar if enabled
     if (toastOptions.showProgress && toastOptions.duration > 0) {
       const progressBar = document.createElement("div");
-      progressBar.className = "toast-progress-bar";
+      progressBar.className = "zephyr-toast-progress-bar";
 
       const progressBarFill = document.createElement("div");
-      progressBarFill.className = "toast-progress-bar-fill";
+      progressBarFill.className = "zephyr-toast-progress-bar-fill";
 
       progressBar.appendChild(progressBarFill);
       toast.appendChild(progressBar);
@@ -236,8 +277,8 @@ class ZephyrToast {
       toast.addEventListener("click", (e) => {
         if (
           e.target !== toast &&
-          e.target.className !== "toast-notification-message" &&
-          e.target.className !== "toast-notification-content"
+          e.target.className !== "zephyr-toast-notification-message" &&
+          e.target.className !== "zephyr-toast-notification-content"
         )
           return;
         toastOptions.onClick();
@@ -299,7 +340,9 @@ class ZephyrToast {
    * Remove all toast notifications
    */
   removeAll() {
-    const toasts = this.container.querySelectorAll(".toast-notification");
+    const toasts = this.container.querySelectorAll(
+      ".zephyr-toast-notification"
+    );
     toasts.forEach((toast) => this.removeToast(toast));
   }
 
@@ -359,6 +402,6 @@ class ZephyrToast {
    */
   updatePosition(position) {
     this.options.position = position;
-    this.container.className = `zephyr-toast-container position-${position}`;
+    this.container.className = `zephyr-toast-container zephyr-position-${position}`;
   }
 }
