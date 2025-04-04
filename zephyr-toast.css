@@ -1,6 +1,6 @@
 /*!
  * ZephyrToast - A Toast Notification Library
- * Version: 1.1.0
+ * Version: 1.2.0
  *
  * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
  * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
@@ -118,4 +118,32 @@
     background-color: rgba(0, 0, 0, 0.075);
     transition: width linear;
     width: 100%;
+}
+
+/*
+ * Responsive adjustments for mobile view (max-width: 576px)
+ * Applies full-width and centered alignment to all toast positions 
+ * for better readability and appearance on small screens.
+ */
+@media (max-width: 576px) {
+
+    .zephyr-position-top-right,
+    .zephyr-position-top-left,
+    .zephyr-position-bottom-right,
+    .zephyr-position-bottom-left,
+    .zephyr-position-top-center,
+    .zephyr-position-bottom-center {
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 10px !important;
+    }
+
+    .zephyr-toast-notification {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
 }

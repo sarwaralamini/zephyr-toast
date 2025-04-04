@@ -345,46 +345,85 @@ This is a sample notification message.</textarea
                       >Custom</label
                     >
                   </div>
-                  <div class="form-check form-check-inline">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      name="icon-type"
-                      id="icon-none"
-                      value="none"
-                    />
-                    <label class="form-check-label" for="icon-none">None</label>
-                  </div>
                 </div>
               </div>
 
               <div class="col-12 icon-custom-container d-none">
-                <div class="mb-3">
-                  <label for="toast-custom-icon" class="form-label"
-                    >Select Predefined Icon</label
-                  >
-                  <select class="form-select" id="toast-custom-icon">
-                    <option value="fa-solid fa-bell">Bell</option>
-                    <option value="fa-solid fa-check">Check</option>
-                    <option value="fa-solid fa-circle-info">Info</option>
-                    <option value="fa-solid fa-triangle-exclamation">
-                      Warning
-                    </option>
-                    <option value="fa-solid fa-circle-xmark">Error</option>
-                    <option value="fa-solid fa-message">Message</option>
-                    <option value="fa-solid fa-envelope">Envelope</option>
-                  </select>
-                </div>
-                <div class="mb-3">
-                  <label for="toast-custom-icon-url" class="form-label"
-                    >Custom Icon URL</label
-                  >
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="toast-custom-icon-url"
-                    placeholder="Enter URL for custom icon"
-                  />
+                <div class="row">
+                  <div class="col-12">
+                    <div
+                      class="alert alert-info d-flex align-items-center"
+                      role="alert"
+                    >
+                      <i class="fas fa-info-circle me-2"></i>
+                      <span
+                        ><strong>Note:</strong> You can use any icon library
+                        such as Font Awesome, Material Icons, Bootstrap Icons,
+                        etc. Just ensure that the relevant library is properly
+                        loaded in your project before using any icons.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="mb-3">
+                      <label class="form-label d-block">Is Icon</label>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="is-icon-true-false"
+                          id="is-icon-true"
+                          value="true"
+                        />
+                        <label class="form-check-label" for="is-icon-true"
+                          >true</label
+                        >
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="is-icon-true-false"
+                          id="is-icon-false"
+                          value="false"
+                          checked
+                        />
+                        <label class="form-check-label" for="is-icon-false"
+                          >false</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <div class="mb-3">
+                      <label for="toast-custom-icon" class="form-label"
+                        >Select Predefined Icon</label
+                      >
+                      <select class="form-select" id="toast-custom-icon">
+                        <option value="fa-solid fa-bell">Bell</option>
+                        <option value="fa-solid fa-check">Check</option>
+                        <option value="fa-solid fa-circle-info">Info</option>
+                        <option value="fa-solid fa-triangle-exclamation">
+                          Warning
+                        </option>
+                        <option value="fa-solid fa-circle-xmark">Error</option>
+                        <option value="fa-solid fa-message">Message</option>
+                        <option value="fa-solid fa-envelope">Envelope</option>
+                      </select>
+                    </div>
+                    <div class="mb-3 custom-icon-url">
+                      <label for="toast-custom-icon-url" class="form-label"
+                        >Custom Icon URL</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="toast-custom-icon-url"
+                        placeholder="Enter URL for custom icon"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -487,6 +526,19 @@ This is a sample notification message.</textarea
           );
           if (this.value === "custom") {
             customIconContainer.classList.remove("d-none");
+            document
+              .querySelectorAll('input[name="is-icon-true-false"]')
+              .forEach((radio) => {
+                radio.addEventListener("change", function () {
+                  const customIconUrlContainer =
+                    document.querySelector(".custom-icon-url");
+                  if (this.value === "true") {
+                    customIconUrlContainer.classList.add("d-none");
+                  } else {
+                    customIconUrlContainer.classList.remove("d-none");
+                  }
+                });
+              });
           } else {
             customIconContainer.classList.add("d-none");
           }
@@ -526,18 +578,24 @@ This is a sample notification message.</textarea
         const iconType = document.querySelector(
           'input[name="icon-type"]:checked'
         ).value;
+
+        const isIcon = document.querySelector(
+          'input[name="is-icon-true-false"]:checked'
+        ).value;
+
         let iconOption = null;
 
         if (iconType === "custom") {
-          const customIconUrl = document.getElementById(
-            "toast-custom-icon-url"
-          ).value;
+          let customIconUrl = ""; // Define it here so it's always available
+          if (isIcon !== "true") {
+            customIconUrl = document.getElementById(
+              "toast-custom-icon-url"
+            ).value;
+          }
           const customIcon = document.getElementById("toast-custom-icon").value;
 
           // If URL is provided, use it, otherwise fallback to the dropdown selection
           iconOption = customIconUrl ? customIconUrl : customIcon;
-        } else if (iconType === "none") {
-          iconOption = false;
         } else {
           iconOption = null; // Default is the predefined icon, no URL needed
         }
@@ -559,10 +617,10 @@ This is a sample notification message.</textarea
 
         // Add conditional options
         if (iconType !== "default") {
+          options.isIcon = isIcon === "true";
           options.icon = iconOption;
         }
 
-        console.log(options);
         // Generate code
         let code = "// Initialize ZephyrToast (once in your application)\n";
         code += "const toast = new ZephyrToast();\n\n";
@@ -610,12 +668,7 @@ This is a sample notification message.</textarea
             toast.error(message, options);
           }
         } catch (error) {
-          previewContainer.innerHTML = `
-                    <div class="alert alert-danger m-3">
-                    <h5>Toast Error</h5>
-                    <p>There was an error showing the toast: ${error.message}</p>
-                    </div>
-                `;
+          console.error("Toast Error:", error.message);
         }
       });
 

@@ -89,7 +89,7 @@ toast.success("Profile updated successfully!", {
 
 # ZephyrToast Custom Icons
 
-ZephyrToast now supports custom icons in your toast notifications. This feature allows you to replace the default icons with your own images, SVGs, or FontAwesome icons to better match your application's design.
+ZephyrToast now supports custom icons in your toast notifications. This feature allows you to replace the default icons with your own images, SVGs, or icons from any icon library (e.g., FontAwesome, Material Icons, Bootstrap Icons) to better match your application's design.
 
 ## Icon Usage Examples
 
@@ -133,18 +133,18 @@ toast.error("Error message", {
 });
 ```
 
-### FontAwesome Icons
+### Icon Libraries
 
-You can use FontAwesome icon classes (requires FontAwesome to be loaded in your project):
+You can use icons from any supported icon library (e.g., FontAwesome, Material Icons, Bootstrap Icons, etc.). Just make sure the relevant library is loaded in your project before using any icons.
 
 ```javascript
 toast.success("Success message", {
-  icon: "fas fa-check-circle",
+  icon: "fas fa-check-circle", // Example from FontAwesome
 });
 
 toast.info("Info message", {
-  icon: "far fa-bell",
-});
+  icon: "material-icons info",
+}); // Example from Material Icons
 ```
 
 ## Advanced Customization for Icon
@@ -195,7 +195,7 @@ If no custom icon is provided, ZephyrToast will use its default icons based on t
 ## Icon Compatibility Notes
 
 - Image files (PNG, JPG, JPEG, GIF) will be displayed at 16×16px by default unless dimensions are specified
-- FontAwesome icons require the FontAwesome library to be loaded in your project
+- Icons from any icon library (e.g., FontAwesome, Material Icons, Bootstrap Icons) require the respective library to be loaded in your project.
 - SVG icons will inherit the color defined by the toast type (using currentColor)
 
 ## Author

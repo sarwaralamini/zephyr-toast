@@ -1,6 +1,6 @@
 /**
  * ZephyrToast - A Toast Notification Library
- * Version: 1.1.0
+ * Version: 1.2.0
  *
  * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
  * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
@@ -31,6 +31,7 @@ class ZephyrToast {
         out: "fadeOut",
       },
       icon: null,
+      isIcon: false,
       onClose: null,
       onClick: null,
     };
@@ -185,17 +186,25 @@ class ZephyrToast {
     if (toastOptions.icon) {
       // Handle different icon types
       if (typeof toastOptions.icon === "string") {
-        // Check if it's a URL (image)
-        if (toastOptions.icon.match(/\.(jpeg|jpg|gif|png)$/) !== null) {
-          iconDiv.innerHTML = `<img src="${toastOptions.icon}" alt="icon" style="width: 16px; height: 16px;" />`;
-        }
-        // Check if it's a FontAwesome icon class
-        else if (toastOptions.icon.includes("fa-")) {
+        if (toastOptions.isIcon) {
+          // Don't allow image URLs with isIcon
+          // Only check for image URLs if the icon is not a class name (i.e., doesn't look like a URL)
+          if (toastOptions.icon.match(/\.(jpeg|jpg|gif|png)$/i)) {
+            throw new Error(
+              "isIcon is true, but an image URL was provided for the icon."
+            );
+          }
+          // Render icon as custom HTML (can be any library: e.g. FontAwesome, Bootstrap Icons, etc.)
           iconDiv.innerHTML = `<i class="${toastOptions.icon}"></i>`;
-        }
-        // Assume it's SVG content
-        else {
-          iconDiv.innerHTML = toastOptions.icon;
+        } else {
+          // Not isIcon: check if it's an image
+          if (toastOptions.icon.match(/\.(jpeg|jpg|gif|png)$/i)) {
+            iconDiv.innerHTML = `<img src="${toastOptions.icon}" alt="icon" style="width: 16px; height: 16px;" />`;
+          }
+          // Default to rendering as a font-icon class (e.g. FontAwesome, Bootstrap Icons, etc.)
+          else {
+            iconDiv.innerHTML = `<i class="${toastOptions.icon}"></i>`;
+          }
         }
       }
       // If it's an object with specific properties
