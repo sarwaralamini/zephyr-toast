@@ -1,6 +1,6 @@
 /*!
  * ZephyrToast - A Toast Notification Library
- * Version: 1.2.0
+ * Version: 1.3.0
  *
  * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
  * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
@@ -116,6 +116,19 @@
 .zephyr-toast-progress-bar-fill {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.075);
+    transition: width linear;
+    width: 100%;
+}
+
+.zephyr-toast-progress-bar-void{
+    height: 5px;
+    background-color: rgba(75, 84, 88, 1);
+    position: relative;
+}
+
+.zephyr-toast-progress-bar-void-fill {
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.15);
     transition: width linear;
     width: 100%;
 }

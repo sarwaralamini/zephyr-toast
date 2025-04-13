@@ -6,7 +6,7 @@ ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library
 
 ## Features
 
-- 🌈 Multiple notification types: Success, Info, Warning, Error
+- 🌈 Multiple notification types: Success, Info, Warning, Error, Zen (light), Void (dark)
 - 📍 Flexible positioning: Top-right, Top-left, Bottom-right, Bottom-left, Top-center, Bottom-center
 - ✨ Beautiful animations powered by zephyr-toast-animate.css
 - ⏱️ Progress bar with customizable duration
@@ -47,17 +47,21 @@ toast.success("Operation completed successfully!");
 toast.error("Something went wrong. Please try again.");
 
 // Show a warning toast
-Toast.warning("Your session will expire in 5 minutes.");
+toast.warning("Your session will expire in 5 minutes.");
 
 // Show an info toast
 toast.info("3 new messages in your inbox.");
+
+// Show a zen toast (light)
+toast.zen("Everything is running smoothly.");
+
+// Show a void toast (dark)
+toast.void("Just a quick update.");
 ```
 
 ## Demo
 
-Open `zephyr-toast-demo.html` in your browser to see ZephyrToast in action and explore all available options.
-
-Additionally, you can open the [Toast Notification Generator](https://sarwaralamini.github.io/zephyr-toast) to easily create your own toast notifications.
+Easily create your own toast notifications using the [Toast Notification Generator](https://sarwaralamini.github.io/zephyr-toast). Simply open `index.html` and start customizing your toasts with different styles, icons, and messages.
 
 ## Dependencies
 
@@ -191,6 +195,8 @@ If no custom icon is provided, ZephyrToast will use its default icons based on t
 - Info: Information circle
 - Warning: Warning triangle
 - Error: X circle
+- Zen: Sun
+- Void: Moon
 
 ## Icon Compatibility Notes
 

@@ -171,6 +171,8 @@
                     <option value="info" selected>Info</option>
                     <option value="warning">Warning</option>
                     <option value="error">Error</option>
+                    <option value="zen">Zen (Light)</option>
+                    <option value="void">Void (Dark)</option>
                   </select>
                 </div>
               </div>
@@ -630,7 +632,9 @@ This is a sample notification message.</textarea
           type === "success" ||
           type === "info" ||
           type === "warning" ||
-          type === "error"
+          type === "error" ||
+          type === "zen" ||
+          type === "void"
         ) {
           code += `// Show ${type} toast\n`;
           code += `toast.${type}("${escapeString(message)}"`;
@@ -666,6 +670,14 @@ This is a sample notification message.</textarea
 
           if (type === "error") {
             toast.error(message, options);
+          }
+
+          if (type === "zen") {
+            toast.zen(message, options);
+          }
+
+          if (type === "void") {
+            toast.void(message, options);
           }
         } catch (error) {
           console.error("Toast Error:", error.message);

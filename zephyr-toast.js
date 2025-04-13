@@ -1,6 +1,6 @@
 /**
  * ZephyrToast - A Toast Notification Library
- * Version: 1.2.0
+ * Version: 1.3.0
  *
  * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
  * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
@@ -44,48 +44,60 @@ class ZephyrToast {
 
     // Animation classes
     this.animations = {
-      fadeIn: "zephyr_animate__fadeIn",
-      fadeOut: "zephyr_animate__fadeOut",
-      slideInLeft: "zephyr_animate__slideInLeft",
-      slideOutLeft: "zephyr_animate__slideOutLeft",
-      slideInRight: "zephyr_animate__slideInRight",
-      slideOutRight: "zephyr_animate__slideOutRight",
-      slideInDown: "zephyr_animate__slideInDown",
-      slideOutUp: "zephyr_animate__slideOutUp",
-      slideInUp: "zephyr_animate__slideInUp",
-      slideOutDown: "zephyr_animate__slideOutDown",
-      bounceIn: "zephyr_animate__bounceIn",
-      bounceOut: "zephyr_animate__bounceOut",
-      zoomIn: "zephyr_animate__zoomIn",
-      zoomOut: "zephyr_animate__zoomOut",
+      fadeIn: "zephyr_animate_fadeIn",
+      fadeOut: "zephyr_animate_fadeOut",
+      slideInLeft: "zephyr_animate_slideInLeft",
+      slideOutLeft: "zephyr_animate_slideOutLeft",
+      slideInRight: "zephyr_animate_slideInRight",
+      slideOutRight: "zephyr_animate_slideOutRight",
+      slideInDown: "zephyr_animate_slideInDown",
+      slideOutUp: "zephyr_animate_slideOutUp",
+      slideInUp: "zephyr_animate_slideInUp",
+      slideOutDown: "zephyr_animate_slideOutDown",
+      bounceIn: "zephyr_animate_bounceIn",
+      bounceOut: "zephyr_animate_bounceOut",
+      zoomIn: "zephyr_animate_zoomIn",
+      zoomOut: "zephyr_animate_zoomOut",
     };
 
     // Toast class types
     this.types = {
       success: {
-        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>',
         bgColor: "#e3f7ed",
         textColor: "#3bad71",
         borderColor: "#b5eace",
       },
       info: {
-        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>',
         bgColor: "#dff0fa",
         textColor: "#2385ba",
         borderColor: "#a9d7f1",
       },
       warning: {
-        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>',
         bgColor: "#fff5da",
         textColor: "#d9a209",
         borderColor: "#ffe59d",
       },
       error: {
-        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/></svg>',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/></svg>',
         bgColor: "#fde8e4",
         textColor: "#cc563d",
         borderColor: "#f9c1b6",
       },
+      zen: {
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"/></svg>',
+        bgColor: "#f4f7f9",
+        textColor: "#2e3a59",
+        borderColor: "#d8e1e8",
+      },          
+      void: {
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"/></svg>',
+        bgColor: "#111113",
+        textColor: "#f1f1f1",
+        borderColor: "#111113",
+      },      
     };
 
     // Add necessary CSS
@@ -167,7 +179,7 @@ class ZephyrToast {
 
     // Create toast element
     const toast = document.createElement("div");
-    toast.className = `zephyr-toast-notification zephyr_animate__animated ${
+    toast.className = `zephyr-toast-notification zephyr_animate ${
       this.animations[toastOptions.animation.in]
     }`;
     toast.style.backgroundColor = this.types[toastOptions.type].bgColor;
@@ -265,20 +277,20 @@ class ZephyrToast {
     // Add progress bar if enabled
     if (toastOptions.showProgress && toastOptions.duration > 0) {
       const progressBar = document.createElement("div");
-      progressBar.className = "zephyr-toast-progress-bar";
-
+      progressBar.className = toastOptions.type === 'void' ? "zephyr-toast-progress-bar-void" : "zephyr-toast-progress-bar";
+    
       const progressBarFill = document.createElement("div");
-      progressBarFill.className = "zephyr-toast-progress-bar-fill";
-
+      progressBarFill.className = toastOptions.type === 'void' ? "zephyr-toast-progress-bar-void-fill" : "zephyr-toast-progress-bar-fill";
+    
       progressBar.appendChild(progressBarFill);
       toast.appendChild(progressBar);
-
-      // Animate progress bar
+    
       setTimeout(() => {
         progressBarFill.style.width = "0%";
         progressBarFill.style.transitionDuration = `${toastOptions.duration}ms`;
       }, 10);
     }
+    
 
     // Add click handler if provided
     if (typeof toastOptions.onClick === "function") {
@@ -403,6 +415,26 @@ class ZephyrToast {
    */
   error(message, options = {}) {
     return this.createToast(message, { ...options, type: "error" });
+  }
+
+  /**
+   * Show a zen toast notification
+   * @param {string} message - The message to display
+   * @param {object} options - Custom options for this notification
+   * @returns {HTMLElement} The created toast notification element
+   */
+  zen(message, options = {}) {
+    return this.createToast(message, { ...options, type: "zen" });
+  }
+
+  /**
+   * Show a void toast notification
+   * @param {string} message - The message to display
+   * @param {object} options - Custom options for this notification
+   * @returns {HTMLElement} The created toast notification element
+   */
+  void(message, options = {}) {
+    return this.createToast(message, { ...options, type: "void" });
   }
 
   /**

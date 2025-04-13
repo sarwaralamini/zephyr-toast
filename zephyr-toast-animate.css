@@ -1,6 +1,6 @@
 /*!
  * ZephyrToast - A Toast Notification Library
- * Version: 1.2.0
+ * Version: 1.3.0
  *
  * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
  * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
@@ -15,7 +15,7 @@
  */
 
 /* Base animation class */
-.zephyr_animate__animated {
+.zephyr_animate {
     animation-duration: 0.75s;
     animation-fill-mode: both;
 }
@@ -31,7 +31,7 @@
     }
 }
 
-.zephyr_animate__fadeIn {
+.zephyr_animate_fadeIn {
     animation-name: fadeIn;
 }
 
@@ -45,7 +45,7 @@
     }
 }
 
-.zephyr_animate__fadeOut {
+.zephyr_animate_fadeOut {
     animation-name: fadeOut;
 }
 
@@ -61,7 +61,7 @@
     }
 }
 
-.zephyr_animate__slideInLeft {
+.zephyr_animate_slideInLeft {
     animation-name: slideInLeft;
 }
 
@@ -76,7 +76,7 @@
     }
 }
 
-.zephyr_animate__slideOutLeft {
+.zephyr_animate_slideOutLeft {
     animation-name: slideOutLeft;
 }
 
@@ -92,7 +92,7 @@
     }
 }
 
-.zephyr_animate__slideInRight {
+.zephyr_animate_slideInRight {
     animation-name: slideInRight;
 }
 
@@ -107,7 +107,7 @@
     }
 }
 
-.zephyr_animate__slideOutRight {
+.zephyr_animate_slideOutRight {
     animation-name: slideOutRight;
 }
 
@@ -123,7 +123,7 @@
     }
 }
 
-.zephyr_animate__slideInDown {
+.zephyr_animate_slideInDown {
     animation-name: slideInDown;
 }
 
@@ -138,7 +138,7 @@
     }
 }
 
-.zephyr_animate__slideOutUp {
+.zephyr_animate_slideOutUp {
     animation-name: slideOutUp;
 }
 
@@ -154,7 +154,7 @@
     }
 }
 
-.zephyr_animate__slideInUp {
+.zephyr_animate_slideInUp {
     animation-name: slideInUp;
 }
 
@@ -169,7 +169,7 @@
     }
 }
 
-.zephyr_animate__slideOutDown {
+.zephyr_animate_slideOutDown {
     animation-name: slideOutDown;
 }
 
@@ -213,7 +213,7 @@
     }
 }
 
-.zephyr_animate__bounceIn {
+.zephyr_animate_bounceIn {
     animation-name: bounceIn;
     animation-duration: 0.75s;
 }
@@ -235,7 +235,7 @@
     }
 }
 
-.zephyr_animate__bounceOut {
+.zephyr_animate_bounceOut {
     animation-name: bounceOut;
     animation-duration: 0.75s;
 }
@@ -256,7 +256,7 @@
     }
 }
 
-.zephyr_animate__zoomIn {
+.zephyr_animate_zoomIn {
     animation-name: zoomIn;
 }
 
@@ -275,6 +275,6 @@
     }
 }
 
-.zephyr_animate__zoomOut {
+.zephyr_animate_zoomOut {
     animation-name: zoomOut;
 }
