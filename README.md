@@ -11,7 +11,7 @@ ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library
 - ✨ Beautiful animations powered by zephyr-toast-animate.css
 - ⏱️ Progress bar with customizable duration
 - 🎨 Bootstrap 5 inspired styling with no dependencies
-- 🔧 Highly customizable: titles, animations, close buttons, and more
+- 🔧 Highly customizable: titles, animations, close buttons, themes, and more
 
 ## Installation
 
@@ -88,6 +88,32 @@ toast.success("Profile updated successfully!", {
   },
   onClose: () => console.log("Toast closed"),
   onClick: () => console.log("Toast clicked"),
+});
+```
+
+# Custom Themes
+
+ZephyrToast supports custom theming for your notifications. You can override default colors with your own theme:
+
+```javascript
+toast.info("Custom themed notification", {
+  theme: {
+    bgColor: "#f0f4f8", // Background color
+    textColor: "#2b3d49", // Text color
+    borderColor: "#a5b0b6", // Border color
+    progressTrackColor: "#00000026", // Progress track color
+    progressBarColor: "#00000013", // Progress bar color
+  },
+});
+```
+
+# Enabling/Disabling Icons
+
+You can globally enable or disable icons for any notification:
+
+```javascript
+toast.success("Profile updated successfully!", {
+  enableIcon: false,
 });
 ```
 

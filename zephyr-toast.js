@@ -1,6 +1,6 @@
 /**
  * ZephyrToast - A Toast Notification Library
- * Version: 1.3.0
+ * Version: 1.4.0
  *
  * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
  * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
@@ -30,6 +30,7 @@ class ZephyrToast {
         in: "fadeIn",
         out: "fadeOut",
       },
+      enableIcon: true,
       icon: null,
       isIcon: false,
       onClose: null,
@@ -169,8 +170,19 @@ class ZephyrToast {
    * @returns {HTMLElement} The created toast notification element
    */
   createToast(message, options = {}) {
-    // Merge options
-    const toastOptions = { ...this.options, ...options, message };
+    // Merge options with defaults, including theme properties
+    const toastOptions = { 
+        ...this.options, 
+        ...options, 
+        message,
+        theme: { // Merge theme options (allow user override)
+            bgColor: options.theme?.bgColor || this.types[options.type]?.bgColor,
+            textColor: options.theme?.textColor || this.types[options.type]?.textColor,
+            borderColor: options.theme?.borderColor || this.types[options.type]?.borderColor,
+            progressTrackColor: options.theme?.progressTrackColor,
+            progressBarColor: options.theme?.progressBarColor,
+        }
+    };
 
     // Update position if provided in options
     if (options.position && options.position !== this.options.position) {
@@ -182,65 +194,64 @@ class ZephyrToast {
     toast.className = `zephyr-toast-notification zephyr_animate ${
       this.animations[toastOptions.animation.in]
     }`;
-    toast.style.backgroundColor = this.types[toastOptions.type].bgColor;
-    toast.style.color = this.types[toastOptions.type].textColor;
-    toast.style.borderColor = this.types[toastOptions.type].borderColor;
+    toast.style.backgroundColor = toastOptions.theme.bgColor;
+    toast.style.color = toastOptions.theme.textColor;
+    toast.style.borderColor = toastOptions.theme.borderColor;
 
     // Create toast body
     const toastBody = document.createElement("div");
     toastBody.className = "zephyr-toast-notification-body";
 
-    // Add icon
-    const iconDiv = document.createElement("div");
-    iconDiv.className = "zephyr-toast-notification-icon";
-
-    // Check if a custom icon is provided
-    if (toastOptions.icon) {
-      // Handle different icon types
-      if (typeof toastOptions.icon === "string") {
-        if (toastOptions.isIcon) {
-          // Don't allow image URLs with isIcon
-          // Only check for image URLs if the icon is not a class name (i.e., doesn't look like a URL)
-          if (toastOptions.icon.match(/\.(jpeg|jpg|gif|png)$/i)) {
-            throw new Error(
-              "isIcon is true, but an image URL was provided for the icon."
-            );
-          }
-          // Render icon as custom HTML (can be any library: e.g. FontAwesome, Bootstrap Icons, etc.)
-          iconDiv.innerHTML = `<i class="${toastOptions.icon}"></i>`;
-        } else {
-          // Not isIcon: check if it's an image
-          if (toastOptions.icon.match(/\.(jpeg|jpg|gif|png)$/i)) {
-            iconDiv.innerHTML = `<img src="${toastOptions.icon}" alt="icon" style="width: 16px; height: 16px;" />`;
-          }
-          // Default to rendering as a font-icon class (e.g. FontAwesome, Bootstrap Icons, etc.)
-          else {
+    //Adds an icon to the toast notification if `enableIcon` is not explicitly set to false.
+    if (toastOptions.enableIcon !== false) {
+      const iconDiv = document.createElement("div");
+      iconDiv.className = "zephyr-toast-notification-icon";
+  
+      // Check if a custom icon is provided
+      if (toastOptions.icon) {
+        
+        if (typeof toastOptions.icon === "string") {
+          if (toastOptions.isIcon) {
+            
+            if (toastOptions.icon.match(/\.(jpeg|jpg|gif|png)$/i)) {
+              throw new Error(
+                "isIcon is true, but an image URL was provided for the icon."
+              );
+            }
+            
             iconDiv.innerHTML = `<i class="${toastOptions.icon}"></i>`;
+          } else {
+            if (toastOptions.icon.match(/\.(jpeg|jpg|gif|png)$/i)) {
+              iconDiv.innerHTML = `<img src="${toastOptions.icon}" alt="icon" style="width: 16px; height: 16px;" />`;
+            }
+            else {
+              iconDiv.innerHTML = `<i class="${toastOptions.icon}"></i>`;
+            }
           }
         }
-      }
-      // If it's an object with specific properties
-      else if (typeof toastOptions.icon === "object") {
-        if (toastOptions.icon.url) {
-          // Image URL
-          iconDiv.innerHTML = `<img src="${
-            toastOptions.icon.url
-          }" alt="icon" style="width: ${
-            toastOptions.icon.width || "16px"
-          }; height: ${toastOptions.icon.height || "16px"};" />`;
-        } else if (toastOptions.icon.fontAwesome) {
-          // FontAwesome with specific class
-          iconDiv.innerHTML = `<i class="${toastOptions.icon.fontAwesome}"></i>`;
-        } else if (toastOptions.icon.svg) {
-          // SVG content
-          iconDiv.innerHTML = toastOptions.icon.svg;
+        // If it's an object with specific properties
+        else if (typeof toastOptions.icon === "object") {
+          if (toastOptions.icon.url) {
+            // Image URL
+            iconDiv.innerHTML = `<img src="${
+              toastOptions.icon.url
+            }" alt="icon" style="width: ${
+              toastOptions.icon.width || "16px"
+            }; height: ${toastOptions.icon.height || "16px"};" />`;
+          } else if (toastOptions.icon.fontAwesome) {
+            // FontAwesome with specific class
+            iconDiv.innerHTML = `<i class="${toastOptions.icon.fontAwesome}"></i>`;
+          } else if (toastOptions.icon.svg) {
+            // SVG content
+            iconDiv.innerHTML = toastOptions.icon.svg;
+          }
         }
+      } else {
+        // Use default icon based on type
+        iconDiv.innerHTML = this.types[toastOptions.type].icon;
       }
-    } else {
-      // Use default icon based on type
-      iconDiv.innerHTML = this.types[toastOptions.type].icon;
+      toastBody.appendChild(iconDiv);
     }
-    toastBody.appendChild(iconDiv);
 
     // Add content
     const contentDiv = document.createElement("div");
@@ -279,9 +290,14 @@ class ZephyrToast {
       const progressBar = document.createElement("div");
       progressBar.className = toastOptions.type === 'void' ? "zephyr-toast-progress-bar-void" : "zephyr-toast-progress-bar";
     
+      // Apply user/default background (track)
+      progressBar.style.backgroundColor = toastOptions.theme.progressTrackColor;
+
       const progressBarFill = document.createElement("div");
       progressBarFill.className = toastOptions.type === 'void' ? "zephyr-toast-progress-bar-void-fill" : "zephyr-toast-progress-bar-fill";
     
+      // Apply user/default fill color
+      progressBarFill.style.backgroundColor = toastOptions.theme.progressBarColor;
       progressBar.appendChild(progressBarFill);
       toast.appendChild(progressBar);
     

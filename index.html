@@ -317,35 +317,123 @@ This is a sample notification message.</textarea
                 </div>
               </div>
 
-              <!-- Icon Options -->
-
+              <!-- Theme Options -->
               <div class="col-12">
                 <div class="mb-3">
-                  <label class="form-label d-block">Icon Options</label>
-                  <div class="form-check form-check-inline">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      name="icon-type"
-                      id="icon-default"
-                      value="default"
-                      checked
-                    />
-                    <label class="form-check-label" for="icon-default"
-                      >Default</label
-                    >
+                  <label class="form-label d-block">Theme Options</label>
+                  <div class="mb-2">
+                    <div class="form-check">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="toast-enable-custom-theme"
+                      />
+                      <label class="form-check-label" for="toast-enable-custom-theme">Custom Theme</label>
+                    </div>
                   </div>
-                  <div class="form-check form-check-inline">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      name="icon-type"
-                      id="icon-custom"
-                      value="custom"
-                    />
-                    <label class="form-check-label" for="icon-custom"
-                      >Custom</label
-                    >
+                  <div id="theme-options" class="d-none">
+                    <div class="row g-3">
+                      <div class="col-md-4">
+                        <div class="mb-3">
+                          <label for="toast-bg-color" class="form-label">Background Color</label>
+                          <div class="input-group">
+                            <span class="input-group-text">
+                              <span id="bg-color-preview" class="color-preview" style="background-color: #f0f4f8;"></span>
+                            </span>
+                            <input type="text" class="form-control" id="toast-bg-color" value="#f0f4f8" placeholder="#f0f4f8">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="mb-3">
+                          <label for="toast-text-color" class="form-label">Text Color</label>
+                          <div class="input-group">
+                            <span class="input-group-text">
+                              <span id="text-color-preview" class="color-preview" style="background-color: #2b3d49;"></span>
+                            </span>
+                            <input type="text" class="form-control" id="toast-text-color" value="#2b3d49" placeholder="#2b3d49">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="mb-3">
+                          <label for="toast-border-color" class="form-label">Border Color</label>
+                          <div class="input-group">
+                            <span class="input-group-text">
+                              <span id="border-color-preview" class="color-preview" style="background-color: #a5b0b6;"></span>
+                            </span>
+                            <input type="text" class="form-control" id="toast-border-color" value="#a5b0b6" placeholder="#a5b0b6">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="mb-3">
+                          <label for="toast-progress-track-color" class="form-label">Progress Track Color</label>
+                          <div class="input-group">
+                            <span class="input-group-text">
+                              <span id="progress-track-color-preview" class="color-preview" style="background-color: #a5b0b6;"></span>
+                            </span>
+                            <input type="text" class="form-control" id="toast-progress-track-color" value="#00000026" placeholder="#00000026">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="mb-3">
+                          <label for="toast-progress-bar-color" class="form-label">Progress Bar Color</label>
+                          <div class="input-group">
+                            <span class="input-group-text">
+                              <span id="toast-progress-bar-color-preview" class="color-preview" style="background-color: #a5b0b6;"></span>
+                            </span>
+                            <input type="text" class="form-control" id="toast-progress-bar-color" value="#00000013" placeholder="#00000013">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Icon Options -->
+              <div class="col-12" id="icon-options-section">
+                <div class="mb-3">
+                  <label class="form-label d-block">Icon Options</label>
+                  <div class="mb-2">
+                    <div class="form-check">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="toast-enable-icon"
+                        checked
+                      />
+                      <label class="form-check-label" for="toast-enable-icon">Enable Icon</label>
+                    </div>
+                  </div>
+                  <div id="icon-type-options">
+                    <div class="form-check form-check-inline">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="icon-type"
+                        id="icon-default"
+                        value="default"
+                        checked
+                      />
+                      <label class="form-check-label" for="icon-default"
+                        >Default</label
+                      >
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="icon-type"
+                        id="icon-custom"
+                        value="custom"
+                      />
+                      <label class="form-check-label" for="icon-custom"
+                        >Custom</label
+                      >
+                    </div>
                   </div>
                 </div>
               </div>
@@ -577,6 +665,8 @@ This is a sample notification message.</textarea
         ).checked;
 
         // Handle icon options
+        const enableIcon = document.getElementById("toast-enable-icon").checked;
+
         const iconType = document.querySelector(
           'input[name="icon-type"]:checked'
         ).value;
@@ -602,6 +692,20 @@ This is a sample notification message.</textarea
           iconOption = null; // Default is the predefined icon, no URL needed
         }
 
+        // Add this to where you collect form values
+        const enableCustomTheme = document.getElementById("toast-enable-custom-theme").checked;
+        let theme = null;
+
+        if (enableCustomTheme) {
+          theme = {
+            bgColor: document.getElementById("toast-bg-color").value,
+            textColor: document.getElementById("toast-text-color").value,
+            borderColor: document.getElementById("toast-border-color").value,
+            progressTrackColor: document.getElementById("toast-progress-track-color").value,
+            progressBarColor: document.getElementById("toast-progress-bar-color").value
+          };
+        }
+
         // Create options object
         const options = {
           position: position,
@@ -611,11 +715,17 @@ This is a sample notification message.</textarea
           showProgress: showProgress,
           showClose: showClose,
           newestOnTop: newestOnTop,
+          enableIcon: enableIcon,
           animation: {
             in: animationIn,
             out: animationOut,
           },
         };
+
+        // Add theme if custom theme is enabled
+        if (enableCustomTheme && theme) {
+          options.theme = theme;
+        }
 
         // Add conditional options
         if (iconType !== "default") {
@@ -704,6 +814,49 @@ This is a sample notification message.</textarea
           .replace(/"/g, '\\"')
           .replace(/\n/g, "\\n");
       }
+
+      // Toggle theme options based on Custom Theme checkbox
+      document.getElementById("toast-enable-custom-theme").addEventListener("change", function() {
+        const themeOptions = document.getElementById("theme-options");
+        
+        if (this.checked) {
+          themeOptions.classList.remove("d-none");
+        } else {
+          themeOptions.classList.add("d-none");
+        }
+      });
+
+      // Update color previews when input changes
+      document.getElementById("toast-bg-color").addEventListener("input", function() {
+        document.getElementById("bg-color-preview").style.backgroundColor = this.value;
+      });
+
+      document.getElementById("toast-text-color").addEventListener("input", function() {
+        document.getElementById("text-color-preview").style.backgroundColor = this.value;
+      });
+
+      document.getElementById("toast-border-color").addEventListener("input", function() {
+        document.getElementById("border-color-preview").style.backgroundColor = this.value;
+      });
+
+      document.getElementById("toast-progress-track-color").addEventListener("input", function() {
+        document.getElementById("progress-track-color-preview").style.backgroundColor = this.value;
+      });
+
+      document.getElementById("toast-progress-bar-color").addEventListener("input", function() {
+        document.getElementById("toast-progress-bar-color-preview").style.backgroundColor = this.value;
+      });
+
+      // Toggle Icon Options visibility based on Enable Icon checkbox
+      document.getElementById("toast-enable-icon").addEventListener("change", function() {
+        const iconOptionsSection = document.getElementById("icon-type-options");
+        
+        if (this.checked) {
+          iconOptionsSection.classList.remove("d-none");
+        } else {
+          iconOptionsSection.classList.add("d-none");
+        }
+      });
     </script>
   </body>
 </html>
