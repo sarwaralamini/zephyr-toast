@@ -107,6 +107,24 @@ toast.info("Custom themed notification", {
 });
 ```
 
+# Pause On Hover
+
+You can pause the toast auto-dismiss countdown when the user hovers over it:
+
+```javascript
+toast.info("This toast will pause when hovered", {
+  pauseOnHover: true, // Default is true
+});
+```
+
+# Pause On Hover
+
+```javascript
+toast.success("Operation <strong>completed</strong> successfully!", {
+  allowHtml: true, // Default is false
+});
+```
+
 # Enabling/Disabling Icons
 
 You can globally enable or disable icons for any notification:
@@ -237,3 +255,7 @@ Md. Sarwar Alam - [GitHub](https://github.com/sarwaralamini)
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+```
+
+```

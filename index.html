@@ -317,6 +317,33 @@ This is a sample notification message.</textarea
                 </div>
               </div>
 
+              <div class="col-md-6">
+                <div class="mb-3 form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="toast-pause-on-hover"
+                    checked
+                  />
+                  <label class="form-check-label" for="toast-pause-on-hover"
+                    >Pause On Hover</label
+                  >
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="mb-3 form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="toast-allow-html"
+                  />
+                  <label class="form-check-label" for="toast-allow-html"
+                    >Allow HTML in Message</label
+                  >
+                </div>
+              </div>
+
               <!-- Theme Options -->
               <div class="col-12">
                 <div class="mb-3">
@@ -664,6 +691,9 @@ This is a sample notification message.</textarea
           "toast-include-onclose"
         ).checked;
 
+        const pauseOnHover = document.getElementById("toast-pause-on-hover").checked;
+        const allowHtml = document.getElementById("toast-allow-html").checked;
+
         // Handle icon options
         const enableIcon = document.getElementById("toast-enable-icon").checked;
 
@@ -721,6 +751,10 @@ This is a sample notification message.</textarea
             out: animationOut,
           },
         };
+
+        // Add to the options object
+        options.pauseOnHover = pauseOnHover;
+        options.allowHtml = allowHtml;
 
         // Add theme if custom theme is enabled
         if (enableCustomTheme && theme) {

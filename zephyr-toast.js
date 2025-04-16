@@ -1,6 +1,6 @@
 /**
  * ZephyrToast - A Toast Notification Library
- * Version: 1.4.0
+ * Version: 1.5.0
  *
  * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
  * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
@@ -19,20 +19,22 @@ class ZephyrToast {
     // Default configuration
     this.defaults = {
       position: "top-right",
+      newestOnTop: true,
       type: "info",
       duration: 3000,
-      message: "",
-      title: "",
+      pauseOnHover: true,
       showProgress: true,
-      showClose: true,
-      newestOnTop: true,
       animation: {
         in: "fadeIn",
         out: "fadeOut",
       },
+      message: "",
+      title: "",
+      allowHtml: false,
       enableIcon: true,
       icon: null,
       isIcon: false,
+      showClose: true,
       onClose: null,
       onClick: null,
     };
@@ -265,10 +267,14 @@ class ZephyrToast {
       contentDiv.appendChild(titleDiv);
     }
 
-    // Add message
+    // Add message (supports HTML if allowHtml is true)
     const messageDiv = document.createElement("div");
     messageDiv.className = "zephyr-toast-notification-message";
-    messageDiv.textContent = toastOptions.message;
+    if (toastOptions.allowHtml) {
+      messageDiv.innerHTML = toastOptions.message;
+    } else {
+      messageDiv.textContent = toastOptions.message;
+    }
     contentDiv.appendChild(messageDiv);
 
     toastBody.appendChild(contentDiv);
@@ -342,6 +348,57 @@ class ZephyrToast {
       toast._timeoutId = setTimeout(() => {
         this.removeToast(toast);
       }, toastOptions.duration);
+    }
+
+    // Add pause-on-hover functionality that stops the progress bar and prevents auto-removal when user hovers over the toast
+    if (toastOptions.pauseOnHover && toastOptions.duration > 0) {
+      let remainingTime = toastOptions.duration;
+      
+      // Pause progress and timer when user hovers over the toast
+      toast.addEventListener('mouseenter', () => {
+        // Clear the timeout to prevent auto-removal
+        if (toast._timeoutId) {
+          clearTimeout(toast._timeoutId);
+          toast._timeoutId = null;
+        }
+        
+        // Stop the progress bar animation
+        if (toastOptions.showProgress) {
+          const progressBarFill = toast.querySelector('.zephyr-toast-progress-bar-fill, .zephyr-toast-progress-bar-void-fill');
+          if (progressBarFill) {
+            // Calculate remaining time based on current width
+            const currentWidth = parseFloat(getComputedStyle(progressBarFill).width);
+            const fullWidth = parseFloat(getComputedStyle(progressBarFill.parentElement).width);
+            remainingTime = toastOptions.duration * (currentWidth / fullWidth);
+            
+            // Pause animation by removing transition and keeping current width
+            progressBarFill.style.transition = 'none';
+            progressBarFill.style.width = `${(currentWidth / fullWidth) * 100}%`;
+          }
+        }
+      });
+      
+      // Resume progress and timer when user's mouse leaves the toast
+      toast.addEventListener('mouseleave', () => {
+        // Restart the timeout with remaining time
+        if (!toast._timeoutId && remainingTime > 0) {
+          toast._timeoutId = setTimeout(() => {
+            this.removeToast(toast);
+          }, remainingTime);
+          
+          // Restart the progress bar animation
+          if (toastOptions.showProgress) {
+            const progressBarFill = toast.querySelector('.zephyr-toast-progress-bar-fill, .zephyr-toast-progress-bar-void-fill');
+            if (progressBarFill) {
+              // Resume animation
+              setTimeout(() => {
+                progressBarFill.style.transition = `width ${remainingTime}ms linear`;
+                progressBarFill.style.width = '0%';
+              }, 10);
+            }
+          }
+        }
+      });
     }
 
     return toast;
