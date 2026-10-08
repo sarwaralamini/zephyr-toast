@@ -110,8 +110,141 @@ class ZephyrToast {
       },      
     };
 
-    // Add necessary CSS
+    // Validate the initialized configuration before loading styles.
+    this.validateConfiguration(this.options);
+
+    // Add necessary CSS.
     this.injectCSS();
+  }
+
+
+  /**
+   * Validates notification configuration before it is applied.
+   *
+   * Ensures notification types, positions, durations, animations,
+   * and theme structures contain supported values.
+   *
+   * This method is shared by constructor initialization,
+   * individual notification creation, and position updates.
+   *
+   * @param {Object} options - The configuration values to validate.
+   * @returns {void}
+   * @throws {TypeError} If a configuration value has an invalid type.
+   * @throws {RangeError} If a configuration value is unsupported.
+   */
+  validateConfiguration(options) {
+    const validPositions = [
+      "top-right",
+      "top-left",
+      "bottom-right",
+      "bottom-left",
+      "top-center",
+      "bottom-center",
+    ];
+
+    const validEntranceAnimations = [
+      "fadeIn",
+      "slideInLeft",
+      "slideInRight",
+      "slideInDown",
+      "slideInUp",
+      "bounceIn",
+      "zoomIn",
+    ];
+
+    const validExitAnimations = [
+      "fadeOut",
+      "slideOutLeft",
+      "slideOutRight",
+      "slideOutUp",
+      "slideOutDown",
+      "bounceOut",
+      "zoomOut",
+    ];
+
+    // Validate the notification type.
+    if (
+      options.type !== undefined &&
+      !Object.hasOwn(this.types, options.type)
+    ) {
+      throw new RangeError(
+        `Invalid notification type: "${options.type}".`
+      );
+    }
+
+    // Validate the notification position.
+    if (
+      options.position !== undefined &&
+      !validPositions.includes(options.position)
+    ) {
+      throw new RangeError(
+        `Invalid notification position: "${options.position}".`
+      );
+    }
+
+    // Duration must be a finite, non-negative number.
+    if (options.duration !== undefined) {
+      if (
+        typeof options.duration !== "number" ||
+        !Number.isFinite(options.duration)
+      ) {
+        throw new TypeError(
+          "Notification duration must be a finite number."
+        );
+      }
+
+      if (options.duration < 0) {
+        throw new RangeError(
+          "Notification duration cannot be negative."
+        );
+      }
+    }
+
+    // Validate the animation configuration.
+    if (options.animation !== undefined) {
+      const animation = options.animation;
+
+      if (
+        animation === null ||
+        typeof animation !== "object" ||
+        Array.isArray(animation)
+      ) {
+        throw new TypeError(
+          "Animation configuration must be an object."
+        );
+      }
+
+      if (
+        animation.in !== undefined &&
+        !validEntranceAnimations.includes(animation.in)
+      ) {
+        throw new RangeError(
+          `Invalid entrance animation: "${animation.in}".`
+        );
+      }
+
+      if (
+        animation.out !== undefined &&
+        !validExitAnimations.includes(animation.out)
+      ) {
+        throw new RangeError(
+          `Invalid exit animation: "${animation.out}".`
+        );
+      }
+    }
+
+    // Theme configuration must be a non-array object.
+    if (options.theme !== undefined) {
+      if (
+        options.theme === null ||
+        typeof options.theme !== "object" ||
+        Array.isArray(options.theme)
+      ) {
+        throw new TypeError(
+          "Notification theme must be a configuration object."
+        );
+      }
+    }
   }
 
   /**
@@ -179,6 +312,9 @@ class ZephyrToast {
    * @returns {HTMLElement} The created toast notification element
    */
   createToast(message, options = {}) {
+
+    // Validate user-provided options before merging and normalizing them.
+    this.validateConfiguration(options);
     
     /**
      * Resolves notification configuration using the following priority:
@@ -228,6 +364,9 @@ class ZephyrToast {
           this.options.theme?.progressBarColor,
       },
     };
+
+    // Validate the resolved configuration before creating DOM elements.
+    this.validateConfiguration(toastOptions);
 
     // Update position if provided in options
     if (options.position && options.position !== this.options.position) {
@@ -621,12 +760,24 @@ class ZephyrToast {
     return this.createToast(message, { ...options, type: "void" });
   }
 
+  
   /**
-   * Update container position
-   * @param {string} position - New position ('top-right', 'top-left', 'bottom-right', 'bottom-left', 'top-center', 'bottom-center')
+   * Updates the notification container position.
+   *
+   * Validates the requested position before modifying the
+   * instance configuration or container CSS classes.
+   *
+   * @param {string} position - The new notification position.
+   * @returns {void}
+   * @throws {RangeError} If the position is unsupported.
    */
   updatePosition(position) {
+    // Reject unsupported positions before changing the container.
+    this.validateConfiguration({ position });
+
     this.options.position = position;
-    this.container.className = `zephyr-toast-container zephyr-position-${position}`;
+
+    this.container.className =
+      `zephyr-toast-container zephyr-position-${position}`;
   }
 }
