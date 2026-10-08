@@ -126,6 +126,53 @@ async function verifyBrowser() {
 }
 
 /**
+ * Verifies npm package entry points and stylesheet exports.
+ *
+ * @returns {Promise<void>}
+ */
+async function verifyPackageExports() {
+  const packageJson = JSON.parse(
+    await readFile(
+      resolve(projectRoot, "package.json"),
+      "utf8"
+    )
+  );
+
+  assert.equal(
+    packageJson.exports["."].import,
+    "./dist/zephyr-toast.es.js"
+  );
+
+  assert.equal(
+    packageJson.exports["."].default,
+    "./dist/zephyr-toast.es.js"
+  );
+
+  assert.equal(
+    packageJson.exports["./browser"],
+    "./dist/zephyr-toast.js"
+  );
+
+  assert.equal(
+    packageJson.exports["./style.css"],
+    "./dist/zephyr-toast.css"
+  );
+
+  assert.equal(
+    packageJson.exports["./animations.css"],
+    "./dist/zephyr-toast-animate.css"
+  );
+
+  // Confirm that the actual package name resolves to its ES module.
+  const module = await import("zephyr-toast");
+
+  assert.equal(typeof module.default, "function");
+  assert.equal(module.ZephyrToast, module.default);
+
+  console.log("PASS npm package exports");
+}
+
+/**
  * Executes the distribution verification checks.
  *
  * @returns {Promise<void>}
@@ -142,6 +189,7 @@ async function main() {
 
   await verifyEsm();
   await verifyBrowser();
+  await verifyPackageExports();
 
   console.log("All distribution checks passed.");
 }
