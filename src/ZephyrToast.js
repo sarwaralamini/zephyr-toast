@@ -1,3 +1,5 @@
+import { ANIMATIONS } from "./config/animations.js";
+
 /**
  * ZephyrToast - A Toast Notification Library
  * Version: 1.5.0
@@ -52,23 +54,8 @@ class ZephyrToast {
     // Initialize the container
     this.initializeContainer();
 
-    // Animation classes
-    this.animations = {
-      fadeIn: "zephyr_animate_fadeIn",
-      fadeOut: "zephyr_animate_fadeOut",
-      slideInLeft: "zephyr_animate_slideInLeft",
-      slideOutLeft: "zephyr_animate_slideOutLeft",
-      slideInRight: "zephyr_animate_slideInRight",
-      slideOutRight: "zephyr_animate_slideOutRight",
-      slideInDown: "zephyr_animate_slideInDown",
-      slideOutUp: "zephyr_animate_slideOutUp",
-      slideInUp: "zephyr_animate_slideInUp",
-      slideOutDown: "zephyr_animate_slideOutDown",
-      bounceIn: "zephyr_animate_bounceIn",
-      bounceOut: "zephyr_animate_bounceOut",
-      zoomIn: "zephyr_animate_zoomIn",
-      zoomOut: "zephyr_animate_zoomOut",
-    };
+    // Animation classes are maintained in the shared configuration module.
+    this.animations = ANIMATIONS;
 
     // Toast class types
     this.types = {
