@@ -1,17 +1,14 @@
 
 /**
- * @file ZephyrToast Unit Tests
- * @description
- * Regression tests for the ZephyrToast notification library.
+ * @fileoverview Unit tests for the ZephyrToast notification library.
  *
- * This suite validates the existing standalone browser implementation,
+ * Provides regression coverage for the standalone browser implementation,
  * including initialization, notification rendering, configuration,
  * content handling, positioning, and public convenience methods.
  *
- * The original library is evaluated inside an isolated jsdom context
- * to preserve its browser-global API without modifying the source.
+ * The library is evaluated inside an isolated jsdom environment to
+ * preserve its browser-global API without modifying the source.
  *
- * @version 1.5.0
  * @author Md. Sarwar Alam
  * @license MIT
  */
