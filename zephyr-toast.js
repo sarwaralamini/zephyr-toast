@@ -40,7 +40,14 @@ class ZephyrToast {
     };
 
     // Merge options with defaults
-    this.options = { ...this.defaults, ...options };
+    this.options = {
+      ...this.defaults,
+      ...options,
+      animation: {
+        ...this.defaults.animation,
+        ...options.animation,
+      },
+    };
 
     // Initialize the container
     this.initializeContainer();
@@ -172,18 +179,54 @@ class ZephyrToast {
    * @returns {HTMLElement} The created toast notification element
    */
   createToast(message, options = {}) {
-    // Merge options with defaults, including theme properties
-    const toastOptions = { 
-        ...this.options, 
-        ...options, 
-        message,
-        theme: { // Merge theme options (allow user override)
-            bgColor: options.theme?.bgColor || this.types[options.type]?.bgColor,
-            textColor: options.theme?.textColor || this.types[options.type]?.textColor,
-            borderColor: options.theme?.borderColor || this.types[options.type]?.borderColor,
-            progressTrackColor: options.theme?.progressTrackColor,
-            progressBarColor: options.theme?.progressBarColor,
-        }
+    
+    /**
+     * Resolves notification configuration using the following priority:
+     *
+     * 1. Library defaults
+     * 2. Notification type defaults
+     * 3. Constructor-level configuration
+     * 4. Per-notification configuration
+     *
+     * Nested animation and theme objects are merged independently
+     * to preserve unspecified configuration properties.
+     */
+    const toastType = options.type ?? this.options.type;
+    const typeTheme = this.types[toastType] ?? this.types.info;
+
+    const toastOptions = {
+      ...this.options,
+      ...options,
+      message,
+      animation: {
+        ...this.defaults.animation,
+        ...this.options.animation,
+        ...options.animation,
+      },
+      theme: {
+        bgColor:
+          options.theme?.bgColor ??
+          this.options.theme?.bgColor ??
+          typeTheme.bgColor,
+
+        textColor:
+          options.theme?.textColor ??
+          this.options.theme?.textColor ??
+          typeTheme.textColor,
+
+        borderColor:
+          options.theme?.borderColor ??
+          this.options.theme?.borderColor ??
+          typeTheme.borderColor,
+
+        progressTrackColor:
+          options.theme?.progressTrackColor ??
+          this.options.theme?.progressTrackColor,
+
+        progressBarColor:
+          options.theme?.progressBarColor ??
+          this.options.theme?.progressBarColor,
+      },
     };
 
     // Update position if provided in options
