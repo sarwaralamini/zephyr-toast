@@ -3,7 +3,7 @@ import { createDefaultOptions } from "./config/defaults.js";
 import { createNotificationTypes } from "./config/types.js";
 import { validateConfiguration } from "./config/validation.js";
 import { createSafeSvg } from "./renderers/svg.js";
-import { renderIcon } from "./renderers/icons.js";
+import { renderToast } from "./renderers/toast.js";
 import {
   initializeLifecycle,
   dismissToast,
@@ -212,104 +212,14 @@ class ZephyrToast {
       this.updatePosition(options.position);
     }
 
-    // Create toast element
-    const toast = document.createElement("div");
-    toast.className = `zephyr-toast-notification zephyr_animate ${
-      this.animations[toastOptions.animation.in]
-    }`;
-    toast.style.backgroundColor = toastOptions.theme.bgColor;
-    toast.style.color = toastOptions.theme.textColor;
-    toast.style.borderColor = toastOptions.theme.borderColor;
-
-    // Create toast body
-    const toastBody = document.createElement("div");
-    toastBody.className = "zephyr-toast-notification-body";
-
-    //Adds an icon to the toast notification if `enableIcon` is not explicitly set to false.
-    
-    // Render the notification icon using the shared icon renderer.
-    const iconElement = renderIcon(
+    // Create the notification using the shared DOM renderer.
+    const toast = renderToast(
       toastOptions,
       this.types,
-      document
+      this.animations,
+      document,
+      (element) => this.removeToast(element)
     );
-
-    if (iconElement) {
-      toastBody.appendChild(iconElement);
-    }
-
-    // Add content
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "zephyr-toast-notification-content";
-
-    // Add title if provided
-    if (toastOptions.title) {
-      const titleDiv = document.createElement("div");
-      titleDiv.className = "zephyr-toast-notification-title";
-      titleDiv.textContent = toastOptions.title;
-      contentDiv.appendChild(titleDiv);
-    }
-
-    // Add message (supports HTML if allowHtml is true)
-    const messageDiv = document.createElement("div");
-    messageDiv.className = "zephyr-toast-notification-message";
-    if (toastOptions.allowHtml) {
-      messageDiv.innerHTML = toastOptions.message;
-    } else {
-      messageDiv.textContent = toastOptions.message;
-    }
-    contentDiv.appendChild(messageDiv);
-
-    toastBody.appendChild(contentDiv);
-    toast.appendChild(toastBody);
-
-    // Add close button if enabled
-    if (toastOptions.showClose) {
-      const closeButton = document.createElement("button");
-      closeButton.type = "button";
-      closeButton.className = "zephyr-toast-notification-close";
-      closeButton.innerHTML = "&times;";
-      closeButton.style.color = this.types[toastOptions.type].textColor;
-      closeButton.addEventListener("click", () => this.removeToast(toast));
-      toastBody.appendChild(closeButton);
-    }
-
-    // Add progress bar if enabled
-    if (toastOptions.showProgress && toastOptions.duration > 0) {
-      const progressBar = document.createElement("div");
-      progressBar.className = toastOptions.type === 'void' ? "zephyr-toast-progress-bar-void" : "zephyr-toast-progress-bar";
-    
-      // Apply user/default background (track)
-      progressBar.style.backgroundColor = toastOptions.theme.progressTrackColor;
-
-      const progressBarFill = document.createElement("div");
-      progressBarFill.className = toastOptions.type === 'void' ? "zephyr-toast-progress-bar-void-fill" : "zephyr-toast-progress-bar-fill";
-    
-      // Apply user/default fill color
-      progressBarFill.style.backgroundColor = toastOptions.theme.progressBarColor;
-      progressBar.appendChild(progressBarFill);
-      toast.appendChild(progressBar);
-    
-      setTimeout(() => {
-        progressBarFill.style.width = "0%";
-        progressBarFill.style.transitionDuration = `${toastOptions.duration}ms`;
-      }, 10);
-    }
-    
-
-    // Add click handler if provided
-    if (typeof toastOptions.onClick === "function") {
-      toast.style.cursor = "pointer";
-      toast.addEventListener("click", (e) => {
-        if (
-          e.target !== toast &&
-          e.target.className !== "zephyr-toast-notification-message" &&
-          e.target.className !== "zephyr-toast-notification-content"
-        )
-          return;
-        toastOptions.onClick();
-      });
-    }
 
     // Store options with the toast
     toast._options = toastOptions;

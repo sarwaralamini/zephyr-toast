@@ -40,6 +40,8 @@ import {
   renderIcon,
 } from "../src/renderers/icons.js";
 
+import { renderToast } from "../src/renderers/toast.js";
+
 import {
   initializeLifecycle,
   dismissToast,
@@ -638,6 +640,191 @@ describe("ZephyrToast Modular Architecture", () => {
         }
       } finally {
         vi.useRealTimers();
+      }
+    });
+  });
+
+  describe("Toast DOM Rendering", () => {
+    /**
+     * Builds a valid set of resolved notification options.
+     *
+     * @param {Object} overrides - Options to override.
+     * @returns {Object} Resolved options.
+     */
+    function createOptions(overrides = {}) {
+      return {
+        ...createDefaultOptions(),
+        duration: 0,
+        type: "info",
+        theme: {
+          bgColor: "#dff0fa",
+          textColor: "#2385ba",
+          borderColor: "#a9d7f1",
+        },
+        ...overrides,
+      };
+    }
+
+    it("creates a notification without inserting it into the DOM", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        const toast = renderToast(
+          createOptions(),
+          createNotificationTypes(),
+          ANIMATIONS,
+          dom.window.document,
+          () => {}
+        );
+
+        expect(toast.classList.contains(
+          "zephyr-toast-notification"
+        )).toBe(true);
+
+        expect(toast.isConnected).toBe(false);
+        expect(toast.querySelector(
+          ".zephyr-toast-notification-message"
+        )).not.toBeNull();
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("renders untrusted HTML-like content as plain text", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        const toast = renderToast(
+          createOptions({
+            message: '<img src=x onerror="alert(1)">',
+            allowHtml: false,
+          }),
+          createNotificationTypes(),
+          ANIMATIONS,
+          dom.window.document,
+          () => {}
+        );
+
+        expect(toast.querySelector(
+          ".zephyr-toast-notification-message img"
+        )).toBeNull();
+
+        expect(toast.textContent).toContain("<img");
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("supports explicitly trusted HTML content", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        const toast = renderToast(
+          createOptions({
+            message: "<strong>Important</strong>",
+            allowHtml: true,
+          }),
+          createNotificationTypes(),
+          ANIMATIONS,
+          dom.window.document,
+          () => {}
+        );
+
+        expect(toast.querySelector("strong")).not.toBeNull();
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("renders a close button that invokes dismissal", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        const dismissed = vi.fn();
+
+        const toast = renderToast(
+          createOptions(),
+          createNotificationTypes(),
+          ANIMATIONS,
+          dom.window.document,
+          dismissed
+        );
+
+        const closeButton = toast.querySelector(
+          ".zephyr-toast-notification-close"
+        );
+
+        expect(closeButton).not.toBeNull();
+
+        closeButton.click();
+
+        expect(dismissed).toHaveBeenCalledOnce();
+        expect(dismissed).toHaveBeenCalledWith(toast);
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("renders the progress bar for timed notifications", () => {
+      vi.useFakeTimers();
+
+      try {
+        const dom = new JSDOM(
+          "<!DOCTYPE html><html><body></body></html>"
+        );
+
+        try {
+          const toast = renderToast(
+            createOptions({
+              duration: 2000,
+              showProgress: true,
+            }),
+            createNotificationTypes(),
+            ANIMATIONS,
+            dom.window.document,
+            () => {}
+          );
+
+          expect(toast.querySelector(
+            ".zephyr-toast-progress-bar"
+          )).not.toBeNull();
+
+          vi.advanceTimersByTime(10);
+
+          const progressFill = toast.querySelector(
+            ".zephyr-toast-progress-bar-fill"
+          );
+
+          expect(progressFill.style.width).toBe("0%");
+          expect(progressFill.style.transitionDuration).toBe("2000ms");
+        } finally {
+          dom.window.close();
+        }
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("does not create a progress bar for persistent notifications", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        const toast = renderToast(
+          createOptions({
+            duration: 0,
+            showProgress: true,
+          }),
+          createNotificationTypes(),
+          ANIMATIONS,
+          dom.window.document,
+          () => {}
+        );
+
+        expect(toast.querySelector(
+          ".zephyr-toast-progress-bar"
+        )).toBeNull();
+      } finally {
+        dom.window.close();
       }
     });
   });
