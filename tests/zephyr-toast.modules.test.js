@@ -12,10 +12,16 @@
 
 import { describe, it, expect, vi } from "vitest";
 import { JSDOM } from "jsdom";
+
 import {
   DEFAULT_OPTIONS,
   createDefaultOptions,
 } from "../src/config/defaults.js";
+
+import {
+  NOTIFICATION_TYPES,
+  createNotificationTypes,
+} from "../src/config/types.js";
 
 import { ANIMATIONS } from "../src/config/animations.js";
 
@@ -65,7 +71,6 @@ describe("ZephyrToast Modular Architecture", () => {
       expect(typeof ZephyrToast).toBe("function");
     });
   });
-
 
   describe("Default Configuration", () => {
     it("exports the expected immutable default options", () => {
@@ -142,4 +147,55 @@ describe("ZephyrToast Modular Architecture", () => {
       }
     });
   });
+
+  describe("Notification Types and Themes", () => {
+    it("exports all six built-in notification types", () => {
+      const expectedTypes = [
+        "success",
+        "info",
+        "warning",
+        "error",
+        "zen",
+        "void",
+      ];
+
+      expect(Object.keys(NOTIFICATION_TYPES)).toEqual(expectedTypes);
+
+      for (const type of expectedTypes) {
+        const config = NOTIFICATION_TYPES[type];
+
+        expect(config.icon).toContain("<svg");
+        expect(config.icon).toContain("</svg>");
+        expect(config.bgColor).toMatch(/^#[0-9a-f]{6}$/i);
+        expect(config.textColor).toMatch(/^#[0-9a-f]{6}$/i);
+        expect(config.borderColor).toMatch(/^#[0-9a-f]{6}$/i);
+      }
+    });
+
+    it("keeps exported notification definitions immutable", () => {
+      expect(Object.isFrozen(NOTIFICATION_TYPES)).toBe(true);
+
+      for (const config of Object.values(NOTIFICATION_TYPES)) {
+        expect(Object.isFrozen(config)).toBe(true);
+      }
+    });
+
+    it("creates independent notification type definitions", () => {
+      const first = createNotificationTypes();
+      const second = createNotificationTypes();
+
+      expect(first).not.toBe(second);
+      expect(first.success).not.toBe(second.success);
+
+      first.success.bgColor = "#123456";
+      first.info.textColor = "#abcdef";
+
+      expect(second.success.bgColor).toBe("#e3f7ed");
+      expect(second.info.textColor).toBe("#2385ba");
+
+      expect(NOTIFICATION_TYPES.success.bgColor).toBe("#e3f7ed");
+      expect(NOTIFICATION_TYPES.info.textColor).toBe("#2385ba");
+    });
+  });
+
 });
