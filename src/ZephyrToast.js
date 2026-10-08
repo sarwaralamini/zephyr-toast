@@ -1,4 +1,5 @@
 import { ANIMATIONS } from "./config/animations.js";
+import { createDefaultOptions } from "./config/defaults.js";
 
 /**
  * ZephyrToast - A Toast Notification Library
@@ -18,28 +19,8 @@ import { ANIMATIONS } from "./config/animations.js";
 
 class ZephyrToast {
   constructor(options = {}) {
-    // Default configuration
-    this.defaults = {
-      position: "top-right",
-      newestOnTop: true,
-      type: "info",
-      duration: 3000,
-      pauseOnHover: true,
-      showProgress: true,
-      animation: {
-        in: "fadeIn",
-        out: "fadeOut",
-      },
-      message: "",
-      title: "",
-      allowHtml: false,
-      enableIcon: true,
-      icon: null,
-      isIcon: false,
-      showClose: true,
-      onClose: null,
-      onClick: null,
-    };
+    // Create independent default configuration for this instance.
+    this.defaults = createDefaultOptions();
 
     // Merge options with defaults
     this.options = {

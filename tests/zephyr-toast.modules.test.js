@@ -10,7 +10,12 @@
  * @license MIT
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { JSDOM } from "jsdom";
+import {
+  DEFAULT_OPTIONS,
+  createDefaultOptions,
+} from "../src/config/defaults.js";
 
 import { ANIMATIONS } from "../src/config/animations.js";
 
@@ -58,6 +63,83 @@ describe("ZephyrToast Modular Architecture", () => {
     it("exposes the same class through named and default exports", () => {
       expect(ZephyrToast).toBe(NamedZephyrToast);
       expect(typeof ZephyrToast).toBe("function");
+    });
+  });
+
+
+  describe("Default Configuration", () => {
+    it("exports the expected immutable default options", () => {
+      expect(DEFAULT_OPTIONS.position).toBe("top-right");
+      expect(DEFAULT_OPTIONS.type).toBe("info");
+      expect(DEFAULT_OPTIONS.duration).toBe(3000);
+      expect(DEFAULT_OPTIONS.newestOnTop).toBe(true);
+      expect(DEFAULT_OPTIONS.pauseOnHover).toBe(true);
+      expect(DEFAULT_OPTIONS.showProgress).toBe(true);
+      expect(DEFAULT_OPTIONS.allowHtml).toBe(false);
+      expect(DEFAULT_OPTIONS.enableIcon).toBe(true);
+      expect(DEFAULT_OPTIONS.showClose).toBe(true);
+
+      expect(DEFAULT_OPTIONS.animation).toEqual({
+        in: "fadeIn",
+        out: "fadeOut",
+      });
+
+      expect(Object.isFrozen(DEFAULT_OPTIONS)).toBe(true);
+      expect(Object.isFrozen(DEFAULT_OPTIONS.animation)).toBe(true);
+    });
+
+    it("creates independent mutable default configuration objects", () => {
+      const first = createDefaultOptions();
+      const second = createDefaultOptions();
+
+      expect(first).not.toBe(second);
+      expect(first.animation).not.toBe(second.animation);
+
+      first.position = "bottom-left";
+      first.animation.in = "zoomIn";
+
+      expect(second.position).toBe("top-right");
+      expect(second.animation.in).toBe("fadeIn");
+
+      expect(DEFAULT_OPTIONS.position).toBe("top-right");
+      expect(DEFAULT_OPTIONS.animation.in).toBe("fadeIn");
+    });
+
+    it("keeps default configuration independent between instances", () => {
+      const dom = new JSDOM(
+        `<!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <script src="/zephyr-toast.js"></script>
+          </head>
+          <body></body>
+        </html>`,
+        { url: "http://localhost/" }
+      );
+
+      vi.stubGlobal("document", dom.window.document);
+
+      try {
+        const first = new ZephyrToast();
+        const second = new ZephyrToast();
+
+        expect(first.defaults).not.toBe(second.defaults);
+        expect(first.defaults.animation).not.toBe(
+          second.defaults.animation
+        );
+
+        first.defaults.position = "bottom-left";
+        first.defaults.animation.in = "zoomIn";
+
+        expect(second.defaults.position).toBe("top-right");
+        expect(second.defaults.animation.in).toBe("fadeIn");
+
+        expect(DEFAULT_OPTIONS.position).toBe("top-right");
+        expect(DEFAULT_OPTIONS.animation.in).toBe("fadeIn");
+      } finally {
+        vi.unstubAllGlobals();
+        dom.window.close();
+      }
     });
   });
 });
