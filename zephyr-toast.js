@@ -393,6 +393,21 @@ class ZephyrToast {
       }
     }
 
+
+    // Reject array-based icon configurations before rendering.
+    if (Array.isArray(options.icon)) {
+      throw new TypeError(
+        "Icon configuration must be a string or a non-array object."
+      );
+    }
+
+    // Reject array-based icon configurations before rendering.
+    if (Array.isArray(options.icon)) {
+      throw new TypeError(
+        "Icon configuration must be a string or a non-array object."
+      );
+    }
+
     // Theme configuration must be a non-array object.
     if (options.theme !== undefined) {
       if (
