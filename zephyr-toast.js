@@ -440,31 +440,63 @@ class ZephyrToast {
     return toast;
   }
 
+
   /**
-   * Remove a toast notification
-   * @param {HTMLElement} toast - The toast element to remove
+   * Dismisses a toast notification and releases its dismissal timer.
+   *
+   * The operation is idempotent. Notifications that are already closing
+   * or have been removed are ignored, preventing duplicate animations,
+   * unnecessary timers, and repeated callback execution.
+   *
+   * The notification remains in the DOM until its exit animation
+   * completes. The onClose callback executes only after removal.
+   *
+   * @param {HTMLElement} toast - The notification element to dismiss.
+   * @returns {void}
    */
   removeToast(toast) {
-    // Clear timeout if exists
-    if (toast._timeoutId) {
-      clearTimeout(toast._timeoutId);
+    // Ignore invalid, closing, or previously removed notifications.
+    if (
+      !toast ||
+      toast._lifecycleState === "closing" ||
+      toast._lifecycleState === "closed" ||
+      !toast.parentNode
+    ) {
+      return;
     }
 
-    // Apply exit animation
-    toast.classList.remove(this.animations[toast._options.animation.in]);
-    toast.classList.add(this.animations[toast._options.animation.out]);
+    // Mark the toast immediately to prevent duplicate dismissal.
+    toast._lifecycleState = "closing";
 
-    // Remove after animation completes
-    setTimeout(() => {
-      if (toast && toast.parentNode) {
+    // Cancel the pending automatic dismissal timer.
+    if (toast._timeoutId != null) {
+      clearTimeout(toast._timeoutId);
+      toast._timeoutId = null;
+    }
+
+    // Replace the entrance animation with the configured exit animation.
+    const { animation, onClose } = toast._options;
+
+    toast.classList.remove(this.animations[animation.in]);
+    toast.classList.add(this.animations[animation.out]);
+
+    // Complete removal after the existing 500ms exit period.
+    toast._removalTimeoutId = setTimeout(() => {
+      toast._removalTimeoutId = null;
+
+      if (toast.parentNode) {
         toast.parentNode.removeChild(toast);
-        // Call onClose callback if provided
-        if (typeof toast._options.onClose === "function") {
-          toast._options.onClose();
-        }
+      }
+
+      toast._lifecycleState = "closed";
+
+      // Notify consumers once the notification has been removed.
+      if (typeof onClose === "function") {
+        onClose();
       }
     }, 500);
   }
+
 
   /**
    * Remove all toast notifications
