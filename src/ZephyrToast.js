@@ -4,6 +4,10 @@ import { createNotificationTypes } from "./config/types.js";
 import { validateConfiguration } from "./config/validation.js";
 import { createSafeSvg } from "./renderers/svg.js";
 import { renderIcon } from "./renderers/icons.js";
+import {
+  initializeLifecycle,
+  dismissToast,
+} from "./core/lifecycle.js";
 
 /**
  * ZephyrToast - A Toast Notification Library
@@ -322,159 +326,31 @@ class ZephyrToast {
       toast.style.opacity = "1";
     }, 10);
 
-    // Auto-remove after duration
-    if (toastOptions.duration > 0) {
-      toast._timeoutId = setTimeout(() => {
-        this.removeToast(toast);
-      }, toastOptions.duration);
-    }
-
-    
-    /**
-     * Pauses automatic dismissal while the pointer is over the toast.
-     *
-     * Remaining time is calculated using a monotonic clock rather
-     * than measuring the progress bar's rendered width. This ensures
-     * accurate timing regardless of progress bar visibility.
-     *
-     * The progress indicator is synchronized with the remaining
-     * duration and resumes from its paused position.
-     */
-    if (toastOptions.pauseOnHover && toastOptions.duration > 0) {
-      let remainingTime = toastOptions.duration;
-      let timerStartedAt = performance.now();
-      let isPaused = false;
-
-      const progressBarFill = toast.querySelector(
-        ".zephyr-toast-progress-bar-fill, .zephyr-toast-progress-bar-void-fill"
-      );
-
-      /**
-       * Pauses the dismissal timer and progress animation.
-       *
-       * @returns {void}
-       */
-      const pause = () => {
-        if (isPaused || !toast._timeoutId) {
-          return;
-        }
-
-        isPaused = true;
-
-        const elapsed = performance.now() - timerStartedAt;
-
-        remainingTime = Math.max(0, remainingTime - elapsed);
-
-        clearTimeout(toast._timeoutId);
-        toast._timeoutId = null;
-
-        if (progressBarFill) {
-          const remainingPercentage =
-            (remainingTime / toastOptions.duration) * 100;
-
-          progressBarFill.style.transition = "none";
-          progressBarFill.style.width = `${remainingPercentage}%`;
-        }
-      };
-
-      /**
-       * Resumes dismissal using the time remaining before the pause.
-       *
-       * @returns {void}
-       */
-      const resume = () => {
-        if (!isPaused) {
-          return;
-        }
-
-        isPaused = false;
-        timerStartedAt = performance.now();
-
-        if (remainingTime <= 0) {
-          this.removeToast(toast);
-          return;
-        }
-
-        toast._timeoutId = setTimeout(() => {
-          toast._timeoutId = null;
-          this.removeToast(toast);
-        }, remainingTime);
-
-        if (progressBarFill) {
-          // Force layout so the paused width is applied before
-          // restarting the CSS transition.
-          void progressBarFill.offsetWidth;
-
-          progressBarFill.style.transition =
-            `width ${remainingTime}ms linear`;
-
-          progressBarFill.style.width = "0%";
-        }
-      };
-
-      toast.addEventListener("mouseenter", pause);
-      toast.addEventListener("mouseleave", resume);
-    }
+    // Initialize automatic dismissal and hover behavior.
+    initializeLifecycle(
+      toast,
+      toastOptions,
+      (element) => this.removeToast(element)
+    );
 
     return toast;
   }
 
 
+
   /**
-   * Dismisses a toast notification and releases its dismissal timer.
+   * Dismisses a toast notification.
    *
-   * The operation is idempotent. Notifications that are already closing
-   * or have been removed are ignored, preventing duplicate animations,
-   * unnecessary timers, and repeated callback execution.
+   * Delegates lifecycle state management, animation, timer
+   * cleanup, and removal to the shared lifecycle module.
    *
-   * The notification remains in the DOM until its exit animation
-   * completes. The onClose callback executes only after removal.
-   *
-   * @param {HTMLElement} toast - The notification element to dismiss.
+   * @param {HTMLElement} toast - Notification element to dismiss.
    * @returns {void}
    */
   removeToast(toast) {
-    // Ignore invalid, closing, or previously removed notifications.
-    if (
-      !toast ||
-      toast._lifecycleState === "closing" ||
-      toast._lifecycleState === "closed" ||
-      !toast.parentNode
-    ) {
-      return;
-    }
-
-    // Mark the toast immediately to prevent duplicate dismissal.
-    toast._lifecycleState = "closing";
-
-    // Cancel the pending automatic dismissal timer.
-    if (toast._timeoutId != null) {
-      clearTimeout(toast._timeoutId);
-      toast._timeoutId = null;
-    }
-
-    // Replace the entrance animation with the configured exit animation.
-    const { animation, onClose } = toast._options;
-
-    toast.classList.remove(this.animations[animation.in]);
-    toast.classList.add(this.animations[animation.out]);
-
-    // Complete removal after the existing 500ms exit period.
-    toast._removalTimeoutId = setTimeout(() => {
-      toast._removalTimeoutId = null;
-
-      if (toast.parentNode) {
-        toast.parentNode.removeChild(toast);
-      }
-
-      toast._lifecycleState = "closed";
-
-      // Notify consumers once the notification has been removed.
-      if (typeof onClose === "function") {
-        onClose();
-      }
-    }, 500);
+    dismissToast(toast, this.animations);
   }
+
 
 
   /**

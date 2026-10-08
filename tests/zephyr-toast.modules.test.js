@@ -40,6 +40,11 @@ import {
   renderIcon,
 } from "../src/renderers/icons.js";
 
+import {
+  initializeLifecycle,
+  dismissToast,
+} from "../src/core/lifecycle.js";
+
 import ZephyrToast, {
   ZephyrToast as NamedZephyrToast,
 } from "../src/index.js";
@@ -511,5 +516,130 @@ describe("ZephyrToast Modular Architecture", () => {
       }
     });
   });
-  
+
+  describe("Lifecycle Management", () => {
+    it("exports the lifecycle functions", () => {
+      expect(typeof initializeLifecycle).toBe("function");
+      expect(typeof dismissToast).toBe("function");
+    });
+
+    it("does not schedule dismissal for persistent notifications", () => {
+      vi.useFakeTimers();
+
+      try {
+        const dom = new JSDOM(
+          "<!DOCTYPE html><html><body></body></html>"
+        );
+
+        try {
+          const element = dom.window.document.createElement("div");
+          const onDismiss = vi.fn();
+
+          initializeLifecycle(
+            element,
+            {
+              duration: 0,
+              pauseOnHover: true,
+            },
+            onDismiss
+          );
+
+          vi.advanceTimersByTime(5000);
+
+          expect(onDismiss).not.toHaveBeenCalled();
+          expect(element._timeoutId).toBeUndefined();
+        } finally {
+          dom.window.close();
+        }
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("schedules automatic dismissal after the configured duration", () => {
+      vi.useFakeTimers();
+
+      try {
+        const dom = new JSDOM(
+          "<!DOCTYPE html><html><body></body></html>"
+        );
+
+        try {
+          const element = dom.window.document.createElement("div");
+          const onDismiss = vi.fn();
+
+          initializeLifecycle(
+            element,
+            {
+              duration: 1000,
+              pauseOnHover: false,
+            },
+            onDismiss
+          );
+
+          vi.advanceTimersByTime(999);
+
+          expect(onDismiss).not.toHaveBeenCalled();
+
+          vi.advanceTimersByTime(1);
+
+          expect(onDismiss).toHaveBeenCalledOnce();
+          expect(onDismiss).toHaveBeenCalledWith(element);
+        } finally {
+          dom.window.close();
+        }
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("dismisses a notification only once", () => {
+      vi.useFakeTimers();
+
+      try {
+        const dom = new JSDOM(
+          "<!DOCTYPE html><html><body></body></html>"
+        );
+
+        try {
+          const element = dom.window.document.createElement("div");
+          const onClose = vi.fn();
+
+          element._options = {
+            animation: {
+              in: "fadeIn",
+              out: "fadeOut",
+            },
+            onClose,
+          };
+
+          dom.window.document.body.appendChild(element);
+
+          const animations = {
+            fadeIn: "zephyr_animate_fadeIn",
+            fadeOut: "zephyr_animate_fadeOut",
+          };
+
+          dismissToast(element, animations);
+          dismissToast(element, animations);
+          dismissToast(element, animations);
+
+          expect(vi.getTimerCount()).toBe(1);
+          expect(element._lifecycleState).toBe("closing");
+
+          vi.advanceTimersByTime(500);
+
+          expect(element.isConnected).toBe(false);
+          expect(element._lifecycleState).toBe("closed");
+          expect(onClose).toHaveBeenCalledOnce();
+          expect(vi.getTimerCount()).toBe(0);
+        } finally {
+          dom.window.close();
+        }
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
 });
