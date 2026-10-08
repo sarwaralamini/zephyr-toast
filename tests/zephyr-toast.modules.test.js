@@ -23,6 +23,13 @@ import {
   createNotificationTypes,
 } from "../src/config/types.js";
 
+import {
+  validateConfiguration,
+  VALID_POSITIONS,
+  VALID_ENTRANCE_ANIMATIONS,
+  VALID_EXIT_ANIMATIONS,
+} from "../src/config/validation.js";
+
 import { ANIMATIONS } from "../src/config/animations.js";
 
 import ZephyrToast, {
@@ -195,6 +202,104 @@ describe("ZephyrToast Modular Architecture", () => {
 
       expect(NOTIFICATION_TYPES.success.bgColor).toBe("#e3f7ed");
       expect(NOTIFICATION_TYPES.info.textColor).toBe("#2385ba");
+    });
+  });
+
+  describe("Configuration Validation", () => {
+    it("exports all supported positions", () => {
+      expect(VALID_POSITIONS).toEqual([
+        "top-right",
+        "top-left",
+        "bottom-right",
+        "bottom-left",
+        "top-center",
+        "bottom-center",
+      ]);
+
+      expect(Object.isFrozen(VALID_POSITIONS)).toBe(true);
+    });
+
+    it("exports supported animation names", () => {
+      expect(VALID_ENTRANCE_ANIMATIONS).toContain("fadeIn");
+      expect(VALID_ENTRANCE_ANIMATIONS).toContain("zoomIn");
+
+      expect(VALID_EXIT_ANIMATIONS).toContain("fadeOut");
+      expect(VALID_EXIT_ANIMATIONS).toContain("zoomOut");
+
+      expect(Object.isFrozen(VALID_ENTRANCE_ANIMATIONS)).toBe(true);
+      expect(Object.isFrozen(VALID_EXIT_ANIMATIONS)).toBe(true);
+    });
+
+    it("accepts valid notification configuration", () => {
+      expect(() => {
+        validateConfiguration({
+          type: "success",
+          position: "top-right",
+          duration: 3000,
+          animation: {
+            in: "fadeIn",
+            out: "fadeOut",
+          },
+          icon: {
+            fontAwesome: "fas fa-check",
+          },
+          theme: {
+            bgColor: "#123456",
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it("rejects unsupported notification types", () => {
+      expect(() => {
+        validateConfiguration({
+          type: "invalid",
+        });
+      }).toThrow(/type/i);
+    });
+
+    it("rejects invalid durations", () => {
+      expect(() => {
+        validateConfiguration({
+          duration: -100,
+        });
+      }).toThrow(/duration/i);
+
+      expect(() => {
+        validateConfiguration({
+          duration: "3000",
+        });
+      }).toThrow(/duration/i);
+    });
+
+    it("rejects invalid positions and animations", () => {
+      expect(() => {
+        validateConfiguration({
+          position: "center",
+        });
+      }).toThrow(/position/i);
+
+      expect(() => {
+        validateConfiguration({
+          animation: {
+            in: "unknownAnimation",
+          },
+        });
+      }).toThrow(/animation/i);
+    });
+
+    it("rejects invalid icon and theme structures", () => {
+      expect(() => {
+        validateConfiguration({
+          icon: ["fas", "fa-check"],
+        });
+      }).toThrow(/icon/i);
+
+      expect(() => {
+        validateConfiguration({
+          theme: "dark",
+        });
+      }).toThrow(/theme/i);
     });
   });
 

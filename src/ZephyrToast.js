@@ -1,6 +1,7 @@
 import { ANIMATIONS } from "./config/animations.js";
 import { createDefaultOptions } from "./config/defaults.js";
 import { createNotificationTypes } from "./config/types.js";
+import { validateConfiguration } from "./config/validation.js";
 
 /**
  * ZephyrToast - A Toast Notification Library
@@ -210,140 +211,20 @@ class ZephyrToast {
     return copySafeNode(nodes[0]);
   }
 
+
   /**
-   * Validates notification configuration before it is applied.
+   * Validates notification configuration using the shared validator.
    *
-   * Ensures notification types, positions, durations, animations,
-   * and theme structures contain supported values.
+   * Preserves the existing instance method while delegating validation
+   * to the DOM-independent configuration module.
    *
-   * This method is shared by constructor initialization,
-   * individual notification creation, and position updates.
-   *
-   * @param {Object} options - The configuration values to validate.
+   * @param {Object} options - Configuration values to validate.
    * @returns {void}
    * @throws {TypeError} If a configuration value has an invalid type.
    * @throws {RangeError} If a configuration value is unsupported.
    */
   validateConfiguration(options) {
-    const validPositions = [
-      "top-right",
-      "top-left",
-      "bottom-right",
-      "bottom-left",
-      "top-center",
-      "bottom-center",
-    ];
-
-    const validEntranceAnimations = [
-      "fadeIn",
-      "slideInLeft",
-      "slideInRight",
-      "slideInDown",
-      "slideInUp",
-      "bounceIn",
-      "zoomIn",
-    ];
-
-    const validExitAnimations = [
-      "fadeOut",
-      "slideOutLeft",
-      "slideOutRight",
-      "slideOutUp",
-      "slideOutDown",
-      "bounceOut",
-      "zoomOut",
-    ];
-
-    // Validate the notification type.
-    if (
-      options.type !== undefined &&
-      !Object.hasOwn(this.types, options.type)
-    ) {
-      throw new RangeError(
-        `Invalid notification type: "${options.type}".`
-      );
-    }
-
-    // Validate the notification position.
-    if (
-      options.position !== undefined &&
-      !validPositions.includes(options.position)
-    ) {
-      throw new RangeError(
-        `Invalid notification position: "${options.position}".`
-      );
-    }
-
-    // Duration must be a finite, non-negative number.
-    if (options.duration !== undefined) {
-      if (
-        typeof options.duration !== "number" ||
-        !Number.isFinite(options.duration)
-      ) {
-        throw new TypeError(
-          "Notification duration must be a finite number."
-        );
-      }
-
-      if (options.duration < 0) {
-        throw new RangeError(
-          "Notification duration cannot be negative."
-        );
-      }
-    }
-
-    // Validate the animation configuration.
-    if (options.animation !== undefined) {
-      const animation = options.animation;
-
-      if (
-        animation === null ||
-        typeof animation !== "object" ||
-        Array.isArray(animation)
-      ) {
-        throw new TypeError(
-          "Animation configuration must be an object."
-        );
-      }
-
-      if (
-        animation.in !== undefined &&
-        !validEntranceAnimations.includes(animation.in)
-      ) {
-        throw new RangeError(
-          `Invalid entrance animation: "${animation.in}".`
-        );
-      }
-
-      if (
-        animation.out !== undefined &&
-        !validExitAnimations.includes(animation.out)
-      ) {
-        throw new RangeError(
-          `Invalid exit animation: "${animation.out}".`
-        );
-      }
-    }
-
-    // Reject array-based icon configurations before rendering.
-    if (Array.isArray(options.icon)) {
-      throw new TypeError(
-        "Icon configuration must be a string or a non-array object."
-      );
-    }
-
-    // Theme configuration must be a non-array object.
-    if (options.theme !== undefined) {
-      if (
-        options.theme === null ||
-        typeof options.theme !== "object" ||
-        Array.isArray(options.theme)
-      ) {
-        throw new TypeError(
-          "Notification theme must be a configuration object."
-        );
-      }
-    }
+    validateConfiguration(options);
   }
 
   /**
