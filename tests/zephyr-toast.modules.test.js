@@ -34,6 +34,12 @@ import { ANIMATIONS } from "../src/config/animations.js";
 
 import { createSafeSvg } from "../src/renderers/svg.js";
 
+import {
+  createClassIcon,
+  createImageIcon,
+  renderIcon,
+} from "../src/renderers/icons.js";
+
 import ZephyrToast, {
   ZephyrToast as NamedZephyrToast,
 } from "../src/index.js";
@@ -355,4 +361,155 @@ describe("ZephyrToast Modular Architecture", () => {
     });
   });
 
+  describe("Icon Rendering", () => {
+    it("renders icon classes without interpreting HTML", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        const icon = createClassIcon(
+          'fas fa-check"><img src=x onerror=alert(1)>',
+          dom.window.document
+        );
+
+        expect(icon.localName).toBe("i");
+        expect(icon.getAttribute("class")).toContain("fa-check");
+        expect(icon.querySelector("img")).toBeNull();
+        expect(icon.querySelector("[onerror]")).toBeNull();
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("renders valid image icons without event attributes", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
+        url: "https://example.com/",
+      });
+
+      try {
+        const image = createImageIcon(
+          "/images/check.png",
+          dom.window.document,
+          "24px",
+          "24px"
+        );
+
+        expect(image.localName).toBe("img");
+        expect(image.getAttribute("src")).toBe("/images/check.png");
+        expect(image.style.width).toBe("24px");
+        expect(image.style.height).toBe("24px");
+        expect(image.hasAttribute("onerror")).toBe(false);
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("rejects unsafe image URL protocols", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
+        url: "https://example.com/",
+      });
+
+      try {
+        expect(() => {
+          createImageIcon(
+            "javascript:alert(1)",
+            dom.window.document
+          );
+        }).toThrow(/url|http/i);
+
+        expect(() => {
+          createImageIcon(
+            "data:image/svg+xml,<svg></svg>",
+            dom.window.document
+          );
+        }).toThrow(/url|http/i);
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("renders the correct built-in notification icon", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        const types = createNotificationTypes();
+
+        const icon = renderIcon(
+          {
+            type: "success",
+            icon: null,
+            enableIcon: true,
+          },
+          types,
+          dom.window.document
+        );
+
+        expect(icon).not.toBeNull();
+        expect(icon.className).toBe(
+          "zephyr-toast-notification-icon"
+        );
+        expect(icon.querySelector("svg")).not.toBeNull();
+        expect(icon.querySelector("path")).not.toBeNull();
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("renders custom SVG icons through the secure renderer", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        const icon = renderIcon(
+          {
+            type: "info",
+            icon: {
+              svg: '<svg viewBox="0 0 24 24"><path d="M0 0L12 12" /></svg>',
+            },
+            enableIcon: true,
+          },
+          createNotificationTypes(),
+          dom.window.document
+        );
+
+        expect(icon.querySelector("svg")).not.toBeNull();
+        expect(icon.querySelector("path")).not.toBeNull();
+
+        expect(() => {
+          renderIcon(
+            {
+              type: "info",
+              icon: {
+                svg: '<svg onload="alert(1)"></svg>',
+              },
+              enableIcon: true,
+            },
+            createNotificationTypes(),
+            dom.window.document
+          );
+        }).toThrow(/svg|unsafe|attribute/i);
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("does not render an icon when icons are disabled", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        const icon = renderIcon(
+          {
+            type: "info",
+            icon: null,
+            enableIcon: false,
+          },
+          createNotificationTypes(),
+          dom.window.document
+        );
+
+        expect(icon).toBeNull();
+      } finally {
+        dom.window.close();
+      }
+    });
+  });
+  
 });

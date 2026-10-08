@@ -3,6 +3,7 @@ import { createDefaultOptions } from "./config/defaults.js";
 import { createNotificationTypes } from "./config/types.js";
 import { validateConfiguration } from "./config/validation.js";
 import { createSafeSvg } from "./renderers/svg.js";
+import { renderIcon } from "./renderers/icons.js";
 
 /**
  * ZephyrToast - A Toast Notification Library
@@ -222,115 +223,15 @@ class ZephyrToast {
 
     //Adds an icon to the toast notification if `enableIcon` is not explicitly set to false.
     
-    // Render notification icons using DOM APIs to prevent HTML injection.
-    if (toastOptions.enableIcon !== false) {
-      const iconDiv = document.createElement("div");
-      iconDiv.className = "zephyr-toast-notification-icon";
+    // Render the notification icon using the shared icon renderer.
+    const iconElement = renderIcon(
+      toastOptions,
+      this.types,
+      document
+    );
 
-      const icon = toastOptions.icon;
-
-      /**
-       * Creates an icon element from CSS class names.
-       *
-       * Assigning the class attribute directly prevents the supplied
-       * value from being interpreted as HTML markup.
-       *
-       * @param {string} className - CSS classes for the icon.
-       * @returns {HTMLElement} The generated icon element.
-       */
-      const createClassIcon = (className) => {
-        const element = document.createElement("i");
-        element.setAttribute("class", className);
-        return element;
-      };
-
-      /**
-       * Creates an image icon without interpolating HTML attributes.
-       *
-       * Supports relative, HTTP, and HTTPS image URLs. Dimensions are
-       * applied using the CSSOM rather than inline HTML markup.
-       *
-       * @param {string} url - The image source URL.
-       * @param {string} [width="16px"] - Image width.
-       * @param {string} [height="16px"] - Image height.
-       * @returns {HTMLImageElement} The generated image element.
-       * @throws {TypeError} If the URL is invalid or unsupported.
-       */
-      const createImageIcon = (
-        url,
-        width = "16px",
-        height = "16px"
-      ) => {
-        if (typeof url !== "string" || !url.trim()) {
-          throw new TypeError("Icon image URL must be a non-empty string.");
-        }
-
-        let parsedUrl;
-
-        try {
-          parsedUrl = new URL(url, document.baseURI);
-        } catch {
-          throw new TypeError("Invalid icon image URL.");
-        }
-
-        if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-          throw new TypeError(
-            "Icon image URL must use HTTP, HTTPS, or a relative path."
-          );
-        }
-
-        const image = document.createElement("img");
-
-        // Preserve the supplied URL while preventing attribute injection.
-        image.setAttribute("src", url);
-        image.setAttribute("alt", "");
-        image.style.width = width;
-        image.style.height = height;
-
-        return image;
-      };
-
-      if (typeof icon === "string" && icon.length > 0) {
-        const isImageUrl = /\.(jpeg|jpg|gif|png)(?:[?#].*)?$/i.test(icon);
-
-        if (toastOptions.isIcon && isImageUrl) {
-          throw new TypeError(
-            "An image URL cannot be used when isIcon is true."
-          );
-        }
-
-        if (isImageUrl && !toastOptions.isIcon) {
-          iconDiv.appendChild(createImageIcon(icon));
-        } else {
-          iconDiv.appendChild(createClassIcon(icon));
-        }
-      } else if (icon && typeof icon === "object") {
-        if (icon.url !== undefined) {
-          iconDiv.appendChild(
-            createImageIcon(icon.url, icon.width, icon.height)
-          );
-        } else if (icon.fontAwesome !== undefined) {
-          if (typeof icon.fontAwesome !== "string") {
-            throw new TypeError(
-              "Icon class names must be provided as a string."
-            );
-          }
-
-          iconDiv.appendChild(createClassIcon(icon.fontAwesome));
-        } else if (icon.svg !== undefined) {
-          if (typeof icon.svg !== "string") {
-            throw new TypeError("Custom SVG must be a string.");
-          }
-
-          // Validate and construct custom SVG using approved DOM elements.
-          iconDiv.appendChild(this.createSafeSvg(icon.svg));
-        }
-      } else {
-        // Built-in icons are static library-controlled SVG markup.
-        iconDiv.innerHTML = this.types[toastOptions.type].icon;
-      }
-
-      toastBody.appendChild(iconDiv);
+    if (iconElement) {
+      toastBody.appendChild(iconElement);
     }
 
     // Add content
