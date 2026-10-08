@@ -2,6 +2,7 @@ import { ANIMATIONS } from "./config/animations.js";
 import { createDefaultOptions } from "./config/defaults.js";
 import { createNotificationTypes } from "./config/types.js";
 import { validateConfiguration } from "./config/validation.js";
+import { createSafeSvg } from "./renderers/svg.js";
 
 /**
  * ZephyrToast - A Toast Notification Library
@@ -50,165 +51,18 @@ class ZephyrToast {
     this.injectCSS();
   }
 
-
   /**
-   * Creates a restricted SVG icon from supplied SVG markup.
+   * Creates a validated custom SVG icon.
    *
-   * Only supported SVG drawing elements and attributes are copied
-   * into a new SVG DOM tree. Scripts, event handlers, embedded
-   * content, external references, and unsupported markup are rejected.
+   * Delegates parsing and security validation to the shared
+   * SVG renderer while preserving the existing class API.
    *
-   * @param {string} markup - SVG markup to validate and render.
+   * @param {string} markup - SVG markup to validate.
    * @returns {SVGSVGElement} The validated SVG icon.
-   * @throws {TypeError} If the SVG contains unsupported content.
+   * @throws {TypeError} If the markup contains unsupported content.
    */
   createSafeSvg(markup) {
-    if (typeof markup !== "string" || !markup.trim()) {
-      throw new TypeError("SVG icon markup must be a non-empty string.");
-    }
-
-    const svgNamespace = "http://www.w3.org/2000/svg";
-
-    const allowedElements = new Set([
-      "svg",
-      "g",
-      "path",
-      "circle",
-      "ellipse",
-      "rect",
-      "line",
-      "polyline",
-      "polygon",
-    ]);
-
-    const allowedAttributes = new Set([
-      "viewBox",
-      "width",
-      "height",
-      "fill",
-      "fill-opacity",
-      "fill-rule",
-      "stroke",
-      "stroke-width",
-      "stroke-linecap",
-      "stroke-linejoin",
-      "stroke-miterlimit",
-      "stroke-dasharray",
-      "stroke-dashoffset",
-      "stroke-opacity",
-      "opacity",
-      "d",
-      "cx",
-      "cy",
-      "r",
-      "rx",
-      "ry",
-      "x",
-      "y",
-      "x1",
-      "y1",
-      "x2",
-      "y2",
-      "points",
-      "transform",
-      "xmlns",
-    ]);
-
-    // Parse markup in an inert template, never in the live document.
-    const template = document.createElement("template");
-    template.innerHTML = markup;
-
-    const nodes = Array.from(template.content.childNodes).filter(
-      (node) =>
-        node.nodeType !== 3 || node.textContent.trim() !== ""
-    );
-
-    if (
-      nodes.length !== 1 ||
-      nodes[0].nodeType !== 1 ||
-      nodes[0].localName !== "svg" ||
-      nodes[0].namespaceURI !== svgNamespace
-    ) {
-      throw new TypeError("Invalid or unsafe SVG icon markup.");
-    }
-
-    /**
-     * Recursively copies approved SVG nodes and attributes.
-     *
-     * @param {Element} source - SVG element to validate.
-     * @returns {SVGElement} A newly constructed, validated element.
-     * @throws {TypeError} If unsupported SVG content is encountered.
-     */
-    const copySafeNode = (source) => {
-      if (
-        source.namespaceURI !== svgNamespace ||
-        !allowedElements.has(source.localName)
-      ) {
-        throw new TypeError(
-          `Unsafe or unsupported SVG element: ${source.localName}.`
-        );
-      }
-
-      const target = document.createElementNS(
-        svgNamespace,
-        source.localName
-      );
-
-      for (const attribute of Array.from(source.attributes)) {
-        const name = attribute.name;
-        const value = attribute.value;
-
-        // Reject event handlers, namespaced references, and
-        // attributes outside the explicitly supported subset.
-        if (
-          !allowedAttributes.has(name) ||
-          (attribute.namespaceURI &&
-            attribute.namespaceURI !== "http://www.w3.org/2000/xmlns/")
-        ) {
-          throw new TypeError(
-            `Unsafe or unsupported SVG attribute: ${name}.`
-          );
-        }
-
-        // Reject URL functions, control characters, markup, and
-        // protocol-like content inside supported attributes.
-        if (
-          /url\s*\(/i.test(value) ||
-          /(?:javascript|data|vbscript)\s*:/i.test(value) ||
-          /[<>\u0000-\u001f\u007f]/.test(value)
-        ) {
-          throw new TypeError(
-            `Unsafe SVG attribute value: ${name}.`
-          );
-        }
-
-        if (name === "xmlns") {
-          if (value !== svgNamespace) {
-            throw new TypeError("Invalid SVG namespace.");
-          }
-
-          continue;
-        }
-
-        target.setAttribute(name, value);
-      }
-
-      for (const child of Array.from(source.childNodes)) {
-        if (child.nodeType === 3 && child.textContent.trim() === "") {
-          continue;
-        }
-
-        if (child.nodeType !== 1) {
-          throw new TypeError("Unsupported SVG child content.");
-        }
-
-        target.appendChild(copySafeNode(child));
-      }
-
-      return target;
-    };
-
-    return copySafeNode(nodes[0]);
+    return createSafeSvg(markup, document);
   }
 
 

@@ -32,6 +32,8 @@ import {
 
 import { ANIMATIONS } from "../src/config/animations.js";
 
+import { createSafeSvg } from "../src/renderers/svg.js";
+
 import ZephyrToast, {
   ZephyrToast as NamedZephyrToast,
 } from "../src/index.js";
@@ -300,6 +302,56 @@ describe("ZephyrToast Modular Architecture", () => {
           theme: "dark",
         });
       }).toThrow(/theme/i);
+    });
+  });
+
+  describe("Secure SVG Rendering", () => {
+    it("creates supported SVG elements in the target document", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        const svg = createSafeSvg(
+          '<svg viewBox="0 0 24 24"><path d="M2 2L12 12" /></svg>',
+          dom.window.document
+        );
+
+        expect(svg.localName).toBe("svg");
+        expect(svg.ownerDocument).toBe(dom.window.document);
+        expect(svg.getAttribute("viewBox")).toBe("0 0 24 24");
+        expect(svg.querySelector("path")).not.toBeNull();
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("rejects unsafe SVG attributes", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        expect(() => {
+          createSafeSvg(
+            '<svg onload="alert(1)"><path d="M0 0" /></svg>',
+            dom.window.document
+          );
+        }).toThrow(/svg|unsafe|attribute/i);
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it("rejects unsupported SVG elements", () => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+
+      try {
+        expect(() => {
+          createSafeSvg(
+            "<svg><script>alert(1)</script></svg>",
+            dom.window.document
+          );
+        }).toThrow(/svg|unsafe|unsupported/i);
+      } finally {
+        dom.window.close();
+      }
     });
   });
 
