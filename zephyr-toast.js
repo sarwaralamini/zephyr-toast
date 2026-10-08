@@ -350,55 +350,91 @@ class ZephyrToast {
       }, toastOptions.duration);
     }
 
-    // Add pause-on-hover functionality that stops the progress bar and prevents auto-removal when user hovers over the toast
+    
+    /**
+     * Pauses automatic dismissal while the pointer is over the toast.
+     *
+     * Remaining time is calculated using a monotonic clock rather
+     * than measuring the progress bar's rendered width. This ensures
+     * accurate timing regardless of progress bar visibility.
+     *
+     * The progress indicator is synchronized with the remaining
+     * duration and resumes from its paused position.
+     */
     if (toastOptions.pauseOnHover && toastOptions.duration > 0) {
       let remainingTime = toastOptions.duration;
-      
-      // Pause progress and timer when user hovers over the toast
-      toast.addEventListener('mouseenter', () => {
-        // Clear the timeout to prevent auto-removal
-        if (toast._timeoutId) {
-          clearTimeout(toast._timeoutId);
+      let timerStartedAt = performance.now();
+      let isPaused = false;
+
+      const progressBarFill = toast.querySelector(
+        ".zephyr-toast-progress-bar-fill, .zephyr-toast-progress-bar-void-fill"
+      );
+
+      /**
+       * Pauses the dismissal timer and progress animation.
+       *
+       * @returns {void}
+       */
+      const pause = () => {
+        if (isPaused || !toast._timeoutId) {
+          return;
+        }
+
+        isPaused = true;
+
+        const elapsed = performance.now() - timerStartedAt;
+
+        remainingTime = Math.max(0, remainingTime - elapsed);
+
+        clearTimeout(toast._timeoutId);
+        toast._timeoutId = null;
+
+        if (progressBarFill) {
+          const remainingPercentage =
+            (remainingTime / toastOptions.duration) * 100;
+
+          progressBarFill.style.transition = "none";
+          progressBarFill.style.width = `${remainingPercentage}%`;
+        }
+      };
+
+      /**
+       * Resumes dismissal using the time remaining before the pause.
+       *
+       * @returns {void}
+       */
+      const resume = () => {
+        if (!isPaused) {
+          return;
+        }
+
+        isPaused = false;
+        timerStartedAt = performance.now();
+
+        if (remainingTime <= 0) {
+          this.removeToast(toast);
+          return;
+        }
+
+        toast._timeoutId = setTimeout(() => {
           toast._timeoutId = null;
+          this.removeToast(toast);
+        }, remainingTime);
+
+        if (progressBarFill) {
+          // Force layout so the paused width is applied before
+          // restarting the CSS transition.
+          void progressBarFill.offsetWidth;
+
+          progressBarFill.style.transition =
+            `width ${remainingTime}ms linear`;
+
+          progressBarFill.style.width = "0%";
         }
-        
-        // Stop the progress bar animation
-        if (toastOptions.showProgress) {
-          const progressBarFill = toast.querySelector('.zephyr-toast-progress-bar-fill, .zephyr-toast-progress-bar-void-fill');
-          if (progressBarFill) {
-            // Calculate remaining time based on current width
-            const currentWidth = parseFloat(getComputedStyle(progressBarFill).width);
-            const fullWidth = parseFloat(getComputedStyle(progressBarFill.parentElement).width);
-            remainingTime = toastOptions.duration * (currentWidth / fullWidth);
-            
-            // Pause animation by removing transition and keeping current width
-            progressBarFill.style.transition = 'none';
-            progressBarFill.style.width = `${(currentWidth / fullWidth) * 100}%`;
-          }
-        }
-      });
-      
-      // Resume progress and timer when user's mouse leaves the toast
-      toast.addEventListener('mouseleave', () => {
-        // Restart the timeout with remaining time
-        if (!toast._timeoutId && remainingTime > 0) {
-          toast._timeoutId = setTimeout(() => {
-            this.removeToast(toast);
-          }, remainingTime);
-          
-          // Restart the progress bar animation
-          if (toastOptions.showProgress) {
-            const progressBarFill = toast.querySelector('.zephyr-toast-progress-bar-fill, .zephyr-toast-progress-bar-void-fill');
-            if (progressBarFill) {
-              // Resume animation
-              setTimeout(() => {
-                progressBarFill.style.transition = `width ${remainingTime}ms linear`;
-                progressBarFill.style.width = '0%';
-              }, 10);
-            }
-          }
-        }
-      });
+      };
+
+      toast.addEventListener("mouseenter", pause);
+      toast.addEventListener("mouseleave", resume);
     }
 
     return toast;
