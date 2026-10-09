@@ -23,7 +23,7 @@ import { runInContext } from "node:vm";
  * @type {string}
  */
 const source = readFileSync(
-  new URL("../zephyr-toast.js", import.meta.url),
+  new URL("../dist/zephyr-toast.js", import.meta.url),
   "utf8",
 );
 
@@ -132,10 +132,8 @@ function createTestEnvironment() {
  * @returns {Function} The ZephyrToast constructor.
  */
 function loadZephyrToast(dom) {
-  runInContext(
-    `${source}\nglobalThis.ZephyrToast = ZephyrToast;`,
-    dom.getInternalVMContext(),
-  );
+  // The generated IIFE bundle registers window.ZephyrToast itself.
+  runInContext(source, dom.getInternalVMContext());
 
   return dom.window.ZephyrToast;
 }
