@@ -40,19 +40,19 @@ class ZephyrToast {
       },
     };
 
-    // Initialize the container
-    this.initializeContainer();
-
     // Animation classes are maintained in the shared configuration module.
     this.animations = ANIMATIONS;
 
     // Create independent notification type definitions.
     this.types = createNotificationTypes();
 
-    // Validate the initialized configuration before loading styles.
+    // Validate configuration before modifying the DOM.
     this.validateConfiguration(this.options);
 
-    // Add necessary CSS.
+    // Initialize the notification container only after validation succeeds.
+    this.initializeContainer();
+
+    // Load stylesheets for standalone browser usage.
     this.injectCSS();
   }
 
