@@ -27,6 +27,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build --mode module && vite build --mode browser",
+    "build:demo": "npm run build && node scripts/build-demo.mjs",
     "verify:build": "node scripts/verify-build.mjs",
     "check": "npm run test && npm run verify:build && npm pack --dry-run",
     "test": "npm run build && vitest run",
