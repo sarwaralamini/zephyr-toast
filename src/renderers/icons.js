@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Notification icon rendering for ZephyrToast.
  *
@@ -49,12 +48,10 @@ export function createImageIcon(
   url,
   documentRef,
   width = "16px",
-  height = "16px"
+  height = "16px",
 ) {
   if (typeof url !== "string" || !url.trim()) {
-    throw new TypeError(
-      "Icon image URL must be a non-empty string."
-    );
+    throw new TypeError("Icon image URL must be a non-empty string.");
   }
 
   let parsedUrl;
@@ -67,7 +64,7 @@ export function createImageIcon(
 
   if (!["http:", "https:"].includes(parsedUrl.protocol)) {
     throw new TypeError(
-      "Icon image URL must use HTTP, HTTPS, or a relative path."
+      "Icon image URL must use HTTP, HTTPS, or a relative path.",
     );
   }
 
@@ -107,9 +104,7 @@ export function renderIcon(options, types, documentRef) {
     const isImageUrl = /\.(jpeg|jpg|gif|png)(?:[?#].*)?$/i.test(icon);
 
     if (options.isIcon && isImageUrl) {
-      throw new TypeError(
-        "An image URL cannot be used when isIcon is true."
-      );
+      throw new TypeError("An image URL cannot be used when isIcon is true.");
     }
 
     if (isImageUrl && !options.isIcon) {
@@ -120,29 +115,20 @@ export function renderIcon(options, types, documentRef) {
   } else if (icon && typeof icon === "object") {
     if (Array.isArray(icon)) {
       throw new TypeError(
-        "Icon configuration must be a string or a non-array object."
+        "Icon configuration must be a string or a non-array object.",
       );
     }
 
     if (icon.url !== undefined) {
       iconDiv.appendChild(
-        createImageIcon(
-          icon.url,
-          documentRef,
-          icon.width,
-          icon.height
-        )
+        createImageIcon(icon.url, documentRef, icon.width, icon.height),
       );
     } else if (icon.fontAwesome !== undefined) {
       if (typeof icon.fontAwesome !== "string") {
-        throw new TypeError(
-          "Icon class names must be provided as a string."
-        );
+        throw new TypeError("Icon class names must be provided as a string.");
       }
 
-      iconDiv.appendChild(
-        createClassIcon(icon.fontAwesome, documentRef)
-      );
+      iconDiv.appendChild(createClassIcon(icon.fontAwesome, documentRef));
     } else if (icon.svg !== undefined) {
       if (typeof icon.svg !== "string") {
         throw new TypeError("Custom SVG must be a string.");

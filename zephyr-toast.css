@@ -14,124 +14,123 @@
  * Released under the MIT License
  */
 
-
 .zephyr-toast-container {
-    position: fixed;
-    z-index: 9999;
-    padding: 15px;
-    overflow: hidden;
-    min-width: fit-content;
-    box-sizing: border-box;
+  position: fixed;
+  z-index: 9999;
+  padding: 15px;
+  overflow: hidden;
+  min-width: fit-content;
+  box-sizing: border-box;
 }
 
 .zephyr-position-top-right {
-    top: 0px;
-    right: 0px;
+  top: 0px;
+  right: 0px;
 }
 
 .zephyr-position-top-left {
-    top: 0px;
-    left: 0px;
+  top: 0px;
+  left: 0px;
 }
 
 .zephyr-position-bottom-right {
-    bottom: 0px;
-    right: 0px;
+  bottom: 0px;
+  right: 0px;
 }
 
 .zephyr-position-bottom-left {
-    bottom: 0px;
-    left: 0px;
+  bottom: 0px;
+  left: 0px;
 }
 
 .zephyr-position-top-center {
-    top: 0px;
-    left: 50%;
-    transform: translateX(-50%);
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .zephyr-position-bottom-center {
-    bottom: 0px;
-    left: 50%;
-    transform: translateX(-50%);
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .zephyr-toast-notification {
-    margin-bottom: 15px;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-width: fit-content;
-    opacity: 0;
-    border-width: 1px;
-    border-style: solid;
-    pointer-events: auto;
-    animation-duration: 0.5s;
-    animation-fill-mode: both;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: fit-content;
+  opacity: 0;
+  border-width: 1px;
+  border-style: solid;
+  pointer-events: auto;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
 }
 
 .zephyr-toast-notification-body {
-    padding: 0.75rem;
-    display: flex;
+  padding: 0.75rem;
+  display: flex;
 }
 
 .zephyr-toast-notification-icon {
-    margin-right: 12px;
-    display: flex;
-    align-items: center;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
 }
 
 .zephyr-toast-notification-content {
-    flex: 1;
+  flex: 1;
 }
 
 .zephyr-toast-notification-title {
-    font-weight: bold;
-    margin-bottom: 0.25rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
 }
 
 .zephyr-toast-notification-close {
-    background: transparent;
-    border: 0;
-    padding: 0 0.5rem;
-    cursor: pointer;
-    align-self: flex-start;
-    margin-left: 0.5rem;
-    font-size: 1.25rem;
-    line-height: 1;
-    opacity: 0.7;
+  background: transparent;
+  border: 0;
+  padding: 0 0.5rem;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-left: 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  opacity: 0.7;
 }
 
 .zephyr-toast-notification-close:hover {
-    opacity: 1;
+  opacity: 1;
 }
 
 .zephyr-toast-progress-bar {
-    height: 5px;
-    background-color: rgba(0, 0, 0, 0.15);
-    position: relative;
+  height: 5px;
+  background-color: rgba(0, 0, 0, 0.15);
+  position: relative;
 }
 
 .zephyr-toast-progress-bar-fill {
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.075);
-    transition: width linear;
-    width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.075);
+  transition: width linear;
+  width: 100%;
 }
 
-.zephyr-toast-progress-bar-void{
-    height: 5px;
-    background-color: rgba(75, 84, 88, 1);
-    position: relative;
+.zephyr-toast-progress-bar-void {
+  height: 5px;
+  background-color: rgba(75, 84, 88, 1);
+  position: relative;
 }
 
 .zephyr-toast-progress-bar-void-fill {
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.15);
-    transition: width linear;
-    width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.15);
+  transition: width linear;
+  width: 100%;
 }
 
 /*
@@ -140,24 +139,22 @@
  * for better readability and appearance on small screens.
  */
 @media (max-width: 576px) {
+  .zephyr-position-top-right,
+  .zephyr-position-top-left,
+  .zephyr-position-bottom-right,
+  .zephyr-position-bottom-left,
+  .zephyr-position-top-center,
+  .zephyr-position-bottom-center {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 10px !important;
+  }
 
-    .zephyr-position-top-right,
-    .zephyr-position-top-left,
-    .zephyr-position-bottom-right,
-    .zephyr-position-bottom-left,
-    .zephyr-position-top-center,
-    .zephyr-position-bottom-center {
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 10px !important;
-    }
-
-    .zephyr-toast-notification {
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box;
-    }
-
+  .zephyr-toast-notification {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
 }

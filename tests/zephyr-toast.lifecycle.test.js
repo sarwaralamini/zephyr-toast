@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Lifecycle and timer tests for ZephyrToast.
  *
@@ -12,14 +11,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
@@ -32,7 +24,7 @@ import { runInContext } from "node:vm";
  */
 const source = readFileSync(
   new URL("../zephyr-toast.js", import.meta.url),
-  "utf8"
+  "utf8",
 );
 
 /**
@@ -78,7 +70,7 @@ function createTestClock(window) {
     advance(milliseconds) {
       if (!Number.isFinite(milliseconds) || milliseconds < 0) {
         throw new RangeError(
-          "Time advancement must be a non-negative finite number."
+          "Time advancement must be a non-negative finite number.",
         );
       }
 
@@ -87,10 +79,7 @@ function createTestClock(window) {
       while (true) {
         const next = [...timers.entries()]
           .filter(([, timer]) => timer.time <= target)
-          .sort(
-            (a, b) =>
-              a[1].time - b[1].time || a[0] - b[0]
-          )[0];
+          .sort((a, b) => a[1].time - b[1].time || a[0] - b[0])[0];
 
         if (!next) break;
 
@@ -128,7 +117,7 @@ function createTestEnvironment() {
     {
       url: "http://localhost/",
       runScripts: "outside-only",
-    }
+    },
   );
 
   const clock = createTestClock(dom.window);
@@ -145,7 +134,7 @@ function createTestEnvironment() {
 function loadZephyrToast(dom) {
   runInContext(
     `${source}\nglobalThis.ZephyrToast = ZephyrToast;`,
-    dom.getInternalVMContext()
+    dom.getInternalVMContext(),
   );
 
   return dom.window.ZephyrToast;
@@ -245,7 +234,7 @@ describe("ZephyrToast Lifecycle", () => {
       });
 
       const closeButton = element.querySelector(
-        ".zephyr-toast-notification-close"
+        ".zephyr-toast-notification-close",
       );
 
       closeButton.click();
@@ -299,9 +288,7 @@ describe("ZephyrToast Lifecycle", () => {
       toast.error("Third", { duration: 0 });
 
       expect(
-        toast.container.querySelectorAll(
-          ".zephyr-toast-notification"
-        )
+        toast.container.querySelectorAll(".zephyr-toast-notification"),
       ).toHaveLength(3);
 
       toast.removeAll();
@@ -309,9 +296,7 @@ describe("ZephyrToast Lifecycle", () => {
       clock.advance(500);
 
       expect(
-        toast.container.querySelectorAll(
-          ".zephyr-toast-notification"
-        )
+        toast.container.querySelectorAll(".zephyr-toast-notification"),
       ).toHaveLength(0);
     });
 

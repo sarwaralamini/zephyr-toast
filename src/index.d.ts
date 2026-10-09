@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Public TypeScript declarations for ZephyrToast.
  *
@@ -14,12 +13,7 @@
  * Supported notification types.
  */
 export type ToastType =
-  | "success"
-  | "info"
-  | "warning"
-  | "error"
-  | "zen"
-  | "void";
+  "success" | "info" | "warning" | "error" | "zen" | "void";
 
 /**
  * Supported notification positions.
@@ -104,11 +98,7 @@ export interface ToastSvgIcon {
  * Supported custom notification icon values.
  */
 export type ToastIcon =
-  | string
-  | ToastImageIcon
-  | ToastClassIcon
-  | ToastSvgIcon
-  | null;
+  string | ToastImageIcon | ToastClassIcon | ToastSvgIcon | null;
 
 /**
  * Public configuration accepted by the constructor and
@@ -190,66 +180,42 @@ export declare class ZephyrToast {
   /**
    * Creates and displays a notification.
    */
-  createToast(
-    message: string,
-    options?: ToastOptions
-  ): HTMLElement;
+  createToast(message: string, options?: ToastOptions): HTMLElement;
 
   /**
    * Displays a notification using its configured type.
    */
-  show(
-    message: string,
-    options?: ToastOptions
-  ): HTMLElement;
+  show(message: string, options?: ToastOptions): HTMLElement;
 
   /**
    * Displays a success notification.
    */
-  success(
-    message: string,
-    options?: ToastOptions
-  ): HTMLElement;
+  success(message: string, options?: ToastOptions): HTMLElement;
 
   /**
    * Displays an information notification.
    */
-  info(
-    message: string,
-    options?: ToastOptions
-  ): HTMLElement;
+  info(message: string, options?: ToastOptions): HTMLElement;
 
   /**
    * Displays a warning notification.
    */
-  warning(
-    message: string,
-    options?: ToastOptions
-  ): HTMLElement;
+  warning(message: string, options?: ToastOptions): HTMLElement;
 
   /**
    * Displays an error notification.
    */
-  error(
-    message: string,
-    options?: ToastOptions
-  ): HTMLElement;
+  error(message: string, options?: ToastOptions): HTMLElement;
 
   /**
    * Displays a zen notification.
    */
-  zen(
-    message: string,
-    options?: ToastOptions
-  ): HTMLElement;
+  zen(message: string, options?: ToastOptions): HTMLElement;
 
   /**
    * Displays a void notification.
    */
-  void(
-    message: string,
-    options?: ToastOptions
-  ): HTMLElement;
+  void(message: string, options?: ToastOptions): HTMLElement;
 
   /**
    * Dismisses a notification using its exit animation.

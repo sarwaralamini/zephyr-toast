@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Lifecycle integration tests for modular ZephyrToast.
  *
@@ -10,14 +9,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { JSDOM } from "jsdom";
 import ZephyrToast from "../src/index.js";
@@ -50,7 +42,7 @@ describe("ZephyrToast Modular Lifecycle", () => {
       </html>`,
       {
         url: "http://localhost/",
-      }
+      },
     );
 
     vi.stubGlobal("document", dom.window.document);
@@ -170,17 +162,13 @@ describe("ZephyrToast Modular Lifecycle", () => {
 
       vi.advanceTimersByTime(400);
 
-      element.dispatchEvent(
-        new dom.window.MouseEvent("mouseenter")
-      );
+      element.dispatchEvent(new dom.window.MouseEvent("mouseenter"));
 
       vi.advanceTimersByTime(2000);
 
       expect(element.isConnected).toBe(true);
 
-      element.dispatchEvent(
-        new dom.window.MouseEvent("mouseleave")
-      );
+      element.dispatchEvent(new dom.window.MouseEvent("mouseleave"));
 
       vi.advanceTimersByTime(599);
 

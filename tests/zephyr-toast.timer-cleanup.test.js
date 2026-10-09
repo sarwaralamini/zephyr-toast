@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Timer and event listener cleanup tests.
  *
@@ -11,14 +10,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { JSDOM } from "jsdom";
 import ZephyrToast from "../src/index.js";
@@ -30,12 +22,9 @@ describe("ZephyrToast Timer Cleanup", () => {
   beforeEach(() => {
     vi.useFakeTimers();
 
-    dom = new JSDOM(
-      "<!DOCTYPE html><html><head></head><body></body></html>",
-      {
-        url: "http://localhost/",
-      }
-    );
+    dom = new JSDOM("<!DOCTYPE html><html><head></head><body></body></html>", {
+      url: "http://localhost/",
+    });
 
     vi.stubGlobal("document", dom.window.document);
 
@@ -86,21 +75,18 @@ describe("ZephyrToast Timer Cleanup", () => {
 
     expect(typeof element._hoverCleanup).toBe("function");
 
-    const removeListenerSpy = vi.spyOn(
-      element,
-      "removeEventListener"
-    );
+    const removeListenerSpy = vi.spyOn(element, "removeEventListener");
 
     toast.removeToast(element);
 
     expect(removeListenerSpy).toHaveBeenCalledWith(
       "mouseenter",
-      expect.any(Function)
+      expect.any(Function),
     );
 
     expect(removeListenerSpy).toHaveBeenCalledWith(
       "mouseleave",
-      expect.any(Function)
+      expect.any(Function),
     );
 
     expect(element._hoverCleanup).toBeNull();

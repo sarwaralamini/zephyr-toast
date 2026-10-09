@@ -4,10 +4,7 @@ import { createNotificationTypes } from "./config/types.js";
 import { validateConfiguration } from "./config/validation.js";
 import { createSafeSvg } from "./renderers/svg.js";
 import { renderToast } from "./renderers/toast.js";
-import {
-  initializeLifecycle,
-  dismissToast,
-} from "./core/lifecycle.js";
+import { initializeLifecycle, dismissToast } from "./core/lifecycle.js";
 
 /**
  * ZephyrToast - A Toast Notification Library
@@ -70,7 +67,6 @@ class ZephyrToast {
     return createSafeSvg(markup, document);
   }
 
-
   /**
    * Validates notification configuration using the shared validator.
    *
@@ -102,7 +98,6 @@ class ZephyrToast {
     this.container.className = `zephyr-toast-container zephyr-position-${this.options.position}`;
   }
 
-  
   /**
    * Loads the library stylesheets for standalone browser usage.
    *
@@ -126,10 +121,7 @@ class ZephyrToast {
     for (let i = 0; i < scripts.length; i++) {
       const script = scripts[i];
 
-      if (
-        script.src &&
-        /(?:^|\/)zephyr-toast\.js(?:[?#]|$)/.test(script.src)
-      ) {
+      if (script.src && /(?:^|\/)zephyr-toast\.js(?:[?#]|$)/.test(script.src)) {
         scriptPath = script.src;
         break;
       }
@@ -140,16 +132,11 @@ class ZephyrToast {
       return;
     }
 
-    const scriptDir = scriptPath.substring(
-      0,
-      scriptPath.lastIndexOf("/")
-    );
+    const scriptDir = scriptPath.substring(0, scriptPath.lastIndexOf("/"));
 
-    const animateCSSPath =
-      `${scriptDir}/zephyr-toast-animate.css`;
+    const animateCSSPath = `${scriptDir}/zephyr-toast-animate.css`;
 
-    const zephyrToastCSSPath =
-      `${scriptDir}/zephyr-toast.css`;
+    const zephyrToastCSSPath = `${scriptDir}/zephyr-toast.css`;
 
     const style = document.createElement("style");
 
@@ -169,10 +156,9 @@ class ZephyrToast {
    * @returns {HTMLElement} The created toast notification element
    */
   createToast(message, options = {}) {
-
     // Validate user-provided options before merging and normalizing them.
     this.validateConfiguration(options);
-    
+
     /**
      * Resolves notification configuration using the following priority:
      *
@@ -236,7 +222,7 @@ class ZephyrToast {
       this.types,
       this.animations,
       document,
-      (element) => this.removeToast(element)
+      (element) => this.removeToast(element),
     );
 
     // Store options with the toast
@@ -254,23 +240,21 @@ class ZephyrToast {
     toast._visibilityTimeoutId = setTimeout(() => {
       toast._visibilityTimeoutId = null;
 
-      if (toast._lifecycleState !== "closing" &&
-          toast._lifecycleState !== "closed") {
+      if (
+        toast._lifecycleState !== "closing" &&
+        toast._lifecycleState !== "closed"
+      ) {
         toast.style.opacity = "1";
       }
     }, 10);
 
     // Initialize automatic dismissal and hover behavior.
-    initializeLifecycle(
-      toast,
-      toastOptions,
-      (element) => this.removeToast(element)
+    initializeLifecycle(toast, toastOptions, (element) =>
+      this.removeToast(element),
     );
 
     return toast;
   }
-
-
 
   /**
    * Dismisses a toast notification.
@@ -285,14 +269,12 @@ class ZephyrToast {
     dismissToast(toast, this.animations);
   }
 
-
-
   /**
    * Remove all toast notifications
    */
   removeAll() {
     const toasts = this.container.querySelectorAll(
-      ".zephyr-toast-notification"
+      ".zephyr-toast-notification",
     );
     toasts.forEach((toast) => this.removeToast(toast));
   }
@@ -367,7 +349,6 @@ class ZephyrToast {
     return this.createToast(message, { ...options, type: "void" });
   }
 
-  
   /**
    * Updates the notification container position.
    *
@@ -384,8 +365,7 @@ class ZephyrToast {
 
     this.options.position = position;
 
-    this.container.className =
-      `zephyr-toast-container zephyr-position-${position}`;
+    this.container.className = `zephyr-toast-container zephyr-position-${position}`;
   }
 }
 

@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Constructor safety and DOM integrity tests.
  *
@@ -10,14 +9,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { JSDOM } from "jsdom";
 import ZephyrToast from "../src/index.js";
@@ -26,12 +18,9 @@ describe("ZephyrToast Constructor Safety", () => {
   let dom;
 
   beforeEach(() => {
-    dom = new JSDOM(
-      "<!DOCTYPE html><html><head></head><body></body></html>",
-      {
-        url: "http://localhost/",
-      }
-    );
+    dom = new JSDOM("<!DOCTYPE html><html><head></head><body></body></html>", {
+      url: "http://localhost/",
+    });
 
     vi.stubGlobal("document", dom.window.document);
   });
@@ -48,9 +37,7 @@ describe("ZephyrToast Constructor Safety", () => {
       });
     }).toThrow(RangeError);
 
-    expect(
-      document.getElementById("zephyr-toast-container")
-    ).toBeNull();
+    expect(document.getElementById("zephyr-toast-container")).toBeNull();
   });
 
   it("does not create a container when duration is invalid", () => {
@@ -60,9 +47,7 @@ describe("ZephyrToast Constructor Safety", () => {
       });
     }).toThrow(RangeError);
 
-    expect(
-      document.getElementById("zephyr-toast-container")
-    ).toBeNull();
+    expect(document.getElementById("zephyr-toast-container")).toBeNull();
   });
 
   it("does not modify an existing container on invalid options", () => {
@@ -81,9 +66,7 @@ describe("ZephyrToast Constructor Safety", () => {
       });
     }).toThrow(RangeError);
 
-    expect(existingContainer.className).toBe(
-      "existing-container"
-    );
+    expect(existingContainer.className).toBe("existing-container");
   });
 
   it("creates the container when configuration is valid", () => {
@@ -95,9 +78,7 @@ describe("ZephyrToast Constructor Safety", () => {
     expect(toast.container).not.toBeNull();
 
     expect(
-      toast.container.classList.contains(
-        "zephyr-position-bottom-left"
-      )
+      toast.container.classList.contains("zephyr-position-bottom-left"),
     ).toBe(true);
   });
 });

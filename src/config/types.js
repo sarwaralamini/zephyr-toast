@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Built-in notification types and visual themes.
  *
@@ -80,6 +79,6 @@ export function createNotificationTypes() {
     Object.entries(NOTIFICATION_TYPES).map(([name, config]) => [
       name,
       { ...config },
-    ])
+    ]),
   );
 }

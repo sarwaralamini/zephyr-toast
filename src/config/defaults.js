@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Default notification configuration for ZephyrToast.
  *

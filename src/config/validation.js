@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Configuration validation for ZephyrToast.
  *
@@ -75,9 +74,7 @@ export function validateConfiguration(options) {
     options.type !== undefined &&
     !Object.hasOwn(NOTIFICATION_TYPES, options.type)
   ) {
-    throw new RangeError(
-      `Invalid notification type: "${options.type}".`
-    );
+    throw new RangeError(`Invalid notification type: "${options.type}".`);
   }
 
   // Validate the notification position.
@@ -86,7 +83,7 @@ export function validateConfiguration(options) {
     !VALID_POSITIONS.includes(options.position)
   ) {
     throw new RangeError(
-      `Invalid notification position: "${options.position}".`
+      `Invalid notification position: "${options.position}".`,
     );
   }
 
@@ -96,15 +93,11 @@ export function validateConfiguration(options) {
       typeof options.duration !== "number" ||
       !Number.isFinite(options.duration)
     ) {
-      throw new TypeError(
-        "Notification duration must be a finite number."
-      );
+      throw new TypeError("Notification duration must be a finite number.");
     }
 
     if (options.duration < 0) {
-      throw new RangeError(
-        "Notification duration cannot be negative."
-      );
+      throw new RangeError("Notification duration cannot be negative.");
     }
   }
 
@@ -117,34 +110,28 @@ export function validateConfiguration(options) {
       typeof animation !== "object" ||
       Array.isArray(animation)
     ) {
-      throw new TypeError(
-        "Animation configuration must be an object."
-      );
+      throw new TypeError("Animation configuration must be an object.");
     }
 
     if (
       animation.in !== undefined &&
       !VALID_ENTRANCE_ANIMATIONS.includes(animation.in)
     ) {
-      throw new RangeError(
-        `Invalid entrance animation: "${animation.in}".`
-      );
+      throw new RangeError(`Invalid entrance animation: "${animation.in}".`);
     }
 
     if (
       animation.out !== undefined &&
       !VALID_EXIT_ANIMATIONS.includes(animation.out)
     ) {
-      throw new RangeError(
-        `Invalid exit animation: "${animation.out}".`
-      );
+      throw new RangeError(`Invalid exit animation: "${animation.out}".`);
     }
   }
 
   // Reject array-based icon configurations before rendering.
   if (Array.isArray(options.icon)) {
     throw new TypeError(
-      "Icon configuration must be a string or a non-array object."
+      "Icon configuration must be a string or a non-array object.",
     );
   }
 
@@ -155,9 +142,7 @@ export function validateConfiguration(options) {
       typeof options.theme !== "object" ||
       Array.isArray(options.theme)
     ) {
-      throw new TypeError(
-        "Notification theme must be a configuration object."
-      );
+      throw new TypeError("Notification theme must be a configuration object.");
     }
   }
 }

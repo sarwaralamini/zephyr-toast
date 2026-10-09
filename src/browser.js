@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Standalone browser entry point for ZephyrToast.
  *

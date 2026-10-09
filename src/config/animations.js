@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Animation class mappings for ZephyrToast.
  *

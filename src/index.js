@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Public ES module entry point for ZephyrToast.
  *

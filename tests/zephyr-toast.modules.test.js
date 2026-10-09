@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview ES module architecture regression tests.
  *
@@ -42,14 +41,9 @@ import {
 
 import { renderToast } from "../src/renderers/toast.js";
 
-import {
-  initializeLifecycle,
-  dismissToast,
-} from "../src/core/lifecycle.js";
+import { initializeLifecycle, dismissToast } from "../src/core/lifecycle.js";
 
-import ZephyrToast, {
-  ZephyrToast as NamedZephyrToast,
-} from "../src/index.js";
+import ZephyrToast, { ZephyrToast as NamedZephyrToast } from "../src/index.js";
 
 /**
  * Verifies animation configuration and public module exports.
@@ -75,7 +69,7 @@ describe("ZephyrToast Modular Architecture", () => {
       ];
 
       expect(Object.keys(ANIMATIONS).sort()).toEqual(
-        [...expectedAnimations].sort()
+        [...expectedAnimations].sort(),
       );
 
       expect(ANIMATIONS.fadeIn).toBe("zephyr_animate_fadeIn");
@@ -141,7 +135,7 @@ describe("ZephyrToast Modular Architecture", () => {
           </head>
           <body></body>
         </html>`,
-        { url: "http://localhost/" }
+        { url: "http://localhost/" },
       );
 
       vi.stubGlobal("document", dom.window.document);
@@ -151,9 +145,7 @@ describe("ZephyrToast Modular Architecture", () => {
         const second = new ZephyrToast();
 
         expect(first.defaults).not.toBe(second.defaults);
-        expect(first.defaults.animation).not.toBe(
-          second.defaults.animation
-        );
+        expect(first.defaults.animation).not.toBe(second.defaults.animation);
 
         first.defaults.position = "bottom-left";
         first.defaults.animation.in = "zoomIn";
@@ -325,7 +317,7 @@ describe("ZephyrToast Modular Architecture", () => {
       try {
         const svg = createSafeSvg(
           '<svg viewBox="0 0 24 24"><path d="M2 2L12 12" /></svg>',
-          dom.window.document
+          dom.window.document,
         );
 
         expect(svg.localName).toBe("svg");
@@ -344,7 +336,7 @@ describe("ZephyrToast Modular Architecture", () => {
         expect(() => {
           createSafeSvg(
             '<svg onload="alert(1)"><path d="M0 0" /></svg>',
-            dom.window.document
+            dom.window.document,
           );
         }).toThrow(/svg|unsafe|attribute/i);
       } finally {
@@ -359,7 +351,7 @@ describe("ZephyrToast Modular Architecture", () => {
         expect(() => {
           createSafeSvg(
             "<svg><script>alert(1)</script></svg>",
-            dom.window.document
+            dom.window.document,
           );
         }).toThrow(/svg|unsafe|unsupported/i);
       } finally {
@@ -375,7 +367,7 @@ describe("ZephyrToast Modular Architecture", () => {
       try {
         const icon = createClassIcon(
           'fas fa-check"><img src=x onerror=alert(1)>',
-          dom.window.document
+          dom.window.document,
         );
 
         expect(icon.localName).toBe("i");
@@ -397,7 +389,7 @@ describe("ZephyrToast Modular Architecture", () => {
           "/images/check.png",
           dom.window.document,
           "24px",
-          "24px"
+          "24px",
         );
 
         expect(image.localName).toBe("img");
@@ -417,16 +409,13 @@ describe("ZephyrToast Modular Architecture", () => {
 
       try {
         expect(() => {
-          createImageIcon(
-            "javascript:alert(1)",
-            dom.window.document
-          );
+          createImageIcon("javascript:alert(1)", dom.window.document);
         }).toThrow(/url|http/i);
 
         expect(() => {
           createImageIcon(
             "data:image/svg+xml,<svg></svg>",
-            dom.window.document
+            dom.window.document,
           );
         }).toThrow(/url|http/i);
       } finally {
@@ -447,13 +436,11 @@ describe("ZephyrToast Modular Architecture", () => {
             enableIcon: true,
           },
           types,
-          dom.window.document
+          dom.window.document,
         );
 
         expect(icon).not.toBeNull();
-        expect(icon.className).toBe(
-          "zephyr-toast-notification-icon"
-        );
+        expect(icon.className).toBe("zephyr-toast-notification-icon");
         expect(icon.querySelector("svg")).not.toBeNull();
         expect(icon.querySelector("path")).not.toBeNull();
       } finally {
@@ -474,7 +461,7 @@ describe("ZephyrToast Modular Architecture", () => {
             enableIcon: true,
           },
           createNotificationTypes(),
-          dom.window.document
+          dom.window.document,
         );
 
         expect(icon.querySelector("svg")).not.toBeNull();
@@ -490,7 +477,7 @@ describe("ZephyrToast Modular Architecture", () => {
               enableIcon: true,
             },
             createNotificationTypes(),
-            dom.window.document
+            dom.window.document,
           );
         }).toThrow(/svg|unsafe|attribute/i);
       } finally {
@@ -509,7 +496,7 @@ describe("ZephyrToast Modular Architecture", () => {
             enableIcon: false,
           },
           createNotificationTypes(),
-          dom.window.document
+          dom.window.document,
         );
 
         expect(icon).toBeNull();
@@ -529,9 +516,7 @@ describe("ZephyrToast Modular Architecture", () => {
       vi.useFakeTimers();
 
       try {
-        const dom = new JSDOM(
-          "<!DOCTYPE html><html><body></body></html>"
-        );
+        const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
 
         try {
           const element = dom.window.document.createElement("div");
@@ -543,7 +528,7 @@ describe("ZephyrToast Modular Architecture", () => {
               duration: 0,
               pauseOnHover: true,
             },
-            onDismiss
+            onDismiss,
           );
 
           vi.advanceTimersByTime(5000);
@@ -562,9 +547,7 @@ describe("ZephyrToast Modular Architecture", () => {
       vi.useFakeTimers();
 
       try {
-        const dom = new JSDOM(
-          "<!DOCTYPE html><html><body></body></html>"
-        );
+        const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
 
         try {
           const element = dom.window.document.createElement("div");
@@ -576,7 +559,7 @@ describe("ZephyrToast Modular Architecture", () => {
               duration: 1000,
               pauseOnHover: false,
             },
-            onDismiss
+            onDismiss,
           );
 
           vi.advanceTimersByTime(999);
@@ -599,9 +582,7 @@ describe("ZephyrToast Modular Architecture", () => {
       vi.useFakeTimers();
 
       try {
-        const dom = new JSDOM(
-          "<!DOCTYPE html><html><body></body></html>"
-        );
+        const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
 
         try {
           const element = dom.window.document.createElement("div");
@@ -674,17 +655,17 @@ describe("ZephyrToast Modular Architecture", () => {
           createNotificationTypes(),
           ANIMATIONS,
           dom.window.document,
-          () => {}
+          () => {},
         );
 
-        expect(toast.classList.contains(
-          "zephyr-toast-notification"
-        )).toBe(true);
+        expect(toast.classList.contains("zephyr-toast-notification")).toBe(
+          true,
+        );
 
         expect(toast.isConnected).toBe(false);
-        expect(toast.querySelector(
-          ".zephyr-toast-notification-message"
-        )).not.toBeNull();
+        expect(
+          toast.querySelector(".zephyr-toast-notification-message"),
+        ).not.toBeNull();
       } finally {
         dom.window.close();
       }
@@ -702,12 +683,12 @@ describe("ZephyrToast Modular Architecture", () => {
           createNotificationTypes(),
           ANIMATIONS,
           dom.window.document,
-          () => {}
+          () => {},
         );
 
-        expect(toast.querySelector(
-          ".zephyr-toast-notification-message img"
-        )).toBeNull();
+        expect(
+          toast.querySelector(".zephyr-toast-notification-message img"),
+        ).toBeNull();
 
         expect(toast.textContent).toContain("<img");
       } finally {
@@ -727,7 +708,7 @@ describe("ZephyrToast Modular Architecture", () => {
           createNotificationTypes(),
           ANIMATIONS,
           dom.window.document,
-          () => {}
+          () => {},
         );
 
         expect(toast.querySelector("strong")).not.toBeNull();
@@ -747,11 +728,11 @@ describe("ZephyrToast Modular Architecture", () => {
           createNotificationTypes(),
           ANIMATIONS,
           dom.window.document,
-          dismissed
+          dismissed,
         );
 
         const closeButton = toast.querySelector(
-          ".zephyr-toast-notification-close"
+          ".zephyr-toast-notification-close",
         );
 
         expect(closeButton).not.toBeNull();
@@ -769,9 +750,7 @@ describe("ZephyrToast Modular Architecture", () => {
       vi.useFakeTimers();
 
       try {
-        const dom = new JSDOM(
-          "<!DOCTYPE html><html><body></body></html>"
-        );
+        const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
 
         try {
           const toast = renderToast(
@@ -782,17 +761,17 @@ describe("ZephyrToast Modular Architecture", () => {
             createNotificationTypes(),
             ANIMATIONS,
             dom.window.document,
-            () => {}
+            () => {},
           );
 
-          expect(toast.querySelector(
-            ".zephyr-toast-progress-bar"
-          )).not.toBeNull();
+          expect(
+            toast.querySelector(".zephyr-toast-progress-bar"),
+          ).not.toBeNull();
 
           vi.advanceTimersByTime(10);
 
           const progressFill = toast.querySelector(
-            ".zephyr-toast-progress-bar-fill"
+            ".zephyr-toast-progress-bar-fill",
           );
 
           expect(progressFill.style.width).toBe("0%");
@@ -817,16 +796,13 @@ describe("ZephyrToast Modular Architecture", () => {
           createNotificationTypes(),
           ANIMATIONS,
           dom.window.document,
-          () => {}
+          () => {},
         );
 
-        expect(toast.querySelector(
-          ".zephyr-toast-progress-bar"
-        )).toBeNull();
+        expect(toast.querySelector(".zephyr-toast-progress-bar")).toBeNull();
       } finally {
         dom.window.close();
       }
     });
   });
-
 });

@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Configuration validation tests for ZephyrToast.
  *
@@ -13,13 +12,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
@@ -32,7 +25,7 @@ import { runInContext } from "node:vm";
  */
 const source = readFileSync(
   new URL("../zephyr-toast.js", import.meta.url),
-  "utf8"
+  "utf8",
 );
 
 /**
@@ -56,12 +49,12 @@ function createTestEnvironment() {
     {
       url: "http://localhost/",
       runScripts: "outside-only",
-    }
+    },
   );
 
   runInContext(
     `${source}\nglobalThis.ZephyrToast = ZephyrToast;`,
-    dom.getInternalVMContext()
+    dom.getInternalVMContext(),
   );
 
   return {
@@ -112,14 +105,7 @@ describe("ZephyrToast Configuration Validation", () => {
     it("accepts all supported notification types", () => {
       const toast = new ZephyrToast();
 
-      const types = [
-        "success",
-        "info",
-        "warning",
-        "error",
-        "zen",
-        "void",
-      ];
+      const types = ["success", "info", "warning", "error", "zen", "void"];
 
       for (const type of types) {
         expect(() => {
@@ -231,9 +217,7 @@ describe("ZephyrToast Configuration Validation", () => {
         const toast = new ZephyrToast({ position });
 
         expect(
-          toast.container.classList.contains(
-            `zephyr-position-${position}`
-          )
+          toast.container.classList.contains(`zephyr-position-${position}`),
         ).toBe(true);
       }
     });
@@ -271,17 +255,11 @@ describe("ZephyrToast Configuration Validation", () => {
         },
       });
 
-      expect(element.style.backgroundColor).toBe(
-        "rgb(18, 52, 86)"
-      );
+      expect(element.style.backgroundColor).toBe("rgb(18, 52, 86)");
 
-      expect(element.style.color).toBe(
-        "rgb(255, 255, 255)"
-      );
+      expect(element.style.color).toBe("rgb(255, 255, 255)");
 
-      expect(element.style.borderColor).toBe(
-        "rgb(51, 51, 51)"
-      );
+      expect(element.style.borderColor).toBe("rgb(51, 51, 51)");
     });
   });
 });

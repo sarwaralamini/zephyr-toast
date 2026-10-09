@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Public API compatibility tests for ZephyrToast.
  *
@@ -11,20 +10,11 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { JSDOM } from "jsdom";
 
-import ZephyrToast, {
-  ZephyrToast as NamedZephyrToast,
-} from "../src/index.js";
+import ZephyrToast, { ZephyrToast as NamedZephyrToast } from "../src/index.js";
 
 describe("ZephyrToast Public API Compatibility", () => {
   let dom;
@@ -33,12 +23,9 @@ describe("ZephyrToast Public API Compatibility", () => {
   beforeEach(() => {
     vi.useFakeTimers();
 
-    dom = new JSDOM(
-      "<!DOCTYPE html><html><head></head><body></body></html>",
-      {
-        url: "http://localhost/",
-      }
-    );
+    dom = new JSDOM("<!DOCTYPE html><html><head></head><body></body></html>", {
+      url: "http://localhost/",
+    });
 
     vi.stubGlobal("document", dom.window.document);
 
@@ -73,9 +60,7 @@ describe("ZephyrToast Public API Compatibility", () => {
         duration: 0,
       });
 
-      expect(element).toBeInstanceOf(
-        dom.window.HTMLElement
-      );
+      expect(element).toBeInstanceOf(dom.window.HTMLElement);
 
       expect(toast.container.contains(element)).toBe(true);
     }
@@ -167,8 +152,6 @@ describe("ZephyrToast Public API Compatibility", () => {
     }).toThrow(RangeError);
 
     expect(toast.options.position).toBe(originalPosition);
-    expect(toast.container.className).toBe(
-      originalClassName
-    );
+    expect(toast.container.className).toBe(originalClassName);
   });
 });

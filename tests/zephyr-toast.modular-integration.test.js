@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Integration tests for the modular ZephyrToast library.
  *
@@ -10,14 +9,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { JSDOM } from "jsdom";
 import ZephyrToast from "../src/index.js";
@@ -50,7 +42,7 @@ describe("ZephyrToast Modular Integration", () => {
       </html>`,
       {
         url: "http://localhost/",
-      }
+      },
     );
 
     vi.stubGlobal("document", dom.window.document);
@@ -82,21 +74,15 @@ describe("ZephyrToast Modular Integration", () => {
 
       expect(element._options.type).toBe("success");
 
-      expect(element.style.backgroundColor).toBe(
-        "rgb(18, 52, 86)"
-      );
+      expect(element.style.backgroundColor).toBe("rgb(18, 52, 86)");
 
-      expect(element.style.color).toBe(
-        "rgb(59, 173, 113)"
-      );
+      expect(element.style.color).toBe("rgb(59, 173, 113)");
 
-      expect(element.style.borderColor).toBe(
-        "rgb(181, 234, 206)"
-      );
+      expect(element.style.borderColor).toBe("rgb(181, 234, 206)");
 
-      expect(element.querySelector(
-        ".zephyr-toast-notification-icon svg"
-      )).not.toBeNull();
+      expect(
+        element.querySelector(".zephyr-toast-notification-icon svg"),
+      ).not.toBeNull();
     });
 
     it("preserves instance defaults after per-toast overrides", () => {
@@ -147,9 +133,9 @@ describe("ZephyrToast Modular Integration", () => {
       toast.updatePosition("bottom-left");
 
       expect(toast.options.position).toBe("bottom-left");
-      expect(toast.container.classList.contains(
-        "zephyr-position-bottom-left"
-      )).toBe(true);
+      expect(
+        toast.container.classList.contains("zephyr-position-bottom-left"),
+      ).toBe(true);
 
       expect(element.isConnected).toBe(true);
       expect(toast.container.contains(element)).toBe(true);

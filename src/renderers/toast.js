@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Notification DOM rendering for ZephyrToast.
  *
@@ -31,7 +30,7 @@ export function renderToast(
   types,
   animations,
   documentRef,
-  onDismiss
+  onDismiss,
 ) {
   // Create the notification element.
   const toast = documentRef.createElement("div");
@@ -107,16 +106,14 @@ export function renderToast(
       ? "zephyr-toast-progress-bar-void"
       : "zephyr-toast-progress-bar";
 
-    progressBar.style.backgroundColor =
-      options.theme.progressTrackColor;
+    progressBar.style.backgroundColor = options.theme.progressTrackColor;
 
     const progressBarFill = documentRef.createElement("div");
     progressBarFill.className = isVoid
       ? "zephyr-toast-progress-bar-void-fill"
       : "zephyr-toast-progress-bar-fill";
 
-    progressBarFill.style.backgroundColor =
-      options.theme.progressBarColor;
+    progressBarFill.style.backgroundColor = options.theme.progressBarColor;
 
     progressBar.appendChild(progressBarFill);
     toast.appendChild(progressBar);
@@ -134,8 +131,7 @@ export function renderToast(
       }
 
       progressBarFill.style.width = "0%";
-      progressBarFill.style.transitionDuration =
-        `${options.duration}ms`;
+      progressBarFill.style.transitionDuration = `${options.duration}ms`;
     }, 10);
   }
 
@@ -146,10 +142,8 @@ export function renderToast(
     toast.addEventListener("click", (event) => {
       if (
         event.target !== toast &&
-        event.target.className !==
-          "zephyr-toast-notification-message" &&
-        event.target.className !==
-          "zephyr-toast-notification-content"
+        event.target.className !== "zephyr-toast-notification-message" &&
+        event.target.className !== "zephyr-toast-notification-content"
       ) {
         return;
       }

@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Notification lifecycle management for ZephyrToast.
  *
@@ -41,7 +40,7 @@ export function initializeLifecycle(toast, options, onDismiss) {
   let isPaused = false;
 
   const progressBarFill = toast.querySelector(
-    ".zephyr-toast-progress-bar-fill, .zephyr-toast-progress-bar-void-fill"
+    ".zephyr-toast-progress-bar-fill, .zephyr-toast-progress-bar-void-fill",
   );
 
   /**
@@ -64,8 +63,7 @@ export function initializeLifecycle(toast, options, onDismiss) {
     toast._timeoutId = null;
 
     if (progressBarFill) {
-      const remainingPercentage =
-        (remainingTime / duration) * 100;
+      const remainingPercentage = (remainingTime / duration) * 100;
 
       progressBarFill.style.transition = "none";
       progressBarFill.style.width = `${remainingPercentage}%`;
@@ -99,8 +97,7 @@ export function initializeLifecycle(toast, options, onDismiss) {
       // Force layout before restarting the progress transition.
       void progressBarFill.offsetWidth;
 
-      progressBarFill.style.transition =
-        `width ${remainingTime}ms linear`;
+      progressBarFill.style.transition = `width ${remainingTime}ms linear`;
 
       progressBarFill.style.width = "0%";
     }

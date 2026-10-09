@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Hover and timer regression tests for ZephyrToast.
  *
@@ -13,13 +12,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
@@ -32,7 +25,7 @@ import { runInContext } from "node:vm";
  */
 const source = readFileSync(
   new URL("../zephyr-toast.js", import.meta.url),
-  "utf8"
+  "utf8",
 );
 
 /**
@@ -54,7 +47,7 @@ function createTestClock(window) {
     configurable: true,
     value: () => now,
   });
-  
+
   /** @type {Map<number, {time: number, callback: Function}>} */
   const timers = new Map();
 
@@ -83,7 +76,7 @@ function createTestClock(window) {
     advance(milliseconds) {
       if (!Number.isFinite(milliseconds) || milliseconds < 0) {
         throw new RangeError(
-          "Time advancement must be non-negative and finite."
+          "Time advancement must be non-negative and finite.",
         );
       }
 
@@ -92,10 +85,7 @@ function createTestClock(window) {
       while (true) {
         const next = [...timers.entries()]
           .filter(([, timer]) => timer.time <= target)
-          .sort(
-            (a, b) =>
-              a[1].time - b[1].time || a[0] - b[0]
-          )[0];
+          .sort((a, b) => a[1].time - b[1].time || a[0] - b[0])[0];
 
         if (!next) break;
 
@@ -133,14 +123,14 @@ function createTestEnvironment() {
     {
       url: "http://localhost/",
       runScripts: "outside-only",
-    }
+    },
   );
 
   const clock = createTestClock(dom.window);
 
   runInContext(
     `${source}\nglobalThis.ZephyrToast = ZephyrToast;`,
-    dom.getInternalVMContext()
+    dom.getInternalVMContext(),
   );
 
   return {
@@ -192,7 +182,7 @@ describe("ZephyrToast Hover Behavior", () => {
     element.dispatchEvent(
       new dom.window.MouseEvent(type, {
         bubbles: false,
-      })
+      }),
     );
   }
 
@@ -238,9 +228,7 @@ describe("ZephyrToast Hover Behavior", () => {
 
     clock.advance(1);
 
-    expect(
-      element.classList.contains("zephyr_animate_fadeOut")
-    ).toBe(true);
+    expect(element.classList.contains("zephyr_animate_fadeOut")).toBe(true);
 
     // Allow the existing exit animation to finish.
     clock.advance(500);
@@ -278,9 +266,7 @@ describe("ZephyrToast Hover Behavior", () => {
 
     clock.advance(1);
 
-    expect(
-      element.classList.contains("zephyr_animate_fadeOut")
-    ).toBe(true);
+    expect(element.classList.contains("zephyr_animate_fadeOut")).toBe(true);
 
     clock.advance(500);
 

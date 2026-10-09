@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Secure SVG icon rendering for ZephyrToast.
  *
@@ -81,8 +80,7 @@ export function createSafeSvg(markup, documentRef = document) {
   template.innerHTML = markup;
 
   const nodes = Array.from(template.content.childNodes).filter(
-    (node) =>
-      node.nodeType !== 3 || node.textContent.trim() !== ""
+    (node) => node.nodeType !== 3 || node.textContent.trim() !== "",
   );
 
   if (
@@ -107,14 +105,11 @@ export function createSafeSvg(markup, documentRef = document) {
       !allowedElements.has(source.localName)
     ) {
       throw new TypeError(
-        `Unsafe or unsupported SVG element: ${source.localName}.`
+        `Unsafe or unsupported SVG element: ${source.localName}.`,
       );
     }
 
-    const target = documentRef.createElementNS(
-      svgNamespace,
-      source.localName
-    );
+    const target = documentRef.createElementNS(svgNamespace, source.localName);
 
     for (const attribute of Array.from(source.attributes)) {
       const name = attribute.name;
@@ -124,12 +119,9 @@ export function createSafeSvg(markup, documentRef = document) {
       if (
         !allowedAttributes.has(name) ||
         (attribute.namespaceURI &&
-          attribute.namespaceURI !==
-            "http://www.w3.org/2000/xmlns/")
+          attribute.namespaceURI !== "http://www.w3.org/2000/xmlns/")
       ) {
-        throw new TypeError(
-          `Unsafe or unsupported SVG attribute: ${name}.`
-        );
+        throw new TypeError(`Unsafe or unsupported SVG attribute: ${name}.`);
       }
 
       // Reject external references and unsafe values.
@@ -138,9 +130,7 @@ export function createSafeSvg(markup, documentRef = document) {
         /(?:javascript|data|vbscript)\s*:/i.test(value) ||
         /[<>\u0000-\u001f\u007f]/.test(value)
       ) {
-        throw new TypeError(
-          `Unsafe SVG attribute value: ${name}.`
-        );
+        throw new TypeError(`Unsafe SVG attribute value: ${name}.`);
       }
 
       if (name === "xmlns") {

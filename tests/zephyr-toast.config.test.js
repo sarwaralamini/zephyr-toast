@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Configuration and theme regression tests for ZephyrToast.
  *
@@ -13,13 +12,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
@@ -32,7 +25,7 @@ import { runInContext } from "node:vm";
  */
 const source = readFileSync(
   new URL("../zephyr-toast.js", import.meta.url),
-  "utf8"
+  "utf8",
 );
 
 /**
@@ -56,12 +49,12 @@ function createTestEnvironment() {
     {
       url: "http://localhost/",
       runScripts: "outside-only",
-    }
+    },
   );
 
   runInContext(
     `${source}\nglobalThis.ZephyrToast = ZephyrToast;`,
-    dom.getInternalVMContext()
+    dom.getInternalVMContext(),
   );
 
   return {

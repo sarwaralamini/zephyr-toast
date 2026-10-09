@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Advanced security regression tests for ZephyrToast.
  *
@@ -13,13 +12,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
@@ -32,7 +25,7 @@ import { runInContext } from "node:vm";
  */
 const source = readFileSync(
   new URL("../zephyr-toast.js", import.meta.url),
-  "utf8"
+  "utf8",
 );
 
 /**
@@ -53,12 +46,12 @@ function createTestEnvironment() {
     {
       url: "http://localhost/",
       runScripts: "outside-only",
-    }
+    },
   );
 
   runInContext(
     `${source}\nglobalThis.ZephyrToast = ZephyrToast;`,
-    dom.getInternalVMContext()
+    dom.getInternalVMContext(),
   );
 
   return {
@@ -125,7 +118,7 @@ describe("ZephyrToast Security Hardening", () => {
     it("rejects HTML elements inside SVG foreignObject", () => {
       expect(() => {
         renderSvg(
-          '<svg><foreignObject><div onclick="alert(1)">Test</div></foreignObject></svg>'
+          '<svg><foreignObject><div onclick="alert(1)">Test</div></foreignObject></svg>',
         );
       }).toThrow(/svg|unsafe|unsupported/i);
     });
@@ -133,7 +126,7 @@ describe("ZephyrToast Security Hardening", () => {
     it("rejects SVG animation elements", () => {
       expect(() => {
         renderSvg(
-          '<svg><animate attributeName="opacity" from="0" to="1" /></svg>'
+          '<svg><animate attributeName="opacity" from="0" to="1" /></svg>',
         );
       }).toThrow(/svg|unsafe|unsupported/i);
     });
@@ -141,19 +134,17 @@ describe("ZephyrToast Security Hardening", () => {
     it("rejects SVG external reference elements", () => {
       expect(() => {
         renderSvg(
-          '<svg><use href="https://example.com/icons.svg#check" /></svg>'
+          '<svg><use href="https://example.com/icons.svg#check" /></svg>',
         );
       }).toThrow(/svg|unsafe|unsupported/i);
     });
 
     it("accepts supported nested SVG drawing elements", () => {
       const element = renderSvg(
-        '<svg viewBox="0 0 24 24"><g fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" /><path d="M8 12L11 15L16 9" stroke="currentColor" /></g></svg>'
+        '<svg viewBox="0 0 24 24"><g fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" /><path d="M8 12L11 15L16 9" stroke="currentColor" /></g></svg>',
       );
 
-      const icon = element.querySelector(
-        ".zephyr-toast-notification-icon svg"
-      );
+      const icon = element.querySelector(".zephyr-toast-notification-icon svg");
 
       expect(icon).not.toBeNull();
       expect(icon.querySelector("g")).not.toBeNull();
@@ -166,7 +157,7 @@ describe("ZephyrToast Security Hardening", () => {
     it("rejects inline style attributes", () => {
       expect(() => {
         renderSvg(
-          '<svg style="background:url(https://example.com/tracker)"><path d="M0 0L5 5" /></svg>'
+          '<svg style="background:url(https://example.com/tracker)"><path d="M0 0L5 5" /></svg>',
         );
       }).toThrow(/svg|unsafe|attribute/i);
     });
@@ -174,7 +165,7 @@ describe("ZephyrToast Security Hardening", () => {
     it("rejects namespaced external references", () => {
       expect(() => {
         renderSvg(
-          '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><path xlink:href="https://example.com/icon.svg" /></svg>'
+          '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><path xlink:href="https://example.com/icon.svg" /></svg>',
         );
       }).toThrow(/svg|unsafe|attribute/i);
     });
@@ -182,16 +173,14 @@ describe("ZephyrToast Security Hardening", () => {
     it("rejects URL functions inside allowed attributes", () => {
       expect(() => {
         renderSvg(
-          '<svg><path d="M0 0L5 5" fill="url(https://example.com/fill)" /></svg>'
+          '<svg><path d="M0 0L5 5" fill="url(https://example.com/fill)" /></svg>',
         );
       }).toThrow(/svg|unsafe|attribute/i);
     });
 
     it("rejects event-handler attributes on nested elements", () => {
       expect(() => {
-        renderSvg(
-          '<svg><g><path d="M0 0L5 5" onclick="alert(1)" /></g></svg>'
-        );
+        renderSvg('<svg><g><path d="M0 0L5 5" onclick="alert(1)" /></g></svg>');
       }).toThrow(/svg|unsafe|attribute/i);
     });
   });
@@ -234,13 +223,11 @@ describe("ZephyrToast Security Hardening", () => {
       });
 
       const image = element.querySelector(
-        ".zephyr-toast-notification-icon img"
+        ".zephyr-toast-notification-icon img",
       );
 
       expect(image).not.toBeNull();
-      expect(image.getAttribute("src")).toBe(
-        "/assets/icons/check.png"
-      );
+      expect(image.getAttribute("src")).toBe("/assets/icons/check.png");
     });
   });
 
@@ -267,7 +254,7 @@ describe("ZephyrToast Security Hardening", () => {
         toast.info("Rejected SVG", {
           duration: 0,
           icon: {
-            svg: '<svg><script>alert(1)</script></svg>',
+            svg: "<svg><script>alert(1)</script></svg>",
           },
         });
       }).toThrow();

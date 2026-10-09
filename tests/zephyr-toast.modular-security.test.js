@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Security regression tests for modular ZephyrToast.
  *
@@ -12,14 +11,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { JSDOM } from "jsdom";
 import ZephyrToast from "../src/index.js";
@@ -31,12 +23,9 @@ describe("ZephyrToast Modular Security", () => {
   beforeEach(() => {
     vi.useFakeTimers();
 
-    dom = new JSDOM(
-      "<!DOCTYPE html><html><head></head><body></body></html>",
-      {
-        url: "https://example.com/",
-      }
-    );
+    dom = new JSDOM("<!DOCTYPE html><html><head></head><body></body></html>", {
+      url: "https://example.com/",
+    });
 
     vi.stubGlobal("document", dom.window.document);
 
@@ -77,9 +66,7 @@ describe("ZephyrToast Modular Security", () => {
       renderIcon(icon);
     }).toThrow();
 
-    expect(toast.container.children.length).toBe(
-      previousCount
-    );
+    expect(toast.container.children.length).toBe(previousCount);
   }
 
   describe("SVG Security", () => {
@@ -112,9 +99,7 @@ describe("ZephyrToast Modular Security", () => {
         svg: '<svg viewBox="0 0 24 24"><g><circle cx="12" cy="12" r="8" fill="currentColor" /></g></svg>',
       });
 
-      const svg = element.querySelector(
-        ".zephyr-toast-notification-icon svg"
-      );
+      const svg = element.querySelector(".zephyr-toast-notification-icon svg");
 
       expect(svg).not.toBeNull();
       expect(svg.querySelector("circle")).not.toBeNull();
@@ -143,13 +128,11 @@ describe("ZephyrToast Modular Security", () => {
       });
 
       const image = element.querySelector(
-        ".zephyr-toast-notification-icon img"
+        ".zephyr-toast-notification-icon img",
       );
 
       expect(image).not.toBeNull();
-      expect(image.getAttribute("src")).toBe(
-        "https://example.com/icon.png"
-      );
+      expect(image.getAttribute("src")).toBe("https://example.com/icon.png");
 
       expect(image.style.width).toBe("24px");
       expect(image.style.height).toBe("24px");
@@ -158,31 +141,22 @@ describe("ZephyrToast Modular Security", () => {
 
   describe("DOM Injection Protection", () => {
     it("does not interpret icon classes as HTML", () => {
-      const element = renderIcon(
-        'custom-icon"><img src=x onerror=alert(1)>'
-      );
+      const element = renderIcon('custom-icon"><img src=x onerror=alert(1)>');
 
-      const icon = element.querySelector(
-        ".zephyr-toast-notification-icon"
-      );
+      const icon = element.querySelector(".zephyr-toast-notification-icon");
 
       expect(icon.querySelector("img")).toBeNull();
       expect(icon.querySelector("[onerror]")).toBeNull();
     });
 
     it("renders untrusted notification messages as text", () => {
-      const element = toast.info(
-        '<img src="x" onerror="alert(1)">',
-        {
-          duration: 0,
-        }
-      );
+      const element = toast.info('<img src="x" onerror="alert(1)">', {
+        duration: 0,
+      });
 
       expect(element.querySelector("img")).toBeNull();
 
-      expect(element.textContent).toContain(
-        "<img"
-      );
+      expect(element.textContent).toContain("<img");
     });
   });
 });

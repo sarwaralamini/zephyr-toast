@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview HTML, SVG, and image URL security regression tests.
  *
@@ -12,13 +11,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
@@ -31,7 +24,7 @@ import { runInContext } from "node:vm";
  */
 const source = readFileSync(
   new URL("../zephyr-toast.js", import.meta.url),
-  "utf8"
+  "utf8",
 );
 
 /**
@@ -52,12 +45,12 @@ function createTestEnvironment() {
     {
       url: "http://localhost/",
       runScripts: "outside-only",
-    }
+    },
   );
 
   runInContext(
     `${source}\nglobalThis.ZephyrToast = ZephyrToast;`,
-    dom.getInternalVMContext()
+    dom.getInternalVMContext(),
   );
 
   return {
@@ -97,10 +90,9 @@ describe("ZephyrToast Content Security", () => {
     it("renders HTML-like messages as plain text by default", () => {
       const toast = new ZephyrToast();
 
-      const element = toast.info(
-        '<img src="x" onerror="alert(1)">',
-        { duration: 0 }
-      );
+      const element = toast.info('<img src="x" onerror="alert(1)">', {
+        duration: 0,
+      });
 
       expect(element.querySelector("img")).toBeNull();
       expect(element.textContent).toContain("<img");
@@ -109,10 +101,10 @@ describe("ZephyrToast Content Security", () => {
     it("does not create scripts from untrusted messages", () => {
       const toast = new ZephyrToast();
 
-      const element = toast.info(
-        '<script>alert("unsafe")</script>',
-        { duration: 0, allowHtml: false }
-      );
+      const element = toast.info('<script>alert("unsafe")</script>', {
+        duration: 0,
+        allowHtml: false,
+      });
 
       expect(element.querySelector("script")).toBeNull();
     });
@@ -122,13 +114,10 @@ describe("ZephyrToast Content Security", () => {
     it("supports explicitly enabled trusted HTML", () => {
       const toast = new ZephyrToast();
 
-      const element = toast.info(
-        "<strong>Important message</strong>",
-        {
-          duration: 0,
-          allowHtml: true,
-        }
-      );
+      const element = toast.info("<strong>Important message</strong>", {
+        duration: 0,
+        allowHtml: true,
+      });
 
       expect(element.querySelector("strong")).not.toBeNull();
       expect(element.textContent).toContain("Important message");
@@ -172,9 +161,7 @@ describe("ZephyrToast Content Security", () => {
         },
       });
 
-      const svg = element.querySelector(
-        ".zephyr-toast-notification-icon svg"
-      );
+      const svg = element.querySelector(".zephyr-toast-notification-icon svg");
 
       expect(svg).not.toBeNull();
       expect(svg.querySelector("path")).not.toBeNull();

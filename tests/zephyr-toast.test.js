@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Unit tests for the ZephyrToast notification library.
  *
@@ -13,14 +12,7 @@
  * @license MIT
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
@@ -36,7 +28,7 @@ import { runInContext } from "node:vm";
  */
 const source = readFileSync(
   new URL("../zephyr-toast.js", import.meta.url),
-  "utf8"
+  "utf8",
 );
 
 /**
@@ -52,10 +44,7 @@ const source = readFileSync(
 function loadZephyrToast(dom) {
   const context = dom.getInternalVMContext();
 
-  runInContext(
-    `${source}\nglobalThis.ZephyrToast = ZephyrToast;`,
-    context
-  );
+  runInContext(`${source}\nglobalThis.ZephyrToast = ZephyrToast;`, context);
 
   return dom.window.ZephyrToast;
 }
@@ -84,7 +73,7 @@ function createTestDOM() {
     {
       url: "http://localhost/",
       runScripts: "outside-only",
-    }
+    },
   );
 }
 
@@ -118,22 +107,18 @@ describe("ZephyrToast", () => {
       new ZephyrToast();
 
       const container = dom.window.document.querySelector(
-        "#zephyr-toast-container"
+        "#zephyr-toast-container",
       );
 
       expect(container).not.toBeNull();
-      expect(
-        container.classList.contains("zephyr-toast-container")
-      ).toBe(true);
+      expect(container.classList.contains("zephyr-toast-container")).toBe(true);
     });
 
     it("uses the default top-right position", () => {
       const toast = new ZephyrToast();
 
       expect(
-        toast.container.classList.contains(
-          "zephyr-position-top-right"
-        )
+        toast.container.classList.contains("zephyr-position-top-right"),
       ).toBe(true);
     });
 
@@ -143,9 +128,7 @@ describe("ZephyrToast", () => {
       });
 
       expect(
-        toast.container.classList.contains(
-          "zephyr-position-bottom-center"
-        )
+        toast.container.classList.contains("zephyr-position-bottom-center"),
       ).toBe(true);
     });
 
@@ -154,7 +137,7 @@ describe("ZephyrToast", () => {
       new ZephyrToast();
 
       const containers = dom.window.document.querySelectorAll(
-        "#zephyr-toast-container"
+        "#zephyr-toast-container",
       );
 
       expect(containers).toHaveLength(1);
@@ -169,18 +152,14 @@ describe("ZephyrToast", () => {
       new ZephyrToast();
 
       const styles = dom.window.document.querySelectorAll(
-        "#zephyr-toast-notification-css"
+        "#zephyr-toast-notification-css",
       );
 
       expect(styles).toHaveLength(1);
 
-      expect(styles[0].textContent).toContain(
-        "zephyr-toast.css"
-      );
+      expect(styles[0].textContent).toContain("zephyr-toast.css");
 
-      expect(styles[0].textContent).toContain(
-        "zephyr-toast-animate.css"
-      );
+      expect(styles[0].textContent).toContain("zephyr-toast-animate.css");
     });
   });
 
@@ -194,9 +173,9 @@ describe("ZephyrToast", () => {
 
       expect(element).not.toBeNull();
 
-      expect(
-        element.classList.contains("zephyr-toast-notification")
-      ).toBe(true);
+      expect(element.classList.contains("zephyr-toast-notification")).toBe(
+        true,
+      );
     });
 
     it("renders the provided notification message", () => {
@@ -207,7 +186,7 @@ describe("ZephyrToast", () => {
       });
 
       const message = element.querySelector(
-        ".zephyr-toast-notification-message"
+        ".zephyr-toast-notification-message",
       );
 
       expect(message).not.toBeNull();
@@ -222,9 +201,7 @@ describe("ZephyrToast", () => {
         duration: 0,
       });
 
-      const title = element.querySelector(
-        ".zephyr-toast-notification-title"
-      );
+      const title = element.querySelector(".zephyr-toast-notification-title");
 
       expect(title).not.toBeNull();
       expect(title.textContent).toBe("Success");
@@ -237,9 +214,7 @@ describe("ZephyrToast", () => {
         duration: 0,
       });
 
-      const title = element.querySelector(
-        ".zephyr-toast-notification-title"
-      );
+      const title = element.querySelector(".zephyr-toast-notification-title");
 
       expect(title).toBeNull();
     });
@@ -260,63 +235,49 @@ describe("ZephyrToast", () => {
      * Verifies that every public notification helper creates
      * an element containing the supplied message.
      */
-    it.each([
-      "success",
-      "info",
-      "warning",
-      "error",
-      "zen",
-      "void",
-    ])("supports the %s notification type", (type) => {
-      const toast = new ZephyrToast();
+    it.each(["success", "info", "warning", "error", "zen", "void"])(
+      "supports the %s notification type",
+      (type) => {
+        const toast = new ZephyrToast();
 
-      const message = `${type} notification`;
+        const message = `${type} notification`;
 
-      const element = toast[type](message, {
-        duration: 0,
-      });
+        const element = toast[type](message, {
+          duration: 0,
+        });
 
-      expect(element.textContent).toContain(message);
-    });
+        expect(element.textContent).toContain(message);
+      },
+    );
   });
 
   describe("HTML Content Handling", () => {
     it("escapes HTML content by default", () => {
       const toast = new ZephyrToast();
 
-      const element = toast.info(
-        "<strong>Hello</strong>",
-        {
-          duration: 0,
-        }
-      );
+      const element = toast.info("<strong>Hello</strong>", {
+        duration: 0,
+      });
 
       const message = element.querySelector(
-        ".zephyr-toast-notification-message"
+        ".zephyr-toast-notification-message",
       );
 
-      expect(message.textContent).toBe(
-        "<strong>Hello</strong>"
-      );
+      expect(message.textContent).toBe("<strong>Hello</strong>");
 
-      expect(
-        message.querySelector("strong")
-      ).toBeNull();
+      expect(message.querySelector("strong")).toBeNull();
     });
 
     it("renders HTML when allowHtml is explicitly enabled", () => {
       const toast = new ZephyrToast();
 
-      const element = toast.info(
-        "<strong>Hello</strong>",
-        {
-          duration: 0,
-          allowHtml: true,
-        }
-      );
+      const element = toast.info("<strong>Hello</strong>", {
+        duration: 0,
+        allowHtml: true,
+      });
 
       const message = element.querySelector(
-        ".zephyr-toast-notification-message"
+        ".zephyr-toast-notification-message",
       );
 
       const strong = message.querySelector("strong");
@@ -334,9 +295,7 @@ describe("ZephyrToast", () => {
         duration: 0,
       });
 
-      const button = element.querySelector(
-        ".zephyr-toast-notification-close"
-      );
+      const button = element.querySelector(".zephyr-toast-notification-close");
 
       expect(button).not.toBeNull();
       expect(button.tagName).toBe("BUTTON");
@@ -351,9 +310,7 @@ describe("ZephyrToast", () => {
       });
 
       expect(
-        element.querySelector(
-          ".zephyr-toast-notification-close"
-        )
+        element.querySelector(".zephyr-toast-notification-close"),
       ).toBeNull();
     });
   });
@@ -366,9 +323,7 @@ describe("ZephyrToast", () => {
         duration: 0,
       });
 
-      const icon = element.querySelector(
-        ".zephyr-toast-notification-icon"
-      );
+      const icon = element.querySelector(".zephyr-toast-notification-icon");
 
       expect(icon).not.toBeNull();
       expect(icon.querySelector("svg")).not.toBeNull();
@@ -383,9 +338,7 @@ describe("ZephyrToast", () => {
       });
 
       expect(
-        element.querySelector(
-          ".zephyr-toast-notification-icon"
-        )
+        element.querySelector(".zephyr-toast-notification-icon"),
       ).toBeNull();
     });
 
@@ -397,15 +350,11 @@ describe("ZephyrToast", () => {
         icon: "fas fa-check-circle",
       });
 
-      const icon = element.querySelector(
-        ".zephyr-toast-notification-icon i"
-      );
+      const icon = element.querySelector(".zephyr-toast-notification-icon i");
 
       expect(icon).not.toBeNull();
 
-      expect(
-        icon.classList.contains("fa-check-circle")
-      ).toBe(true);
+      expect(icon.classList.contains("fa-check-circle")).toBe(true);
     });
 
     it("supports custom image icons", () => {
@@ -417,14 +366,12 @@ describe("ZephyrToast", () => {
       });
 
       const image = element.querySelector(
-        ".zephyr-toast-notification-icon img"
+        ".zephyr-toast-notification-icon img",
       );
 
       expect(image).not.toBeNull();
 
-      expect(image.getAttribute("src")).toBe(
-        "https://example.com/icon.png"
-      );
+      expect(image.getAttribute("src")).toBe("https://example.com/icon.png");
     });
   });
 
@@ -437,9 +384,7 @@ describe("ZephyrToast", () => {
         showProgress: true,
       });
 
-      const progress = element.querySelector(
-        ".zephyr-toast-progress-bar"
-      );
+      const progress = element.querySelector(".zephyr-toast-progress-bar");
 
       expect(progress).not.toBeNull();
     });
@@ -452,11 +397,7 @@ describe("ZephyrToast", () => {
         showProgress: false,
       });
 
-      expect(
-        element.querySelector(
-          ".zephyr-toast-progress-bar"
-        )
-      ).toBeNull();
+      expect(element.querySelector(".zephyr-toast-progress-bar")).toBeNull();
     });
 
     it("does not render a progress bar for permanent notifications", () => {
@@ -467,11 +408,7 @@ describe("ZephyrToast", () => {
         showProgress: true,
       });
 
-      expect(
-        element.querySelector(
-          ".zephyr-toast-progress-bar"
-        )
-      ).toBeNull();
+      expect(element.querySelector(".zephyr-toast-progress-bar")).toBeNull();
     });
   });
 
@@ -482,9 +419,7 @@ describe("ZephyrToast", () => {
       toast.updatePosition("bottom-left");
 
       expect(
-        toast.container.classList.contains(
-          "zephyr-position-bottom-left"
-        )
+        toast.container.classList.contains("zephyr-position-bottom-left"),
       ).toBe(true);
 
       expect(toast.options.position).toBe("bottom-left");
@@ -499,9 +434,7 @@ describe("ZephyrToast", () => {
       });
 
       expect(
-        toast.container.classList.contains(
-          "zephyr-position-top-center"
-        )
+        toast.container.classList.contains("zephyr-position-top-center"),
       ).toBe(true);
     });
   });
