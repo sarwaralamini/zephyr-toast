@@ -21,6 +21,7 @@
     padding: 15px;
     overflow: hidden;
     min-width: fit-content;
+    box-sizing: border-box;
 }
 
 .zephyr-position-top-right {
