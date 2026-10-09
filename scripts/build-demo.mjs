@@ -57,6 +57,13 @@ async function buildDemo() {
   console.log("Published demo asset: generator.js");
 
   await copyFile(
+    resolve(demoDirectory, "preview.html"),
+    resolve(assetsDirectory, "preview.html"),
+  );
+
+  console.log("Published demo asset: preview.html");
+
+  await copyFile(
     resolve(demoDirectory, "index.html"),
     resolve(projectRoot, "index.html"),
   );

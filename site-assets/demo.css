@@ -383,3 +383,216 @@ footer a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Phase 2.17H4 — Toolbar, preview and position controls */
+
+.demo-toolbar {
+  border-bottom: 1px solid var(--demo-border);
+  background: rgba(12, 20, 36, 0.94);
+}
+
+.demo-toolbar-inner {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.demo-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--demo-text);
+  font-size: 1.05rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.demo-brand:hover {
+  color: var(--demo-text);
+}
+
+.demo-brand i {
+  color: var(--demo-accent);
+}
+
+.demo-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.demo-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.demo-panel-subtitle,
+.demo-preview-caption {
+  color: var(--demo-muted);
+  font-size: 0.82rem;
+}
+
+.demo-preview-frame {
+  height: 290px;
+  overflow: hidden;
+  border: 1px solid var(--demo-border);
+  border-radius: 12px;
+  background: var(--demo-field);
+}
+
+.demo-preview-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.demo-preview-caption {
+  margin-top: 12px;
+}
+
+.demo-position-section {
+  padding: 16px;
+  background: var(--demo-field);
+  border: 1px solid var(--demo-border);
+  border-radius: 12px;
+}
+
+.demo-position-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.demo-position-grid button {
+  min-height: 46px;
+  padding: 10px 6px;
+  color: var(--demo-muted);
+  background: var(--demo-panel);
+  border: 1px solid var(--demo-border);
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.demo-position-grid button:hover {
+  color: var(--demo-text);
+  border-color: var(--demo-accent);
+}
+
+.demo-position-grid button[aria-pressed="true"] {
+  color: #ffffff;
+  background: #3459a0;
+  border-color: #7ca5ff;
+}
+
+.demo-position-grid button:focus-visible,
+.demo-toolbar button:focus-visible {
+  outline: 3px solid var(--demo-accent);
+  outline-offset: 3px;
+}
+
+/* Light theme */
+
+body[data-demo-theme="light"] {
+  color-scheme: light;
+  --demo-bg: #f3f6fb;
+  --demo-panel: #ffffff;
+  --demo-field: #f8faff;
+  --demo-border: #d9e1ef;
+  --demo-text: #17233a;
+  --demo-muted: #52627c;
+  --demo-accent: #315ed4;
+  --demo-accent-hover: #254db5;
+  background: var(--demo-bg);
+  color: var(--demo-text);
+}
+
+body[data-demo-theme="light"] .demo-toolbar {
+  background: #ffffff;
+}
+
+body[data-demo-theme="light"] .demo-eyebrow {
+  color: #3155a1;
+  background: #edf3ff;
+  border-color: #cbdcfb;
+}
+
+body[data-demo-theme="light"] .form-label,
+body[data-demo-theme="light"] .form-check-label {
+  color: #253654;
+}
+
+body[data-demo-theme="light"] .form-control,
+body[data-demo-theme="light"] .form-select {
+  color: #17233a;
+  background: #ffffff;
+}
+
+body[data-demo-theme="light"] .form-control:focus,
+body[data-demo-theme="light"] .form-select:focus {
+  color: #17233a;
+  background: #ffffff;
+}
+
+body[data-demo-theme="light"] .form-control::placeholder {
+  color: #73829b;
+}
+
+body[data-demo-theme="light"] .form-select option {
+  color: #17233a;
+  background: #ffffff;
+}
+
+body[data-demo-theme="light"] .btn-outline-primary {
+  color: #315ed4;
+  border-color: #a9bee7;
+}
+
+body[data-demo-theme="light"] .btn-outline-primary:hover {
+  color: #ffffff;
+  background: #315ed4;
+}
+
+body[data-demo-theme="light"] .demo-position-grid button[aria-pressed="true"] {
+  color: #ffffff;
+}
+
+body[data-demo-theme="light"] .code-container {
+  color: #d4e4ff;
+  background: #101827;
+}
+
+body[data-demo-theme="light"] footer.bg-dark {
+  background: #e9eef6 !important;
+}
+
+body[data-demo-theme="light"] footer a {
+  color: #3155a1 !important;
+}
+
+@media (max-width: 575px) {
+  .demo-toolbar-inner {
+    flex-wrap: wrap;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .demo-toolbar-actions {
+    gap: 6px;
+  }
+
+  .demo-preview-frame {
+    height: 260px;
+  }
+
+  .demo-position-grid button {
+    font-size: 0.68rem;
+  }
+}

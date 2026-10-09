@@ -1,8 +1,9 @@
 /**
  * @fileoverview ZephyrToast demo generator and interactive controls.
  *
- * Reads the demo form, generates reusable JavaScript examples,
- * and previews notifications using the production browser bundle.
+ * Manages notification configuration, JavaScript code generation,
+ * isolated live previews, visual positioning, custom icons,
+ * interface themes, and clipboard functionality.
  *
  * @module demo/js/generator
  * @author Md. Sarwar Alam
@@ -12,60 +13,148 @@
 "use strict";
 
 (() => {
-  const toast = new window.ZephyrToast();
-
+  /**
+   * @param {string} id - Element ID.
+   * @returns {HTMLElement|null}
+   */
   const byId = (id) => document.getElementById(id);
+
+  /**
+   * @param {string} id - Form element ID.
+   * @returns {string}
+   */
   const value = (id) => byId(id).value;
+
+  /**
+   * @param {string} id - Checkbox element ID.
+   * @returns {boolean}
+   */
   const checked = (id) => byId(id).checked;
 
   const generateButton = byId("generate-toast");
   const copyButton = byId("copy-code");
   const codeOutput = byId("generated-code");
 
+  const previewFrame = byId("toast-preview-frame");
+  const clearPreviewButton = byId("clear-preview");
+
+  const positionSelect = byId("toast-position");
+  const themeButton = byId("demo-theme-toggle");
+  const themeLabel = byId("demo-theme-label");
+
+  const PREVIEW_CHANNEL = "zephyr-demo-preview";
+
+  let previewReady = false;
+
+  /** @type {Array<Record<string, unknown>>} */
+  const pendingPreviewMessages = [];
+
   /**
-   * Finds the selected value from a named radio group.
+   * Returns the currently selected radio value.
    *
    * @param {string} name - Radio group name.
-   * @returns {string} Selected radio value.
+   * @returns {string}
    */
   function selectedRadio(name) {
     return document.querySelector(`input[name="${name}"]:checked`)?.value ?? "";
   }
 
   /**
-   * Resolves the selected custom icon.
+   * Sends data directly to the preview iframe.
+   *
+   * @param {Record<string, unknown>} message - Preview message.
+   * @returns {void}
+   */
+  function postPreviewMessage(message) {
+    previewFrame.contentWindow?.postMessage(message, window.location.origin);
+  }
+
+  /**
+   * Sends an action to the isolated preview.
+   *
+   * Messages are queued until the preview reports that it is ready.
+   * This prevents notifications from being lost during initialization.
+   *
+   * @param {string} action - Preview action.
+   * @param {Record<string, unknown>} payload - Action payload.
+   * @returns {void}
+   */
+  function sendPreview(action, payload = {}) {
+    const message = {
+      channel: PREVIEW_CHANNEL,
+      action,
+      ...payload,
+    };
+
+    if (!previewReady) {
+      pendingPreviewMessages.push(message);
+      return;
+    }
+
+    postPreviewMessage(message);
+  }
+
+  /**
+   * Delivers queued preview messages.
+   *
+   * @returns {void}
+   */
+  function flushPreviewMessages() {
+    while (pendingPreviewMessages.length > 0) {
+      postPreviewMessage(pendingPreviewMessages.shift());
+    }
+  }
+
+  /**
+   * Reads the selected custom icon configuration.
    *
    * @returns {{icon: string, isIcon: boolean}|null}
    */
   function readCustomIcon() {
-    if (!checked("toast-enable-icon")) return null;
-    if (selectedRadio("icon-type") !== "custom") return null;
+    if (!checked("toast-enable-icon")) {
+      return null;
+    }
 
-    const isIcon = selectedRadio("is-icon-true-false") === "true";
+    if (selectedRadio("icon-type") !== "custom") {
+      return null;
+    }
+
+    const useClassIcon = selectedRadio("is-icon-true-false") === "true";
+
     const preset = value("toast-custom-icon").trim();
-    const url = value("toast-custom-icon-url").trim();
+    const customUrl = value("toast-custom-icon-url").trim();
 
-    if (isIcon) {
-      return { icon: preset, isIcon: true };
+    if (useClassIcon) {
+      return {
+        icon: preset,
+        isIcon: true,
+      };
     }
 
-    if (url) {
-      return { icon: url, isIcon: false };
+    if (customUrl) {
+      return {
+        icon: customUrl,
+        isIcon: false,
+      };
     }
 
-    // A preset is a CSS class icon, not an image URL.
-    return { icon: preset, isIcon: true };
+    // The predefined icons use CSS classes, not image URLs.
+    return {
+      icon: preset,
+      isIcon: true,
+    };
   }
 
   /**
-   * Reads all supported notification options from the form.
+   * Collects the current notification configuration.
    *
-   * @returns {Record<string, unknown>} Notification options.
+   * @returns {Record<string, unknown>}
    */
   function readOptions() {
-    const duration = Number(value("toast-duration"));
+    const durationInput = value("toast-duration").trim();
+    const duration = Number(durationInput);
 
-    if (!Number.isFinite(duration) || duration < 0) {
+    if (durationInput === "" || !Number.isFinite(duration) || duration < 0) {
       throw new RangeError("Duration must be a non-negative number.");
     }
 
@@ -106,14 +195,18 @@
   }
 
   /**
-   * Converts an options object into executable example code.
+   * Generates a copy-ready JavaScript notification example.
+   *
+   * JSON.stringify ensures message content is correctly escaped
+   * for JavaScript string literals.
    *
    * @param {string} message - Notification message.
    * @param {Record<string, unknown>} options - Notification options.
-   * @returns {string} Generated JavaScript.
+   * @returns {string}
    */
   function generateCode(message, options) {
     const method = options.type;
+
     const serializedMessage = JSON.stringify(message);
     const serializedOptions = JSON.stringify(options, null, 2);
 
@@ -126,18 +219,19 @@
       ");";
 
     if (checked("toast-include-onclick")) {
-      code += "\n\n// Optional: add an onClick callback to the options object.";
+      code +=
+        "\n\n// Add your onClick callback to the options object if needed.";
     }
 
     if (checked("toast-include-onclose")) {
-      code += "\n// Optional: add an onClose callback to the options object.";
+      code += "\n// Add your onClose callback to the options object if needed.";
     }
 
     return code;
   }
 
   /**
-   * Generates the example and shows a notification.
+   * Reads the generator input and previews the notification.
    *
    * @returns {void}
    */
@@ -150,69 +244,81 @@
 
       const code = generateCode(message, options);
 
-      // Always use textContent for generated source code.
+      // Generated code is always rendered as text.
       codeOutput.textContent = code;
 
-      // Preview with the actual browser distribution.
-      toast[options.type](message, options);
+      // Show notification using the isolated browser preview.
+      sendPreview("show", {
+        message,
+        options,
+      });
     } catch (error) {
       console.error("ZephyrToast generator error:", error);
+
       codeOutput.textContent = `// Error: ${error.message}`;
     }
   }
 
   /**
-   * Copies the generated example to the clipboard.
+   * Copies the generated JavaScript to the clipboard.
    *
    * @returns {Promise<void>}
    */
   async function copyCode() {
     const code = codeOutput.textContent;
 
-    if (!code || code.startsWith("// Error:")) return;
+    if (!code || code.startsWith("// Error:")) {
+      return;
+    }
 
-    const originalLabel = copyButton.textContent;
+    const originalLabel = copyButton.innerHTML;
 
     try {
       await navigator.clipboard.writeText(code);
+
       copyButton.textContent = "Copied!";
     } catch (error) {
-      console.error("Unable to copy generated code:", error);
+      console.error("Unable to copy code:", error);
+
       copyButton.textContent = "Copy failed";
     }
 
     window.setTimeout(() => {
-      copyButton.textContent = originalLabel;
+      copyButton.innerHTML = originalLabel;
     }, 1800);
   }
 
   /**
-   * Updates the visibility of conditional generator controls.
+   * Updates custom theme and icon control visibility.
    *
    * @returns {void}
    */
   function updateConditionalControls() {
-    const customTheme = checked("toast-enable-custom-theme");
-    const enabledIcon = checked("toast-enable-icon");
-    const customIcon = selectedRadio("icon-type") === "custom";
-    const classIcon = selectedRadio("is-icon-true-false") === "true";
+    const customThemeEnabled = checked("toast-enable-custom-theme");
 
-    byId("theme-options").classList.toggle("d-none", !customTheme);
-    byId("icon-type-options").classList.toggle("d-none", !enabledIcon);
+    const iconEnabled = checked("toast-enable-icon");
+
+    const customIconSelected = selectedRadio("icon-type") === "custom";
+
+    const useClassIcon = selectedRadio("is-icon-true-false") === "true";
+
+    byId("theme-options").classList.toggle("d-none", !customThemeEnabled);
+
+    byId("icon-type-options").classList.toggle("d-none", !iconEnabled);
 
     document
       .querySelector(".icon-custom-container")
-      .classList.toggle("d-none", !enabledIcon || !customIcon);
+      .classList.toggle("d-none", !iconEnabled || !customIconSelected);
 
     document
       .querySelector(".custom-icon-url")
-      .classList.toggle("d-none", classIcon);
+      .classList.toggle("d-none", useClassIcon);
   }
 
   /**
-   * Synchronizes a theme color preview with its input.
+   * Synchronizes a theme field's color preview.
    *
-   * @param {string} inputId - Theme field ID.
+   * @param {string} inputId - Color input element ID.
    * @param {string} previewId - Preview element ID.
    * @returns {void}
    */
@@ -225,46 +331,183 @@
     };
 
     input.addEventListener("input", refresh);
+
     refresh();
   }
 
-  // Main generator actions.
-  generateButton.addEventListener("click", generateToast);
-  copyButton.addEventListener("click", copyCode);
+  /**
+   * Synchronizes the visual position buttons.
+   *
+   * @returns {void}
+   */
+  function syncPositionButtons() {
+    document
+      .querySelectorAll("#demo-position-grid [data-position]")
+      .forEach((button) => {
+        const selected = button.dataset.position === positionSelect.value;
 
-  // Bind each conditional control exactly once.
-  byId("toast-enable-custom-theme").addEventListener(
-    "change",
-    updateConditionalControls,
-  );
-
-  byId("toast-enable-icon").addEventListener(
-    "change",
-    updateConditionalControls,
-  );
-
-  document
-    .querySelectorAll('input[name="icon-type"]')
-    .forEach((radio) =>
-      radio.addEventListener("change", updateConditionalControls),
-    );
-
-  document
-    .querySelectorAll('input[name="is-icon-true-false"]')
-    .forEach((radio) =>
-      radio.addEventListener("change", updateConditionalControls),
-    );
-
-  // Theme color previews.
-  for (const [inputId, previewId] of [
-    ["toast-bg-color", "bg-color-preview"],
-    ["toast-text-color", "text-color-preview"],
-    ["toast-border-color", "border-color-preview"],
-    ["toast-progress-track-color", "progress-track-color-preview"],
-    ["toast-progress-bar-color", "toast-progress-bar-color-preview"],
-  ]) {
-    bindColorPreview(inputId, previewId);
+        button.setAttribute("aria-pressed", String(selected));
+      });
   }
 
-  updateConditionalControls();
+  /**
+   * Changes the interface's light/dark mode.
+   *
+   * The preview background changes independently from
+   * the notification's configured custom theme.
+   *
+   * @param {"light"|"dark"} theme - Interface theme.
+   * @returns {void}
+   */
+  function setDemoTheme(theme) {
+    const resolvedTheme = theme === "light" ? "light" : "dark";
+
+    document.body.dataset.demoTheme = resolvedTheme;
+
+    const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
+
+    themeLabel.textContent = nextTheme === "light" ? "Light mode" : "Dark mode";
+
+    themeButton.setAttribute("aria-label", `Switch to ${nextTheme} mode`);
+
+    const themeIcon = themeButton.querySelector("i");
+
+    if (themeIcon) {
+      themeIcon.className =
+        nextTheme === "light" ? "fas fa-sun me-1" : "fas fa-moon me-1";
+    }
+
+    sendPreview("theme", {
+      theme: resolvedTheme,
+    });
+  }
+
+  /**
+   * Handles the preview iframe ready notification.
+   *
+   * Only messages from the expected same-origin frame
+   * are accepted.
+   *
+   * @param {MessageEvent} event - Window message event.
+   * @returns {void}
+   */
+  function handlePreviewMessage(event) {
+    if (
+      event.origin !== window.location.origin ||
+      event.source !== previewFrame.contentWindow
+    ) {
+      return;
+    }
+
+    const data = event.data;
+
+    if (!data || data.channel !== PREVIEW_CHANNEL || data.action !== "ready") {
+      return;
+    }
+
+    previewReady = true;
+
+    flushPreviewMessages();
+  }
+
+  /**
+   * Resets the preview communication state when the
+   * iframe begins a new load.
+   *
+   * @returns {void}
+   */
+  function handlePreviewLoad() {
+    // The iframe sends a "ready" message after initialization.
+    // No additional action is required for its initial load.
+  }
+
+  /**
+   * Registers the demo's event listeners.
+   *
+   * @returns {void}
+   */
+  function initializeEvents() {
+    generateButton.addEventListener("click", generateToast);
+
+    copyButton.addEventListener("click", copyCode);
+
+    clearPreviewButton.addEventListener("click", () => {
+      sendPreview("clear");
+    });
+
+    window.addEventListener("message", handlePreviewMessage);
+
+    previewFrame.addEventListener("load", handlePreviewLoad);
+
+    // Existing position dropdown.
+    positionSelect.addEventListener("change", syncPositionButtons);
+
+    // Visual position buttons.
+    document
+      .querySelectorAll("#demo-position-grid [data-position]")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          positionSelect.value = button.dataset.position;
+
+          syncPositionButtons();
+        });
+      });
+
+    // Light/dark mode.
+    themeButton.addEventListener("click", () => {
+      const currentTheme = document.body.dataset.demoTheme;
+
+      setDemoTheme(currentTheme === "dark" ? "light" : "dark");
+    });
+
+    // Custom theme visibility.
+    byId("toast-enable-custom-theme").addEventListener(
+      "change",
+      updateConditionalControls,
+    );
+
+    // Custom icon visibility.
+    byId("toast-enable-icon").addEventListener(
+      "change",
+      updateConditionalControls,
+    );
+
+    document.querySelectorAll('input[name="icon-type"]').forEach((radio) => {
+      radio.addEventListener("change", updateConditionalControls);
+    });
+
+    document
+      .querySelectorAll('input[name="is-icon-true-false"]')
+      .forEach((radio) => {
+        radio.addEventListener("change", updateConditionalControls);
+      });
+
+    // Theme color previews.
+    const colors = [
+      ["toast-bg-color", "bg-color-preview"],
+      ["toast-text-color", "text-color-preview"],
+      ["toast-border-color", "border-color-preview"],
+      ["toast-progress-track-color", "progress-track-color-preview"],
+      ["toast-progress-bar-color", "toast-progress-bar-color-preview"],
+    ];
+
+    for (const [inputId, previewId] of colors) {
+      bindColorPreview(inputId, previewId);
+    }
+  }
+
+  /**
+   * Initializes generator state and controls.
+   *
+   * @returns {void}
+   */
+  function initialize() {
+    initializeEvents();
+
+    updateConditionalControls();
+    syncPositionButtons();
+    setDemoTheme("dark");
+  }
+
+  initialize();
 })();

@@ -130,8 +130,21 @@ export function renderToast(
         return;
       }
 
-      progressBarFill.style.width = "0%";
+      // Establish the starting width before animating.
+      progressBarFill.style.transitionProperty = "none";
+      progressBarFill.style.width = "100%";
+
+      // Commit the starting state to layout.
+      void progressBarFill.offsetWidth;
+
+      // Configure transition properties explicitly for browser
+      // consistency and reliable DOM regression testing.
+      progressBarFill.style.transitionProperty = "width";
+      progressBarFill.style.transitionTimingFunction = "linear";
       progressBarFill.style.transitionDuration = `${options.duration}ms`;
+
+      // Animate the progress indicator towards zero.
+      progressBarFill.style.width = "0%";
     }, 10);
   }
 

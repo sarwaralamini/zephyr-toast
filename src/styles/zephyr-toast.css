@@ -108,29 +108,41 @@
 }
 
 .zephyr-toast-progress-bar {
-  height: 5px;
-  background-color: rgba(0, 0, 0, 0.15);
+  width: 100%;
+  height: 4px;
   position: relative;
+  background-color: rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .zephyr-toast-progress-bar-fill {
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.075);
-  transition: width linear;
   width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  opacity: 0.8;
+  transition-property: width;
+  transition-timing-function: linear;
+  transition-duration: 0ms;
+  will-change: width;
 }
 
 .zephyr-toast-progress-bar-void {
-  height: 5px;
-  background-color: rgba(75, 84, 88, 1);
+  width: 100%;
+  height: 4px;
   position: relative;
+  background-color: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
 }
 
 .zephyr-toast-progress-bar-void-fill {
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.15);
-  transition: width linear;
   width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  opacity: 0.8;
+  transition-property: width;
+  transition-timing-function: linear;
+  transition-duration: 0ms;
+  will-change: width;
 }
 
 /*
