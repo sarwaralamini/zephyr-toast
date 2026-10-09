@@ -43,6 +43,13 @@ async function buildDemo() {
   }
 
   await copyFile(
+    resolve(demoDirectory, "css", "demo.css"),
+    resolve(assetsDirectory, "demo.css"),
+  );
+
+  console.log("Published demo asset: demo.css");
+
+  await copyFile(
     resolve(demoDirectory, "index.html"),
     resolve(projectRoot, "index.html"),
   );
