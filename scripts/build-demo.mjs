@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Copies production ZephyrToast assets into
  * the GitHub Pages demo directory.

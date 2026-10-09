@@ -1,4 +1,5 @@
 node_modules/
 dist/
+site-assets/
 coverage/
 package-lock.json

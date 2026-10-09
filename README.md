@@ -47,7 +47,7 @@ toast.success("Operation completed successfully!");
 
 ### Standalone browser
 
-Download or host the generated distribution files together:
+After running `npm run build`, the standalone browser files are generated inside the `dist/` directory. Copy these files together to your website:
 
 ```text
 zephyr-toast.js

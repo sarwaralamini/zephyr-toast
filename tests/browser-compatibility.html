@@ -1,171 +1,169 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ZephyrToast Browser Compatibility Test</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZephyrToast Browser Compatibility Test</title>
 
-  <link rel="stylesheet" href="../dist/zephyr-toast-animate.css">
-  <link rel="stylesheet" href="../dist/zephyr-toast.css">
+    <link rel="stylesheet" href="../dist/zephyr-toast-animate.css" />
+    <link rel="stylesheet" href="../dist/zephyr-toast.css" />
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+    <style>
+      * {
+        box-sizing: border-box;
+      }
 
-    body {
-      margin: 0;
-      padding: 24px;
-      font-family: system-ui, sans-serif;
-      background: #f5f7fa;
-      color: #172033;
-    }
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        background: #f5f7fa;
+        color: #172033;
+      }
 
-    main {
-      max-width: 900px;
-      margin: 0 auto;
-    }
+      main {
+        max-width: 900px;
+        margin: 0 auto;
+      }
 
-    h1 {
-      font-size: 1.6rem;
-    }
+      h1 {
+        font-size: 1.6rem;
+      }
 
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 20px 0;
-    }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 20px 0;
+      }
 
-    button, select {
-      padding: 10px 14px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      background: white;
-      color: #172033;
-      font: inherit;
-      cursor: pointer;
-    }
+      button,
+      select {
+        padding: 10px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: white;
+        color: #172033;
+        font: inherit;
+        cursor: pointer;
+      }
 
-    button:hover {
-      background: #e8f0fc;
-    }
+      button:hover {
+        background: #e8f0fc;
+      }
 
-    #results {
-      padding: 16px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      background: white;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      min-height: 110px;
-    }
+      #results {
+        padding: 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: white;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        min-height: 110px;
+      }
 
-    .pass {
-      color: #167346;
-    }
+      .pass {
+        color: #167346;
+      }
 
-    .fail {
-      color: #b42318;
-    }
-  </style>
-</head>
+      .fail {
+        color: #b42318;
+      }
+    </style>
+  </head>
 
-<body>
-  <main>
-    <h1>ZephyrToast Browser Compatibility</h1>
+  <body>
+    <main>
+      <h1>ZephyrToast Browser Compatibility</h1>
 
-    <p>
-      Test the standalone distribution in Chrome, Firefox,
-      Safari, Edge, and mobile browser viewports.
-    </p>
+      <p>
+        Test the standalone distribution in Chrome, Firefox, Safari, Edge, and
+        mobile browser viewports.
+      </p>
 
-    <label for="position">Notification position:</label>
+      <label for="position">Notification position:</label>
 
-    <select id="position">
-      <option value="top-right">Top Right</option>
-      <option value="top-left">Top Left</option>
-      <option value="top-center">Top Center</option>
-      <option value="bottom-right">Bottom Right</option>
-      <option value="bottom-left">Bottom Left</option>
-      <option value="bottom-center">Bottom Center</option>
-    </select>
+      <select id="position">
+        <option value="top-right">Top Right</option>
+        <option value="top-left">Top Left</option>
+        <option value="top-center">Top Center</option>
+        <option value="bottom-right">Bottom Right</option>
+        <option value="bottom-left">Bottom Left</option>
+        <option value="bottom-center">Bottom Center</option>
+      </select>
 
-    <div class="controls">
-      <button data-toast="success">Success</button>
-      <button data-toast="info">Info</button>
-      <button data-toast="warning">Warning</button>
-      <button data-toast="error">Error</button>
-      <button data-toast="zen">Zen</button>
-      <button data-toast="void">Void</button>
-    </div>
+      <div class="controls">
+        <button data-toast="success">Success</button>
+        <button data-toast="info">Info</button>
+        <button data-toast="warning">Warning</button>
+        <button data-toast="error">Error</button>
+        <button data-toast="zen">Zen</button>
+        <button data-toast="void">Void</button>
+      </div>
 
-    <div class="controls">
-      <button id="long-message">Long Message</button>
-      <button id="persistent">Persistent</button>
-      <button id="custom-icon">Custom SVG Icon</button>
-      <button id="remove-all">Remove All</button>
-      <button id="run-checks">Run Automated Checks</button>
-    </div>
+      <div class="controls">
+        <button id="long-message">Long Message</button>
+        <button id="persistent">Persistent</button>
+        <button id="custom-icon">Custom SVG Icon</button>
+        <button id="remove-all">Remove All</button>
+        <button id="run-checks">Run Automated Checks</button>
+      </div>
 
-    <pre id="results" aria-live="polite">Ready for testing.</pre>
-  </main>
+      <pre id="results" aria-live="polite">Ready for testing.</pre>
+    </main>
 
-  <script src="../dist/zephyr-toast.js"></script>
+    <script src="../dist/zephyr-toast.js"></script>
 
-  <script>
-    const results = document.getElementById("results");
+    <script>
+      const results = document.getElementById("results");
 
-    if (typeof window.ZephyrToast !== "function") {
-      results.textContent = "FAIL: Browser bundle did not load.";
-      throw new Error("ZephyrToast global is missing.");
-    }
+      if (typeof window.ZephyrToast !== "function") {
+        results.textContent = "FAIL: Browser bundle did not load.";
+        throw new Error("ZephyrToast global is missing.");
+      }
 
-    const toast = new ZephyrToast();
+      const toast = new ZephyrToast();
 
-    const positionSelect = document.getElementById("position");
+      const positionSelect = document.getElementById("position");
 
-    positionSelect.addEventListener("change", () => {
-      toast.updatePosition(positionSelect.value);
-    });
+      positionSelect.addEventListener("change", () => {
+        toast.updatePosition(positionSelect.value);
+      });
 
-    document.querySelectorAll("[data-toast]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const type = button.dataset.toast;
+      document.querySelectorAll("[data-toast]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const type = button.dataset.toast;
 
-        toast[type]("Testing " + type + " notification", {
-          duration: 3500,
+          toast[type]("Testing " + type + " notification", {
+            duration: 3500,
+          });
         });
       });
-    });
 
-    document.getElementById("long-message")
-      .addEventListener("click", () => {
+      document.getElementById("long-message").addEventListener("click", () => {
         toast.info(
           "This is a long notification intended to test wrapping, " +
-          "mobile screen boundaries, and responsive positioning.",
+            "mobile screen boundaries, and responsive positioning.",
           {
             duration: 5000,
             title: "Responsive Layout Test",
-          }
+          },
         );
       });
 
-    document.getElementById("persistent")
-      .addEventListener("click", () => {
+      document.getElementById("persistent").addEventListener("click", () => {
         toast.info("This notification remains until closed.", {
           duration: 0,
           showClose: true,
         });
       });
 
-    document.getElementById("custom-icon")
-      .addEventListener("click", () => {
+      document.getElementById("custom-icon").addEventListener("click", () => {
         toast.success("Secure SVG icon test", {
           duration: 3500,
           icon: {
-            svg: '<svg xmlns="http://www.w3.org/2000/svg" ' +
+            svg:
+              '<svg xmlns="http://www.w3.org/2000/svg" ' +
               'viewBox="0 0 24 24" width="24" height="24">' +
               '<circle cx="12" cy="12" r="9" ' +
               'fill="currentColor"/></svg>',
@@ -173,13 +171,11 @@
         });
       });
 
-    document.getElementById("remove-all")
-      .addEventListener("click", () => {
+      document.getElementById("remove-all").addEventListener("click", () => {
         toast.removeAll();
       });
 
-    document.getElementById("run-checks")
-      .addEventListener("click", () => {
+      document.getElementById("run-checks").addEventListener("click", () => {
         const checks = [];
 
         function check(name, condition) {
@@ -189,67 +185,44 @@
           });
         }
 
-        check(
-          "Global constructor",
-          typeof window.ZephyrToast === "function"
-        );
+        check("Global constructor", typeof window.ZephyrToast === "function");
 
-        check(
-          "Notification container",
-          toast.container instanceof HTMLElement
-        );
+        check("Notification container", toast.container instanceof HTMLElement);
 
         const element = toast.success("Automated check", {
           duration: 0,
         });
 
-        check(
-          "Notification creation",
-          toast.container.contains(element)
-        );
+        check("Notification creation", toast.container.contains(element));
 
-        check(
-          "Success notification type",
-          element._options.type === "success"
-        );
+        check("Success notification type", element._options.type === "success");
 
         check(
           "Built-in icon rendering",
-          element.querySelector(
-            ".zephyr-toast-notification-icon svg"
-          ) !== null
+          element.querySelector(".zephyr-toast-notification-icon svg") !== null,
         );
 
-        const message = toast.info(
-          '<img src=x onerror=alert(1)>',
-          {
-            duration: 0,
-          }
-        );
+        const message = toast.info("<img src=x onerror=alert(1)>", {
+          duration: 0,
+        });
 
-        check(
-          "HTML rendered as text",
-          message.querySelector("img") === null
-        );
+        check("HTML rendered as text", message.querySelector("img") === null);
 
         check(
           "CSS loaded",
-          getComputedStyle(toast.container).position === "fixed"
+          getComputedStyle(toast.container).position === "fixed",
         );
 
         check(
           "No horizontal overflow",
-          document.documentElement.scrollWidth <=
-            window.innerWidth
+          document.documentElement.scrollWidth <= window.innerWidth,
         );
 
         toast.removeToast(element);
         toast.removeToast(message);
 
         results.textContent = checks
-          .map((item) =>
-            (item.passed ? "PASS: " : "FAIL: ") + item.name
-          )
+          .map((item) => (item.passed ? "PASS: " : "FAIL: ") + item.name)
           .join("\n");
 
         const failed = checks.filter((item) => !item.passed);
@@ -263,6 +236,6 @@
           checks.length +
           " checks passed.";
       });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
