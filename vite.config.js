@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Vite library build configuration for ZephyrToast.
  *
@@ -23,18 +22,21 @@ function copyStylesheets() {
     name: "zephyr-copy-styles",
 
     generateBundle() {
-      for (const filename of [
-        "zephyr-toast.css",
-        "zephyr-toast-animate.css",
-      ]) {
+      // Copy the library stylesheets into the distribution.
+      for (const filename of ["zephyr-toast.css", "zephyr-toast-animate.css"]) {
         this.emitFile({
           type: "asset",
           fileName: filename,
-          source: readFileSync(
-            new URL(`./${filename}`, import.meta.url)
-          ),
+          source: readFileSync(new URL(`./${filename}`, import.meta.url)),
         });
       }
+
+      // Include public TypeScript declarations in the npm package.
+      this.emitFile({
+        type: "asset",
+        fileName: "index.d.ts",
+        source: readFileSync(new URL("./src/index.d.ts", import.meta.url)),
+      });
     },
   };
 }
@@ -57,18 +59,14 @@ export default defineConfig(({ mode }) => {
       sourcemap: true,
 
       lib: {
-        entry: browserBuild
-          ? "src/browser.js"
-          : "src/index.js",
+        entry: browserBuild ? "src/browser.js" : "src/index.js",
 
         name: "ZephyrToastBundle",
 
         formats: browserBuild ? ["iife"] : ["es"],
 
         fileName: () =>
-          browserBuild
-            ? "zephyr-toast.js"
-            : "zephyr-toast.es.js",
+          browserBuild ? "zephyr-toast.js" : "zephyr-toast.es.js",
       },
     },
   };

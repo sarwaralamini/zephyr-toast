@@ -5,10 +5,12 @@
   "type": "module",
   "main": "./dist/zephyr-toast.es.js",
   "module": "./dist/zephyr-toast.es.js",
+  "types": "./dist/index.d.ts",
   "browser": "./dist/zephyr-toast.js",
   "style": "./dist/zephyr-toast.css",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/zephyr-toast.es.js",
       "default": "./dist/zephyr-toast.es.js"
     },

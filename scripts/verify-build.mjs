@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Distribution build verification for ZephyrToast.
  *
@@ -21,10 +20,7 @@ import { JSDOM } from "jsdom";
  *
  * @type {string}
  */
-const projectRoot = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  ".."
-);
+const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 const distDir = resolve(projectRoot, "dist");
 
@@ -50,9 +46,7 @@ async function verifyFile(filename) {
  * @returns {Promise<void>}
  */
 async function verifyEsm() {
-  const fileUrl = pathToFileURL(
-    resolve(distDir, "zephyr-toast.es.js")
-  ).href;
+  const fileUrl = pathToFileURL(resolve(distDir, "zephyr-toast.es.js")).href;
 
   const module = await import(fileUrl);
 
@@ -79,21 +73,18 @@ async function verifyBrowser() {
     {
       url: "http://localhost/",
       runScripts: "outside-only",
-    }
+    },
   );
 
   try {
-    const source = await readFile(
-      resolve(distDir, "zephyr-toast.js"),
-      "utf8"
-    );
+    const source = await readFile(resolve(distDir, "zephyr-toast.js"), "utf8");
 
     dom.window.eval(source);
 
     assert.equal(
       typeof dom.window.ZephyrToast,
       "function",
-      "The browser bundle must expose window.ZephyrToast"
+      "The browser bundle must expose window.ZephyrToast",
     );
 
     const toast = new dom.window.ZephyrToast();
@@ -102,21 +93,16 @@ async function verifyBrowser() {
       duration: 0,
     });
 
-    assert.equal(
-      element._options.type,
-      "success"
-    );
+    assert.equal(element._options.type, "success");
 
     assert.ok(
       dom.window.document.body.contains(element),
-      "Notification must be attached to the document"
+      "Notification must be attached to the document",
     );
 
     assert.ok(
-      dom.window.document.getElementById(
-        "zephyr-toast-notification-css"
-      ),
-      "Browser stylesheet loader must be initialized"
+      dom.window.document.getElementById("zephyr-toast-notification-css"),
+      "Browser stylesheet loader must be initialized",
     );
 
     console.log("PASS Browser global and notification rendering");
@@ -132,35 +118,20 @@ async function verifyBrowser() {
  */
 async function verifyPackageExports() {
   const packageJson = JSON.parse(
-    await readFile(
-      resolve(projectRoot, "package.json"),
-      "utf8"
-    )
+    await readFile(resolve(projectRoot, "package.json"), "utf8"),
   );
 
-  assert.equal(
-    packageJson.exports["."].import,
-    "./dist/zephyr-toast.es.js"
-  );
+  assert.equal(packageJson.exports["."].import, "./dist/zephyr-toast.es.js");
 
-  assert.equal(
-    packageJson.exports["."].default,
-    "./dist/zephyr-toast.es.js"
-  );
+  assert.equal(packageJson.exports["."].default, "./dist/zephyr-toast.es.js");
 
-  assert.equal(
-    packageJson.exports["./browser"],
-    "./dist/zephyr-toast.js"
-  );
+  assert.equal(packageJson.exports["./browser"], "./dist/zephyr-toast.js");
 
-  assert.equal(
-    packageJson.exports["./style.css"],
-    "./dist/zephyr-toast.css"
-  );
+  assert.equal(packageJson.exports["./style.css"], "./dist/zephyr-toast.css");
 
   assert.equal(
     packageJson.exports["./animations.css"],
-    "./dist/zephyr-toast-animate.css"
+    "./dist/zephyr-toast-animate.css",
   );
 
   // Confirm that the actual package name resolves to its ES module.
@@ -168,6 +139,10 @@ async function verifyPackageExports() {
 
   assert.equal(typeof module.default, "function");
   assert.equal(module.ZephyrToast, module.default);
+
+  assert.equal(packageJson.types, "./dist/index.d.ts");
+
+  assert.equal(packageJson.exports["."].types, "./dist/index.d.ts");
 
   console.log("PASS npm package exports");
 }
@@ -183,6 +158,7 @@ async function main() {
     "zephyr-toast.js",
     "zephyr-toast.css",
     "zephyr-toast-animate.css",
+    "index.d.ts",
   ]) {
     await verifyFile(filename);
   }
