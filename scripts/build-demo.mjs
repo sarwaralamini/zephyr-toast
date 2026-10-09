@@ -1,46 +1,57 @@
 /**
- * @fileoverview Copies production ZephyrToast assets into
- * the GitHub Pages demo directory.
+ * @fileoverview Builds the ZephyrToast public demo website.
+ *
+ * Copies the latest production browser distribution into the
+ * published demo asset directory, and publishes the demo HTML
+ * from its maintained source location.
  *
  * @module scripts/build-demo
  * @author Md. Sarwar Alam
  * @license MIT
  */
 
-import { mkdir, copyFile } from "node:fs/promises";
+import { copyFile, mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const projectRoot = resolve(import.meta.dirname, "..");
-const sourceDirectory = resolve(projectRoot, "dist");
-const outputDirectory = resolve(projectRoot, "site-assets");
 
-const files = [
+const distDirectory = resolve(projectRoot, "dist");
+const demoDirectory = resolve(projectRoot, "demo");
+const assetsDirectory = resolve(projectRoot, "site-assets");
+
+const libraryFiles = [
   "zephyr-toast.js",
   "zephyr-toast.css",
   "zephyr-toast-animate.css",
 ];
 
 /**
- * Copies the latest standalone distribution files.
+ * Publishes the latest library assets and demo entry point.
  *
  * @returns {Promise<void>}
  */
 async function buildDemo() {
-  await mkdir(outputDirectory, { recursive: true });
+  await mkdir(assetsDirectory, { recursive: true });
 
-  for (const filename of files) {
+  for (const filename of libraryFiles) {
     await copyFile(
-      resolve(sourceDirectory, filename),
-      resolve(outputDirectory, filename),
+      resolve(distDirectory, filename),
+      resolve(assetsDirectory, filename),
     );
 
-    console.log(`Copied ${filename}`);
+    console.log(`Published library asset: ${filename}`);
   }
 
-  console.log("Demo assets updated successfully.");
+  await copyFile(
+    resolve(demoDirectory, "index.html"),
+    resolve(projectRoot, "index.html"),
+  );
+
+  console.log("Published demo: index.html");
+  console.log("ZephyrToast demo build completed successfully.");
 }
 
 buildDemo().catch((error) => {
-  console.error("Demo build failed:", error);
+  console.error("Failed to build ZephyrToast demo:", error);
   process.exitCode = 1;
 });
