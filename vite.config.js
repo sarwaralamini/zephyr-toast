@@ -27,7 +27,7 @@ function copyStylesheets() {
         this.emitFile({
           type: "asset",
           fileName: filename,
-          source: readFileSync(new URL(`./${filename}`, import.meta.url)),
+          source: readFileSync( new URL(`./src/styles/${filename}`, import.meta.url) ),
         });
       }
 
