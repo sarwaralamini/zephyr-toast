@@ -249,9 +249,15 @@ class ZephyrToast {
       this.container.appendChild(toast);
     }
 
-    // Make toast visible
-    setTimeout(() => {
-      toast.style.opacity = "1";
+    // Make the toast visible after insertion.
+    // Retain the timer so dismissal can cancel pending DOM updates.
+    toast._visibilityTimeoutId = setTimeout(() => {
+      toast._visibilityTimeoutId = null;
+
+      if (toast._lifecycleState !== "closing" &&
+          toast._lifecycleState !== "closed") {
+        toast.style.opacity = "1";
+      }
     }, 10);
 
     // Initialize automatic dismissal and hover behavior.

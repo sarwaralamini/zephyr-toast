@@ -122,7 +122,17 @@ export function renderToast(
     toast.appendChild(progressBar);
 
     // Start the progress animation on the next render cycle.
-    setTimeout(() => {
+    // The lifecycle manager cancels this timer on dismissal.
+    toast._progressTimeoutId = setTimeout(() => {
+      toast._progressTimeoutId = null;
+
+      if (
+        toast._lifecycleState === "closing" ||
+        toast._lifecycleState === "closed"
+      ) {
+        return;
+      }
+
       progressBarFill.style.width = "0%";
       progressBarFill.style.transitionDuration =
         `${options.duration}ms`;

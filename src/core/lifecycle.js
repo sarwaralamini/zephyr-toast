@@ -108,6 +108,13 @@ export function initializeLifecycle(toast, options, onDismiss) {
 
   toast.addEventListener("mouseenter", pause);
   toast.addEventListener("mouseleave", resume);
+
+  // Retain listener cleanup for notification dismissal.
+  toast._hoverCleanup = () => {
+    toast.removeEventListener("mouseenter", pause);
+    toast.removeEventListener("mouseleave", resume);
+    toast._hoverCleanup = null;
+  };
 }
 
 /**
@@ -136,6 +143,23 @@ export function dismissToast(toast, animations) {
   if (toast._timeoutId != null) {
     clearTimeout(toast._timeoutId);
     toast._timeoutId = null;
+  }
+
+  // Cancel pending visibility updates.
+  if (toast._visibilityTimeoutId != null) {
+    clearTimeout(toast._visibilityTimeoutId);
+    toast._visibilityTimeoutId = null;
+  }
+
+  // Cancel pending progress animation updates.
+  if (toast._progressTimeoutId != null) {
+    clearTimeout(toast._progressTimeoutId);
+    toast._progressTimeoutId = null;
+  }
+
+  // Remove lifecycle event listeners.
+  if (typeof toast._hoverCleanup === "function") {
+    toast._hoverCleanup();
   }
 
   const { animation, onClose } = toast._options;
