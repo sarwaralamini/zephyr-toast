@@ -402,6 +402,92 @@ describe("ZephyrToast Modular Architecture", () => {
       }
     });
 
+    it.each([
+      ["JPEG", "/icons/notification.jpeg"],
+      ["JPG", "/icons/notification.jpg"],
+      ["PNG", "/icons/notification.png"],
+      ["GIF", "/icons/notification.gif"],
+      ["WebP", "/icons/notification.webp"],
+      ["AVIF", "/icons/notification.avif"],
+      ["SVG", "/icons/notification.svg"],
+      ["WebP with query", "/icons/notification.webp?v=2"],
+      ["AVIF with fragment", "/icons/notification.avif#icon"],
+      ["SVG with query and fragment", "/icons/notification.svg?v=2#icon"],
+      ["Uppercase WebP", "/icons/notification.WEBP"],
+    ])("renders %s URL strings as image icons", (_format, url) => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
+        url: "https://example.com/",
+      });
+
+      try {
+        const icon = renderIcon(
+          {
+            type: "info",
+            icon: url,
+            isIcon: false,
+            enableIcon: true,
+          },
+          createNotificationTypes(),
+          dom.window.document,
+        );
+
+        const image = icon.querySelector("img");
+
+        expect(image).not.toBeNull();
+        expect(image.getAttribute("src")).toBe(url);
+        expect(image.getAttribute("alt")).toBe("");
+        expect(icon.querySelector("i")).toBeNull();
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it.each([
+      "/icons/notification.webp",
+      "/icons/notification.avif",
+      "/icons/notification.svg",
+    ])("rejects image URL %s when isIcon is true", (url) => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
+        url: "https://example.com/",
+      });
+
+      try {
+        expect(() => {
+          renderIcon(
+            {
+              type: "info",
+              icon: url,
+              isIcon: true,
+              enableIcon: true,
+            },
+            createNotificationTypes(),
+            dom.window.document,
+          );
+        }).toThrow(/image URL cannot be used/i);
+      } finally {
+        dom.window.close();
+      }
+    });
+
+    it.each([
+      "javascript:alert(1)",
+      "data:image/svg+xml,<svg></svg>",
+      "file:///tmp/notification.svg",
+      "ftp://example.com/notification.webp",
+    ])("rejects unsafe image URL protocol: %s", (url) => {
+      const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
+        url: "https://example.com/",
+      });
+
+      try {
+        expect(() => {
+          createImageIcon(url, dom.window.document);
+        }).toThrow(TypeError);
+      } finally {
+        dom.window.close();
+      }
+    });
+
     it("rejects unsafe image URL protocols", () => {
       const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
         url: "https://example.com/",
