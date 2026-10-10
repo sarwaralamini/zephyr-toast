@@ -1,9 +1,15 @@
 /**
  * @fileoverview Notification DOM rendering for ZephyrToast.
  *
- * Creates notification elements, icons, titles, messages, close
- * buttons, progress bars, and click handlers independently of
- * configuration resolution and lifecycle management.
+ * Responsible for constructing individual notification elements,
+ * including their appearance, icons, titles, message content,
+ * close buttons, progress indicators, and click interactions.
+ *
+ * DOM construction is handled independently of configuration
+ * resolution, notification positioning, and lifecycle management.
+ *
+ * The renderer creates and returns a complete notification element
+ * without inserting it into the document.
  *
  * @module renderers/toast
  * @author Md. Sarwar Alam
@@ -13,17 +19,30 @@
 import { renderIcon } from "./icons.js";
 
 /**
- * Creates a notification DOM element without inserting it into the page.
+ * Creates a complete ZephyrToast notification DOM element.
  *
- * Untrusted message content is rendered as text by default.
- * The allowHtml option is intended only for trusted HTML content.
+ * Applies the resolved visual theme and entrance animation,
+ * constructs the notification body, and optionally attaches
+ * a close button, progress indicator, and click handler.
  *
- * @param {Object} options - Resolved notification configuration.
- * @param {Object} types - Notification type definitions.
- * @param {Object} animations - Animation name-to-class mappings.
- * @param {Document} documentRef - Target document.
- * @param {Function} onDismiss - Notification dismissal callback.
- * @returns {HTMLElement} The complete notification element.
+ * Message content is rendered as plain text by default.
+ * When allowHtml is explicitly enabled, the message is rendered
+ * as HTML and must originate from a trusted or sanitized source.
+ *
+ * The returned element is not automatically inserted into
+ * the document. Its caller is responsible for placement and
+ * lifecycle initialization.
+ *
+ * @param {Object} options - Fully resolved notification configuration,
+ * including message, type, theme, animation, and behavior settings.
+ * @param {Object} types - Notification type definitions containing
+ * default colors and icons.
+ * @param {Object} animations - Mapping of supported animation names
+ * to their corresponding CSS class names.
+ * @param {Document} documentRef - Document used to create DOM elements.
+ * @param {Function} onDismiss - Callback responsible for dismissing
+ * the notification when its close button is activated.
+ * @returns {HTMLElement} Constructed notification DOM element.
  */
 export function renderToast(
   options,
@@ -32,6 +51,10 @@ export function renderToast(
   documentRef,
   onDismiss,
 ) {
+  // ----------------------------------------------------------
+  // 1. Notification Element and Theme
+  // ----------------------------------------------------------
+
   // Create the notification element.
   const toast = documentRef.createElement("div");
 
@@ -43,6 +66,10 @@ export function renderToast(
   toast.style.color = options.theme.textColor;
   toast.style.borderColor = options.theme.borderColor;
 
+  // ----------------------------------------------------------
+  // 2. Notification Body and Icon
+  // ----------------------------------------------------------
+
   // Create the notification body.
   const toastBody = documentRef.createElement("div");
   toastBody.className = "zephyr-toast-notification-body";
@@ -53,6 +80,10 @@ export function renderToast(
   if (iconElement) {
     toastBody.appendChild(iconElement);
   }
+
+  // ----------------------------------------------------------
+  // 3. Notification Content
+  // ----------------------------------------------------------
 
   // Create the content container.
   const contentDiv = documentRef.createElement("div");
@@ -82,6 +113,10 @@ export function renderToast(
   toastBody.appendChild(contentDiv);
   toast.appendChild(toastBody);
 
+  // ----------------------------------------------------------
+  // 4. Close Button
+  // ----------------------------------------------------------
+
   // Create the close button.
   if (options.showClose) {
     const closeButton = documentRef.createElement("button");
@@ -96,6 +131,10 @@ export function renderToast(
 
     toastBody.appendChild(closeButton);
   }
+
+  // ----------------------------------------------------------
+  // 5. Progress Indicator
+  // ----------------------------------------------------------
 
   // Create the progress indicator.
   if (options.showProgress && options.duration > 0) {
@@ -148,6 +187,10 @@ export function renderToast(
     }, 10);
   }
 
+  // ----------------------------------------------------------
+  // 6. Notification Click Handler
+  // ----------------------------------------------------------
+
   // Attach the configured click handler.
   if (typeof options.onClick === "function") {
     toast.style.cursor = "pointer";
@@ -164,6 +207,10 @@ export function renderToast(
       options.onClick();
     });
   }
+
+  // ----------------------------------------------------------
+  // 7. Return Constructed Notification
+  // ----------------------------------------------------------
 
   return toast;
 }

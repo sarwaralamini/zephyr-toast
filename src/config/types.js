@@ -1,9 +1,12 @@
 /**
- * @fileoverview Built-in notification types and visual themes.
+ * @fileoverview Built-in notification types and visual themes for ZephyrToast.
  *
- * Defines the SVG icons and default colors for each supported
- * ZephyrToast notification type. The exported definitions are
- * immutable and can be copied for independent instances.
+ * Defines the default SVG icons and color palettes for the six
+ * supported notification types: success, info, warning, error,
+ * zen, and void.
+ *
+ * The exported definitions are immutable. A factory function
+ * provides independent mutable copies for individual instances.
  *
  * @module config/types
  * @author Md. Sarwar Alam
@@ -11,8 +14,18 @@
  */
 
 /**
- * Built-in notification type definitions.
+ * Immutable definitions for all built-in notification types.
  *
+ * Each notification type contains:
+ * - icon: SVG markup representing the notification.
+ * - bgColor: Background color of the notification.
+ * - textColor: Foreground text and icon color.
+ * - borderColor: Border color of the notification.
+ *
+ * Individual type definitions and their containing object are
+ * frozen to prevent modifications to the shared defaults.
+ *
+ * @constant
  * @type {Readonly<Record<string, {
  *   icon: string,
  *   bgColor: string,
@@ -65,14 +78,20 @@ export const NOTIFICATION_TYPES = Object.freeze({
 });
 
 /**
- * Creates an independent mutable copy of the built-in definitions.
+ * Creates independent, mutable notification type definitions.
+ *
+ * Copies the top-level notification type collection and each
+ * individual type configuration so that instances can customize
+ * their visual themes without modifying the shared definitions.
+ *
+ * SVG strings and color values are preserved in the copies.
  *
  * @returns {Record<string, {
  *   icon: string,
  *   bgColor: string,
  *   textColor: string,
  *   borderColor: string
- * }>} Independent notification type definitions.
+ * }>} An independent collection of mutable notification types.
  */
 export function createNotificationTypes() {
   return Object.fromEntries(

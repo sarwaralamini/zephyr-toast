@@ -1,8 +1,13 @@
 /**
  * @fileoverview Notification lifecycle management for ZephyrToast.
  *
- * Manages automatic dismissal, hover pause/resume, exit
- * animations, and notification removal.
+ * Provides lifecycle functionality for notification elements,
+ * including automatic dismissal, hover-based pause and resume,
+ * progress-bar synchronization, exit animations, and cleanup.
+ *
+ * The lifecycle manager operates on notification DOM elements
+ * created by the renderer and uses their internal properties
+ * to track timers, state, and registered event listeners.
  *
  * @module core/lifecycle
  * @author Md. Sarwar Alam
@@ -10,15 +15,23 @@
  */
 
 /**
- * Initializes automatic dismissal and hover behavior.
+ * Initializes automatic dismissal and hover interactions.
  *
- * Notifications with zero duration remain visible until
- * manually dismissed. Hovering pauses the dismissal timer
- * and resumes it using the remaining duration.
+ * Notifications with a positive duration are automatically
+ * dismissed after the configured number of milliseconds.
+ * A duration of zero disables automatic dismissal.
  *
- * @param {HTMLElement} toast - Notification element.
- * @param {Object} options - Resolved notification options.
- * @param {Function} onDismiss - Callback that dismisses the toast.
+ * When pauseOnHover is enabled, hovering over the notification
+ * pauses its dismissal timer and progress-bar animation.
+ * Moving the pointer away resumes both using the remaining time.
+ *
+ * Event listeners and their cleanup callback are registered
+ * directly on the notification element.
+ *
+ * @param {HTMLElement} toast - Notification DOM element.
+ * @param {Object} options - Resolved notification configuration.
+ * @param {Function} onDismiss - Callback responsible for dismissing
+ * the notification element.
  * @returns {void}
  */
 export function initializeLifecycle(toast, options, onDismiss) {
@@ -31,20 +44,30 @@ export function initializeLifecycle(toast, options, onDismiss) {
     }, duration);
   }
 
+  // Persistent notifications and disabled hover handling
+  // do not require pause/resume event listeners.
   if (!pauseOnHover || duration <= 0) {
     return;
   }
 
+  // Track the remaining lifetime of the notification.
   let remainingTime = duration;
   let timerStartedAt = performance.now();
   let isPaused = false;
 
+  // Locate the progress indicator when one is enabled.
   const progressBarFill = toast.querySelector(
     ".zephyr-toast-progress-bar-fill, .zephyr-toast-progress-bar-void-fill",
   );
 
   /**
-   * Pauses automatic dismissal and progress animation.
+   * Pauses the automatic dismissal timer and progress animation.
+   *
+   * Calculates the remaining notification lifetime, cancels
+   * the active dismissal timer, and freezes the progress bar
+   * at its corresponding percentage.
+   *
+   * Repeated pause requests have no effect while already paused.
    *
    * @returns {void}
    */
@@ -71,7 +94,13 @@ export function initializeLifecycle(toast, options, onDismiss) {
   };
 
   /**
-   * Resumes dismissal using the time remaining before hover.
+   * Resumes automatic dismissal and progress animation.
+   *
+   * Schedules a new dismissal timer using the remaining
+   * lifetime and resumes the progress-bar transition.
+   *
+   * If no time remains, the notification is dismissed
+   * immediately through the provided dismissal callback.
    *
    * @returns {void}
    */
@@ -103,6 +132,7 @@ export function initializeLifecycle(toast, options, onDismiss) {
     }
   };
 
+  // Register hover interaction listeners.
   toast.addEventListener("mouseenter", pause);
   toast.addEventListener("mouseleave", resume);
 
@@ -115,13 +145,24 @@ export function initializeLifecycle(toast, options, onDismiss) {
 }
 
 /**
- * Dismisses a notification with its configured exit animation.
+ * Dismisses a notification using its configured exit animation.
  *
- * The operation is idempotent: repeated calls do not create
- * duplicate removal timers or invoke onClose more than once.
+ * Prevents duplicate dismissals by checking the notification's
+ * lifecycle state and whether it remains attached to the DOM.
+ *
+ * Cancels active timers, clears hover listeners, and replaces
+ * the entrance animation class with the configured exit class.
+ *
+ * After the existing 500ms exit period, the notification is
+ * removed from the document and its onClose callback is invoked
+ * if one was provided.
+ *
+ * Repeated dismissal requests do not schedule additional
+ * removal timers or invoke onClose multiple times.
  *
  * @param {HTMLElement} toast - Notification element to dismiss.
- * @param {Object} animations - Mapping of animation names to CSS classes.
+ * @param {Object} animations - Mapping of animation names to
+ * their corresponding CSS classes.
  * @returns {void}
  */
 export function dismissToast(toast, animations) {
@@ -134,6 +175,7 @@ export function dismissToast(toast, animations) {
     return;
   }
 
+  // Mark the notification as closing.
   toast._lifecycleState = "closing";
 
   // Cancel automatic dismissal.

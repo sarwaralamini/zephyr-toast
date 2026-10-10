@@ -1,9 +1,9 @@
 /**
- * @fileoverview Default notification configuration for ZephyrToast.
+ * @fileoverview Default configuration for ZephyrToast notifications.
  *
- * Defines the default options used by new notification instances.
- * The configuration is immutable and should be copied before use
- * to prevent unintended changes to shared defaults.
+ * Defines the immutable default options shared by ZephyrToast instances.
+ * Each instance receives an independent copy of these defaults to avoid
+ * unintended changes to the shared configuration.
  *
  * @module config/defaults
  * @author Md. Sarwar Alam
@@ -11,11 +11,16 @@
  */
 
 /**
- * Default settings for ZephyrToast notifications.
+ * Immutable default configuration for ZephyrToast notifications.
  *
- * Nested animation configuration is frozen separately to prevent
- * accidental changes through the exported object.
+ * Defines the initial notification type, positioning, duration,
+ * appearance, animation, and interaction behavior.
  *
+ * The configuration is shallowly frozen using Object.freeze().
+ * The nested animation object is frozen separately to prevent
+ * modifications to its properties.
+ *
+ * @constant
  * @type {Readonly<Record<string, unknown>>}
  */
 export const DEFAULT_OPTIONS = Object.freeze({
@@ -41,13 +46,14 @@ export const DEFAULT_OPTIONS = Object.freeze({
 });
 
 /**
- * Creates an independent copy of the default configuration.
+ * Creates an independent, mutable copy of the default configuration.
  *
- * The nested animation object is copied as well, allowing each
- * ZephyrToast instance to manage its settings independently
- * without mutating the exported defaults.
+ * Copies all top-level properties and creates a separate animation
+ * object so that instances can customize their settings without
+ * modifying the shared default configuration.
  *
- * @returns {Object} A mutable copy of the default configuration.
+ * @returns {Object} A mutable copy of the default configuration,
+ * including an independently copied animation object.
  */
 export function createDefaultOptions() {
   return {
