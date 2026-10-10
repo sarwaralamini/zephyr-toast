@@ -3,882 +3,888 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <meta
       name="description"
-      content="Create and customize beautiful toast notifications using ZephyrToast, a lightweight JavaScript notification library."
+      content="ZephyrToast is a lightweight, dependency-free JavaScript toast notification library. Explore the interactive demo and generate reusable notification code."
     />
+    <meta name="theme-color" content="#0c1019" />
+    <title>ZephyrToast — Modern JavaScript Notifications</title>
 
-    <title>ZephyrToast — Live Notification Generator</title>
-
-    <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
-
-    <!-- Font Awesome -->
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
       rel="stylesheet"
     />
-
-    <!-- Demo styles -->
     <link rel="stylesheet" href="site-assets/demo.css" />
   </head>
 
   <body data-demo-theme="dark">
-    <!-- =====================================================
-         Toolbar
-    ====================================================== -->
+    <a class="demo-skip-link" href="#generator"> Skip to playground </a>
 
+    <!-- Header -->
     <header class="demo-toolbar">
       <div class="container demo-toolbar-inner">
-        <a href="#" class="demo-brand" aria-label="ZephyrToast home">
-          <i class="fas fa-bell" aria-hidden="true"></i>
-          <span>ZephyrToast</span>
+        <a href="#home" class="demo-brand" aria-label="ZephyrToast home">
+          <span class="demo-brand-mark">
+            <i class="fas fa-bell" aria-hidden="true"></i>
+          </span>
+          <span>Zephyr<span class="demo-brand-accent">Toast</span></span>
         </a>
 
-        <nav class="demo-toolbar-actions" aria-label="Main navigation">
+        <nav class="demo-nav" aria-label="Main navigation">
+          <a href="#features" class="demo-nav-link">Features</a>
+          <a href="#generator" class="demo-nav-link">Playground</a>
+          <a
+            href="https://github.com/sarwaralamini/zephyr-toast#readme"
+            class="demo-nav-link demo-nav-docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Documentation</a
+          >
+        </nav>
+
+        <div class="demo-toolbar-actions">
           <button
             type="button"
             id="demo-theme-toggle"
-            class="btn btn-sm btn-outline-primary"
+            class="demo-icon-button"
             aria-label="Switch to light mode"
+            title="Change appearance"
           >
-            <i class="fas fa-sun me-1" aria-hidden="true"></i>
-            <span id="demo-theme-label">Light mode</span>
+            <i class="fas fa-sun" aria-hidden="true"></i>
+            <span id="demo-theme-label" class="visually-hidden">
+              Light mode
+            </span>
           </button>
 
           <a
             href="https://github.com/sarwaralamini/zephyr-toast"
-            class="btn btn-sm btn-outline-primary"
+            class="demo-github-button"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <i class="fab fa-github me-1" aria-hidden="true"></i>
-            GitHub
+            <i class="fab fa-github" aria-hidden="true"></i>
+            <span>GitHub</span>
+            <i
+              class="fas fa-arrow-up-right-from-square demo-external-icon"
+              aria-hidden="true"
+            ></i>
           </a>
-        </nav>
+        </div>
       </div>
     </header>
 
-    <!-- =====================================================
-         Hero
-    ====================================================== -->
+    <main>
+      <!-- Hero -->
+      <section id="home" class="hero-section">
+        <div class="container">
+          <div class="hero-layout">
+            <div class="hero-content">
+              <div class="demo-eyebrow">
+                <span class="demo-status-dot"></span>
+                Open source JavaScript library
+              </div>
 
-    <section class="hero-section">
-      <div class="container text-center">
-        <div class="demo-eyebrow">Vanilla JavaScript · Zero Dependencies</div>
+              <h1>
+                Notifications that
+                <span class="demo-gradient-text">feel right.</span>
+              </h1>
 
-        <h1>Beautiful notifications, effortlessly.</h1>
-
-        <p class="lead">
-          Create, customize, and preview toast notifications in your browser.
-          Fine-tune every detail and generate ready-to-use JavaScript.
-        </p>
-
-        <div class="mt-4">
-          <a href="#generator" class="btn btn-primary px-4 py-2">
-            <i class="fas fa-wand-magic-sparkles me-2"></i>
-            Open Generator
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- =====================================================
-         Main Generator
-    ====================================================== -->
-
-    <main id="generator" class="container py-5">
-      <div class="row g-4">
-        <!-- ================================================
-             Configuration Panel
-        ================================================= -->
-
-        <div class="col-lg-7">
-          <section class="card p-4 mb-4" aria-labelledby="configuration-title">
-            <div class="mb-4">
-              <h2 class="card-title h4 mb-1" id="configuration-title">
-                Notification Configuration
-              </h2>
-
-              <p class="demo-panel-subtitle mb-0">
-                Customize the appearance and behavior of your notification.
+              <p class="hero-description">
+                Elegant toast notifications without dependencies or unnecessary
+                complexity. Customize every detail, preview the result, and
+                bring it into your next project.
               </p>
-            </div>
 
-            <div class="row g-3">
-              <!-- Notification Type -->
+              <div class="hero-actions">
+                <a href="#generator" class="demo-button demo-button-primary">
+                  Try the playground
+                  <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
 
-              <div class="col-md-6">
-                <label class="form-label" for="toast-type">
-                  Notification Type
-                </label>
-
-                <select id="toast-type" class="form-select">
-                  <option value="success">Success</option>
-                  <option value="info" selected>Info</option>
-                  <option value="warning">Warning</option>
-                  <option value="error">Error</option>
-                  <option value="zen">Zen (Light)</option>
-                  <option value="void">Void (Dark)</option>
-                </select>
-              </div>
-
-              <!-- Notification Position -->
-
-              <div class="col-md-6">
-                <label class="form-label" for="toast-position">
-                  Position
-                </label>
-
-                <select id="toast-position" class="form-select">
-                  <option value="top-left">Top Left</option>
-                  <option value="top-center">Top Center</option>
-                  <option value="top-right" selected>Top Right</option>
-                  <option value="bottom-left">Bottom Left</option>
-                  <option value="bottom-center">Bottom Center</option>
-                  <option value="bottom-right">Bottom Right</option>
-                </select>
-              </div>
-
-              <!-- Visual Position Selector -->
-
-              <div class="col-12">
-                <div class="demo-position-section">
-                  <label class="form-label d-block">
-                    Visual Position Selector
-                  </label>
-
-                  <div
-                    id="demo-position-grid"
-                    class="demo-position-grid"
-                    role="group"
-                    aria-label="Notification position"
-                  >
-                    <button
-                      type="button"
-                      data-position="top-left"
-                      aria-pressed="false"
-                    >
-                      Top Left
-                    </button>
-
-                    <button
-                      type="button"
-                      data-position="top-center"
-                      aria-pressed="false"
-                    >
-                      Top Center
-                    </button>
-
-                    <button
-                      type="button"
-                      data-position="top-right"
-                      aria-pressed="true"
-                    >
-                      Top Right
-                    </button>
-
-                    <button
-                      type="button"
-                      data-position="bottom-left"
-                      aria-pressed="false"
-                    >
-                      Bottom Left
-                    </button>
-
-                    <button
-                      type="button"
-                      data-position="bottom-center"
-                      aria-pressed="false"
-                    >
-                      Bottom Center
-                    </button>
-
-                    <button
-                      type="button"
-                      data-position="bottom-right"
-                      aria-pressed="false"
-                    >
-                      Bottom Right
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Duration -->
-
-              <div class="col-md-6">
-                <label class="form-label" for="toast-duration">
-                  Duration (milliseconds)
-                </label>
-
-                <input
-                  type="number"
-                  id="toast-duration"
-                  class="form-control"
-                  value="5000"
-                  min="0"
-                  step="500"
-                />
-
-                <div class="form-text">
-                  Set to 0 to keep the notification visible.
-                </div>
-              </div>
-
-              <!-- Stack Order -->
-
-              <div class="col-md-6">
-                <label class="form-label" for="toast-newest-on-top">
-                  Stack Order
-                </label>
-
-                <select id="toast-newest-on-top" class="form-select">
-                  <option value="true" selected>Newest on Top</option>
-
-                  <option value="false">Newest on Bottom</option>
-                </select>
-              </div>
-
-              <!-- Notification Title -->
-
-              <div class="col-12">
-                <label class="form-label" for="toast-title">
-                  Notification Title
-                </label>
-
-                <input
-                  type="text"
-                  id="toast-title"
-                  class="form-control"
-                  placeholder="Optional notification title"
-                />
-              </div>
-
-              <!-- Notification Message -->
-
-              <div class="col-12">
-                <label class="form-label" for="toast-message">
-                  Notification Message
-                </label>
-
-                <textarea
-                  id="toast-message"
-                  class="form-control"
-                  rows="3"
-                  placeholder="Enter your notification message"
+                <a
+                  href="https://github.com/sarwaralamini/zephyr-toast"
+                  class="demo-button demo-button-secondary"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-This is a sample notification message.</textarea>
-              </div>
-            </div>
-          </section>
-
-          <!-- ================================================
-               Animation Settings
-          ================================================= -->
-
-          <section class="card p-4 mb-4" aria-labelledby="animation-title">
-            <h2 class="card-title h5 mb-3" id="animation-title">
-              <i class="fas fa-wand-magic-sparkles me-2"></i>
-              Animations
-            </h2>
-
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label" for="toast-animation-in">
-                  Entrance Animation
-                </label>
-
-                <select id="toast-animation-in" class="form-select">
-                  <option value="fadeIn">Fade In</option>
-                  <option value="slideInLeft">Slide In Left</option>
-                  <option value="slideInRight">Slide In Right</option>
-                  <option value="slideInDown">Slide In Down</option>
-                  <option value="slideInUp">Slide In Up</option>
-                  <option value="bounceIn">Bounce In</option>
-                  <option value="zoomIn" selected>Zoom In</option>
-                </select>
+                  <i class="fab fa-github" aria-hidden="true"></i>
+                  View source
+                </a>
               </div>
 
-              <div class="col-md-6">
-                <label class="form-label" for="toast-animation-out">
-                  Exit Animation
-                </label>
-
-                <select id="toast-animation-out" class="form-select">
-                  <option value="fadeOut">Fade Out</option>
-                  <option value="slideOutLeft">Slide Out Left</option>
-                  <option value="slideOutRight">Slide Out Right</option>
-                  <option value="slideOutUp">Slide Out Up</option>
-                  <option value="slideOutDown">Slide Out Down</option>
-                  <option value="bounceOut">Bounce Out</option>
-                  <option value="zoomOut" selected>Zoom Out</option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <!-- ================================================
-               Behavior Settings
-          ================================================= -->
-
-          <section class="card p-4 mb-4" aria-labelledby="behavior-title">
-            <h2 class="card-title h5 mb-3" id="behavior-title">
-              <i class="fas fa-sliders me-2"></i>
-              Behavior
-            </h2>
-
-            <div class="row g-3">
-              <div class="col-sm-6">
-                <div class="form-check">
-                  <input
-                    type="checkbox"
-                    id="toast-show-progress"
-                    class="form-check-input"
-                    checked
-                  />
-
-                  <label class="form-check-label" for="toast-show-progress">
-                    Show Progress Bar
-                  </label>
-                </div>
-              </div>
-
-              <div class="col-sm-6">
-                <div class="form-check">
-                  <input
-                    type="checkbox"
-                    id="toast-show-close"
-                    class="form-check-input"
-                    checked
-                  />
-
-                  <label class="form-check-label" for="toast-show-close">
-                    Show Close Button
-                  </label>
-                </div>
-              </div>
-
-              <div class="col-sm-6">
-                <div class="form-check">
-                  <input
-                    type="checkbox"
-                    id="toast-pause-on-hover"
-                    class="form-check-input"
-                    checked
-                  />
-
-                  <label class="form-check-label" for="toast-pause-on-hover">
-                    Pause on Hover
-                  </label>
-                </div>
-              </div>
-
-              <div class="col-sm-6">
-                <div class="form-check">
-                  <input
-                    type="checkbox"
-                    id="toast-allow-html"
-                    class="form-check-input"
-                  />
-
-                  <label class="form-check-label" for="toast-allow-html">
-                    Allow Trusted HTML
-                  </label>
-                </div>
+              <div class="hero-highlights">
+                <span>
+                  <i class="fas fa-check" aria-hidden="true"></i>
+                  Zero dependencies
+                </span>
+                <span>
+                  <i class="fas fa-check" aria-hidden="true"></i>
+                  Six notification styles
+                </span>
+                <span>
+                  <i class="fas fa-check" aria-hidden="true"></i>
+                  TypeScript definitions
+                </span>
               </div>
             </div>
 
-            <p class="demo-panel-subtitle mt-3 mb-0">
-              Only enable HTML rendering for trusted or sanitized content.
-            </p>
-          </section>
-
-          <!-- ================================================
-               Custom Theme Settings
-          ================================================= -->
-
-          <section class="card p-4 mb-4" aria-labelledby="theme-title">
-            <h2 class="card-title h5 mb-3" id="theme-title">
-              <i class="fas fa-palette me-2"></i>
-              Custom Notification Theme
-            </h2>
-
-            <div class="form-check mb-3">
-              <input
-                type="checkbox"
-                id="toast-enable-custom-theme"
-                class="form-check-input"
-              />
-
-              <label class="form-check-label" for="toast-enable-custom-theme">
-                Enable Custom Theme
-              </label>
-            </div>
-
-            <div id="theme-options" class="d-none">
-              <div class="row g-3">
-                <!-- Background -->
-
-                <div class="col-md-6">
-                  <label class="form-label" for="toast-bg-color">
-                    Background Color
-                  </label>
-
-                  <div class="input-group">
-                    <span class="input-group-text">
-                      <span id="bg-color-preview" class="color-preview"></span>
-                    </span>
-
-                    <input
-                      type="text"
-                      id="toast-bg-color"
-                      class="form-control"
-                      value="#f0f4f8"
-                    />
-                  </div>
+            <div class="hero-visual" aria-hidden="true">
+              <div class="hero-visual-grid"></div>
+              <div class="hero-showcase">
+                <div class="hero-showcase-top">
+                  <span class="hero-showcase-dots">
+                    <span></span><span></span><span></span>
+                  </span>
+                  <span>notifications.js</span>
                 </div>
 
-                <!-- Text -->
-
-                <div class="col-md-6">
-                  <label class="form-label" for="toast-text-color">
-                    Text Color
-                  </label>
-
-                  <div class="input-group">
-                    <span class="input-group-text">
-                      <span
-                        id="text-color-preview"
-                        class="color-preview"
-                      ></span>
-                    </span>
-
-                    <input
-                      type="text"
-                      id="toast-text-color"
-                      class="form-control"
-                      value="#2b3d49"
-                    />
-                  </div>
+                <div class="hero-showcase-code">
+                  <span class="code-purple">const</span>
+                  toast = <span class="code-purple">new</span>
+                  <span class="code-blue">ZephyrToast</span>(); <br /><br />
+                  toast.<span class="code-green">success</span>(
+                  <br />
+                  &nbsp;&nbsp;<span class="code-yellow">"Changes saved!"</span>
+                  <br />
+                  );
                 </div>
 
-                <!-- Border -->
-
-                <div class="col-md-6">
-                  <label class="form-label" for="toast-border-color">
-                    Border Color
-                  </label>
-
-                  <div class="input-group">
-                    <span class="input-group-text">
-                      <span
-                        id="border-color-preview"
-                        class="color-preview"
-                      ></span>
-                    </span>
-
-                    <input
-                      type="text"
-                      id="toast-border-color"
-                      class="form-control"
-                      value="#a5b0b6"
-                    />
-                  </div>
+                <div class="hero-toast hero-toast-success">
+                  <span class="hero-toast-icon">
+                    <i class="fas fa-check"></i>
+                  </span>
+                  <span>
+                    <strong>Changes saved</strong>
+                    <small>Your updates were saved successfully.</small>
+                  </span>
+                  <i class="fas fa-xmark hero-toast-close"></i>
+                  <span class="hero-toast-progress"></span>
                 </div>
 
-                <!-- Progress Track -->
-
-                <div class="col-md-6">
-                  <label class="form-label" for="toast-progress-track-color">
-                    Progress Track
-                  </label>
-
-                  <div class="input-group">
-                    <span class="input-group-text">
-                      <span
-                        id="progress-track-color-preview"
-                        class="color-preview"
-                      ></span>
-                    </span>
-
-                    <input
-                      type="text"
-                      id="toast-progress-track-color"
-                      class="form-control"
-                      value="#dce3ea"
-                    />
-                  </div>
-                </div>
-
-                <!-- Progress Bar -->
-
-                <div class="col-md-6">
-                  <label class="form-label" for="toast-progress-bar-color">
-                    Progress Bar
-                  </label>
-
-                  <div class="input-group">
-                    <span class="input-group-text">
-                      <span
-                        id="toast-progress-bar-color-preview"
-                        class="color-preview"
-                      ></span>
-                    </span>
-
-                    <input
-                      type="text"
-                      id="toast-progress-bar-color"
-                      class="form-control"
-                      value="#2385ba"
-                    />
-                  </div>
+                <div class="hero-toast hero-toast-info">
+                  <span class="hero-toast-icon">
+                    <i class="fas fa-circle-info"></i>
+                  </span>
+                  <span>
+                    <strong>You're all set</strong>
+                    <small>Your notification system is ready.</small>
+                  </span>
+                  <i class="fas fa-xmark hero-toast-close"></i>
                 </div>
               </div>
             </div>
-          </section>
-
-          <!-- ================================================
-               Icon Settings
-          ================================================= -->
-
-          <section
-            class="card p-4 mb-4"
-            id="icon-options-section"
-            aria-labelledby="icon-title"
-          >
-            <h2 class="card-title h5 mb-3" id="icon-title">
-              <i class="fas fa-icons me-2"></i>
-              Icon Settings
-            </h2>
-
-            <div class="form-check mb-3">
-              <input
-                type="checkbox"
-                id="toast-enable-icon"
-                class="form-check-input"
-                checked
-              />
-
-              <label class="form-check-label" for="toast-enable-icon">
-                Enable Icon
-              </label>
-            </div>
-
-            <!-- Icon Type -->
-
-            <div id="icon-type-options">
-              <label class="form-label d-block">Icon Type</label>
-
-              <div class="form-check form-check-inline">
-                <input
-                  type="radio"
-                  name="icon-type"
-                  id="icon-default"
-                  value="default"
-                  class="form-check-input"
-                  checked
-                />
-
-                <label class="form-check-label" for="icon-default">
-                  Default
-                </label>
-              </div>
-
-              <div class="form-check form-check-inline">
-                <input
-                  type="radio"
-                  name="icon-type"
-                  id="icon-custom"
-                  value="custom"
-                  class="form-check-input"
-                />
-
-                <label class="form-check-label" for="icon-custom">
-                  Custom
-                </label>
-              </div>
-            </div>
-
-            <!-- Custom Icon Options -->
-
-            <div class="icon-custom-container d-none mt-4">
-              <label class="form-label d-block"> Custom Icon Format </label>
-
-              <div class="form-check form-check-inline">
-                <input
-                  type="radio"
-                  name="is-icon-true-false"
-                  id="is-icon-true"
-                  value="true"
-                  class="form-check-input"
-                />
-
-                <label class="form-check-label" for="is-icon-true">
-                  CSS Classes
-                </label>
-              </div>
-
-              <div class="form-check form-check-inline">
-                <input
-                  type="radio"
-                  name="is-icon-true-false"
-                  id="is-icon-false"
-                  value="false"
-                  class="form-check-input"
-                  checked
-                />
-
-                <label class="form-check-label" for="is-icon-false">
-                  Image URL
-                </label>
-              </div>
-
-              <div class="mt-3">
-                <label class="form-label" for="toast-custom-icon">
-                  Predefined CSS Icon
-                </label>
-
-                <select id="toast-custom-icon" class="form-select">
-                  <option value="fa-solid fa-bell">Bell</option>
-
-                  <option value="fa-solid fa-check">Check</option>
-
-                  <option value="fa-solid fa-circle-info">Info</option>
-
-                  <option value="fa-solid fa-triangle-exclamation">
-                    Warning
-                  </option>
-
-                  <option value="fa-solid fa-circle-xmark">Error</option>
-
-                  <option value="fa-solid fa-message">Message</option>
-
-                  <option value="fa-solid fa-envelope">Envelope</option>
-                </select>
-              </div>
-
-              <div class="custom-icon-url mt-3">
-                <label class="form-label" for="toast-custom-icon-url">
-                  Custom Image URL
-                </label>
-
-                <input
-                  type="url"
-                  id="toast-custom-icon-url"
-                  class="form-control"
-                  placeholder="https://example.com/icon.png"
-                />
-              </div>
-
-              <p class="demo-panel-subtitle mt-3 mb-0">
-                CSS class icons require the corresponding icon library. Image
-                URLs must use HTTP or HTTPS.
-              </p>
-            </div>
-          </section>
-
-          <!-- Hidden future callback controls.
-               Kept for backward compatibility with generator.js. -->
-
-          <div class="d-none" aria-hidden="true">
-            <input type="checkbox" id="toast-include-onclick" />
-
-            <input type="checkbox" id="toast-include-onclose" />
           </div>
         </div>
+      </section>
 
-        <!-- ================================================
-             Preview and Code Column
-        ================================================= -->
-
-        <div class="col-lg-5">
-          <!-- Live Preview -->
-
-          <section class="card p-4 mb-4" aria-labelledby="preview-title">
-            <div class="demo-panel-heading">
-              <div>
-                <h2 class="card-title h5 mb-1" id="preview-title">
-                  Live Preview
-                </h2>
-
-                <p class="demo-panel-subtitle mb-0">
-                  Preview your notification in real time.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                id="clear-preview"
-                class="btn btn-sm btn-outline-primary"
-              >
-                <i class="fas fa-trash-alt me-1"></i>
-                Clear
-              </button>
-            </div>
-
-            <div class="demo-preview-frame">
-              <iframe
-                id="toast-preview-frame"
-                src="site-assets/preview.html"
-                title="ZephyrToast live notification preview"
-                loading="eager"
-              ></iframe>
-            </div>
-
-            <p class="demo-preview-caption mb-0">
-              Powered by the latest production browser bundle.
+      <!-- Feature Highlights -->
+      <section id="features" class="features-section">
+        <div class="container">
+          <div class="demo-section-intro">
+            <span class="demo-section-label">BUILT FOR DEVELOPERS</span>
+            <h2>Everything you need. Nothing you don't.</h2>
+            <p>
+              A straightforward notification API, flexible styling, and
+              thoughtful defaults that stay out of your way.
             </p>
-          </section>
+          </div>
 
-          <!-- Generated JavaScript -->
+          <div class="demo-features-grid">
+            <article class="demo-feature-card">
+              <span class="demo-feature-icon">
+                <i class="fas fa-feather"></i>
+              </span>
+              <h3>Dependency-free</h3>
+              <p>Pure vanilla JavaScript without runtime packages.</p>
+            </article>
 
-          <section class="card p-4" aria-labelledby="code-title">
-            <div class="demo-panel-heading">
-              <div>
-                <h2 class="card-title h5 mb-1" id="code-title">
-                  Generated Code
-                </h2>
+            <article class="demo-feature-card">
+              <span class="demo-feature-icon">
+                <i class="fas fa-palette"></i>
+              </span>
+              <h3>Fully customizable</h3>
+              <p>Control placement, colors, icons, motion, and behavior.</p>
+            </article>
 
-                <p class="demo-panel-subtitle mb-0">
-                  Copy the generated JavaScript into your project.
-                </p>
-              </div>
+            <article class="demo-feature-card">
+              <span class="demo-feature-icon">
+                <i class="fas fa-code"></i>
+              </span>
+              <h3>Easy integration</h3>
+              <p>Use ES modules or a standalone browser script.</p>
+            </article>
 
-              <button
-                type="button"
-                id="copy-code"
-                class="btn btn-sm btn-outline-primary copy-btn"
-              >
-                <i class="fas fa-copy me-1"></i>
-                Copy
-              </button>
-            </div>
-
-            <div class="code-container p-3 mb-3">
-              <pre><code id="generated-code">// Configure your notification and click Show Notification.</code></pre>
-            </div>
-
-            <button
-              type="button"
-              id="generate-toast"
-              class="btn btn-primary w-100"
-            >
-              <i class="fas fa-play me-2"></i>
-              Show Notification
-            </button>
-
-            <p class="demo-panel-subtitle mt-3 mb-0">
-              The generated example uses the standalone ZephyrToast API.
-            </p>
-          </section>
+            <article class="demo-feature-card">
+              <span class="demo-feature-icon">
+                <i class="fas fa-shield-halved"></i>
+              </span>
+              <h3>Thoughtful defaults</h3>
+              <p>Safe text rendering and predictable notification behavior.</p>
+            </article>
+          </div>
         </div>
-      </div>
+      </section>
+
+      <!-- Playground -->
+      <section id="generator" class="playground-section">
+        <div class="container">
+          <div class="demo-section-intro playground-heading">
+            <span class="demo-section-label">INTERACTIVE PLAYGROUND</span>
+            <h2>Make it yours.</h2>
+            <p>
+              Customize a notification, watch it in the preview, and copy the
+              generated JavaScript into your project.
+            </p>
+          </div>
+
+          <div class="playground-layout">
+            <!-- Left: Configuration -->
+            <div class="playground-settings">
+              <section class="demo-panel">
+                <div class="demo-panel-header">
+                  <div class="demo-panel-header-icon">
+                    <i class="fas fa-sliders" aria-hidden="true"></i>
+                  </div>
+                  <div>
+                    <h3>Configuration</h3>
+                    <p>Shape your notification.</p>
+                  </div>
+                </div>
+
+                <div class="demo-panel-content">
+                  <div class="row g-3">
+                    <div class="col-sm-6">
+                      <label for="toast-type" class="form-label">Type</label>
+                      <select id="toast-type" class="form-select">
+                        <option value="success">Success</option>
+                        <option value="info" selected>Info</option>
+                        <option value="warning">Warning</option>
+                        <option value="error">Error</option>
+                        <option value="zen">Zen</option>
+                        <option value="void">Void</option>
+                      </select>
+                    </div>
+
+                    <div class="col-sm-6">
+                      <label for="toast-duration" class="form-label">
+                        Duration (ms)
+                      </label>
+                      <input
+                        id="toast-duration"
+                        class="form-control"
+                        type="number"
+                        min="0"
+                        step="500"
+                        value="5000"
+                      />
+                    </div>
+
+                    <div class="col-12">
+                      <label for="toast-title" class="form-label">
+                        Title <span class="demo-optional">Optional</span>
+                      </label>
+                      <input
+                        id="toast-title"
+                        class="form-control"
+                        type="text"
+                        placeholder="e.g. Changes saved"
+                      />
+                    </div>
+
+                    <div class="col-12">
+                      <label for="toast-message" class="form-label">
+                        Message
+                      </label>
+                      <textarea
+                        id="toast-message"
+                        class="form-control"
+                        rows="3"
+                      >
+This is a sample notification message.</textarea>
+                    </div>
+
+                    <div class="col-12">
+                      <label for="toast-position" class="form-label">
+                        Position
+                      </label>
+                      <select id="toast-position" class="form-select">
+                        <option value="top-left">Top left</option>
+                        <option value="top-center">Top center</option>
+                        <option value="top-right" selected>Top right</option>
+                        <option value="bottom-left">Bottom left</option>
+                        <option value="bottom-center">Bottom center</option>
+                        <option value="bottom-right">Bottom right</option>
+                      </select>
+
+                      <div
+                        id="demo-position-grid"
+                        class="demo-position-grid"
+                        role="group"
+                        aria-label="Choose notification position"
+                      >
+                        <button
+                          type="button"
+                          data-position="top-left"
+                          aria-label="Top left"
+                          aria-pressed="false"
+                        >
+                          <span
+                            class="position-marker position-top-left"
+                            aria-hidden="true"
+                          >
+                            <span></span>
+                          </span>
+                          <span class="position-name">Top left</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          data-position="top-center"
+                          aria-label="Top center"
+                          aria-pressed="false"
+                        >
+                          <span
+                            class="position-marker position-top-center"
+                            aria-hidden="true"
+                          >
+                            <span></span>
+                          </span>
+                          <span class="position-name">Top center</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          data-position="top-right"
+                          aria-label="Top right"
+                          aria-pressed="true"
+                        >
+                          <span
+                            class="position-marker position-top-right"
+                            aria-hidden="true"
+                          >
+                            <span></span>
+                          </span>
+                          <span class="position-name">Top right</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          data-position="bottom-left"
+                          aria-label="Bottom left"
+                          aria-pressed="false"
+                        >
+                          <span
+                            class="position-marker position-bottom-left"
+                            aria-hidden="true"
+                          >
+                            <span></span>
+                          </span>
+                          <span class="position-name">Bottom left</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          data-position="bottom-center"
+                          aria-label="Bottom center"
+                          aria-pressed="false"
+                        >
+                          <span
+                            class="position-marker position-bottom-center"
+                            aria-hidden="true"
+                          >
+                            <span></span>
+                          </span>
+                          <span class="position-name">Bottom center</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          data-position="bottom-right"
+                          aria-label="Bottom right"
+                          aria-pressed="false"
+                        >
+                          <span
+                            class="position-marker position-bottom-right"
+                            aria-hidden="true"
+                          >
+                            <span></span>
+                          </span>
+                          <span class="position-name">Bottom right</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                      <label for="toast-newest-on-top" class="form-label">
+                        Stack order
+                      </label>
+                      <select id="toast-newest-on-top" class="form-select">
+                        <option value="true" selected>Newest first</option>
+                        <option value="false">Oldest first</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Animation -->
+              <section class="demo-panel">
+                <div class="demo-panel-header">
+                  <div class="demo-panel-header-icon">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                  </div>
+                  <div>
+                    <h3>Animations</h3>
+                    <p>Choose entrance and exit effects.</p>
+                  </div>
+                </div>
+
+                <div class="demo-panel-content">
+                  <div class="row g-3">
+                    <div class="col-sm-6">
+                      <label for="toast-animation-in" class="form-label">
+                        Entrance
+                      </label>
+                      <select id="toast-animation-in" class="form-select">
+                        <option value="fadeIn">Fade in</option>
+                        <option value="slideInLeft">Slide in left</option>
+                        <option value="slideInRight">Slide in right</option>
+                        <option value="slideInDown">Slide in down</option>
+                        <option value="slideInUp">Slide in up</option>
+                        <option value="bounceIn">Bounce in</option>
+                        <option value="zoomIn" selected>Zoom in</option>
+                      </select>
+                    </div>
+
+                    <div class="col-sm-6">
+                      <label for="toast-animation-out" class="form-label">
+                        Exit
+                      </label>
+                      <select id="toast-animation-out" class="form-select">
+                        <option value="fadeOut">Fade out</option>
+                        <option value="slideOutLeft">Slide out left</option>
+                        <option value="slideOutRight">Slide out right</option>
+                        <option value="slideOutUp">Slide out up</option>
+                        <option value="slideOutDown">Slide out down</option>
+                        <option value="bounceOut">Bounce out</option>
+                        <option value="zoomOut" selected>Zoom out</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Behavior -->
+              <section class="demo-panel">
+                <div class="demo-panel-header">
+                  <div class="demo-panel-header-icon">
+                    <i class="fas fa-toggle-on"></i>
+                  </div>
+                  <div>
+                    <h3>Behavior</h3>
+                    <p>Fine-tune the notification experience.</p>
+                  </div>
+                </div>
+
+                <div class="demo-panel-content">
+                  <div class="demo-switch-grid">
+                    <label class="demo-switch-row">
+                      <span>Progress indicator</span>
+                      <input id="toast-show-progress" type="checkbox" checked />
+                    </label>
+                    <label class="demo-switch-row">
+                      <span>Close button</span>
+                      <input id="toast-show-close" type="checkbox" checked />
+                    </label>
+                    <label class="demo-switch-row">
+                      <span>Pause on hover</span>
+                      <input
+                        id="toast-pause-on-hover"
+                        type="checkbox"
+                        checked
+                      />
+                    </label>
+                    <label class="demo-switch-row">
+                      <span>Allow trusted HTML</span>
+                      <input id="toast-allow-html" type="checkbox" />
+                    </label>
+                  </div>
+                  <p class="demo-field-hint mt-3 mb-0">
+                    Enable HTML only for trusted or sanitized content.
+                  </p>
+                </div>
+              </section>
+
+              <!-- Custom Theme -->
+              <section class="demo-panel">
+                <div class="demo-panel-header">
+                  <div class="demo-panel-header-icon">
+                    <i class="fas fa-palette"></i>
+                  </div>
+                  <div>
+                    <h3>Appearance</h3>
+                    <p>Customize notification colors.</p>
+                  </div>
+                </div>
+
+                <div class="demo-panel-content">
+                  <label class="demo-switch-row">
+                    <span>Enable custom theme</span>
+                    <input id="toast-enable-custom-theme" type="checkbox" />
+                  </label>
+
+                  <div id="theme-options" class="d-none mt-4">
+                    <div class="row g-3">
+                      <div class="col-sm-6">
+                        <label for="toast-bg-color" class="form-label">
+                          Background
+                        </label>
+                        <div class="demo-color-field">
+                          <span
+                            id="bg-color-preview"
+                            class="color-preview"
+                          ></span>
+                          <input
+                            id="toast-bg-color"
+                            class="form-control"
+                            value="#f0f4f8"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="col-sm-6">
+                        <label for="toast-text-color" class="form-label">
+                          Text
+                        </label>
+                        <div class="demo-color-field">
+                          <span
+                            id="text-color-preview"
+                            class="color-preview"
+                          ></span>
+                          <input
+                            id="toast-text-color"
+                            class="form-control"
+                            value="#2b3d49"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="col-sm-6">
+                        <label for="toast-border-color" class="form-label">
+                          Border
+                        </label>
+                        <div class="demo-color-field">
+                          <span
+                            id="border-color-preview"
+                            class="color-preview"
+                          ></span>
+                          <input
+                            id="toast-border-color"
+                            class="form-control"
+                            value="#a5b0b6"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="col-sm-6">
+                        <label
+                          for="toast-progress-track-color"
+                          class="form-label"
+                          >Progress track</label
+                        >
+                        <div class="demo-color-field">
+                          <span
+                            id="progress-track-color-preview"
+                            class="color-preview"
+                          ></span>
+                          <input
+                            id="toast-progress-track-color"
+                            class="form-control"
+                            value="#dce3ea"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="col-12">
+                        <label for="toast-progress-bar-color" class="form-label"
+                          >Progress indicator</label
+                        >
+                        <div class="demo-color-field">
+                          <span
+                            id="toast-progress-bar-color-preview"
+                            class="color-preview"
+                          ></span>
+                          <input
+                            id="toast-progress-bar-color"
+                            class="form-control"
+                            value="#2385ba"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Icons -->
+              <section id="icon-options-section" class="demo-panel">
+                <div class="demo-panel-header">
+                  <div class="demo-panel-header-icon">
+                    <i class="fas fa-icons"></i>
+                  </div>
+                  <div>
+                    <h3>Icons</h3>
+                    <p>Default icons or your own.</p>
+                  </div>
+                </div>
+
+                <div class="demo-panel-content">
+                  <label class="demo-switch-row">
+                    <span>Enable notification icon</span>
+                    <input id="toast-enable-icon" type="checkbox" checked />
+                  </label>
+
+                  <div id="icon-type-options" class="mt-3">
+                    <div class="demo-radio-row">
+                      <label>
+                        <input
+                          type="radio"
+                          name="icon-type"
+                          value="default"
+                          checked
+                        />
+                        Default icon
+                      </label>
+                      <label>
+                        <input type="radio" name="icon-type" value="custom" />
+                        Custom icon
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="icon-custom-container d-none mt-3">
+                    <div class="demo-radio-row mb-3">
+                      <label>
+                        <input
+                          type="radio"
+                          name="is-icon-true-false"
+                          value="true"
+                        />
+                        CSS class
+                      </label>
+                      <label>
+                        <input
+                          type="radio"
+                          name="is-icon-true-false"
+                          value="false"
+                          checked
+                        />
+                        Image URL
+                      </label>
+                    </div>
+
+                    <label for="toast-custom-icon" class="form-label">
+                      CSS icon preset
+                    </label>
+                    <select id="toast-custom-icon" class="form-select">
+                      <option value="fa-solid fa-bell">Bell</option>
+                      <option value="fa-solid fa-check">Check</option>
+                      <option value="fa-solid fa-circle-info">Info</option>
+                      <option value="fa-solid fa-triangle-exclamation">
+                        Warning
+                      </option>
+                      <option value="fa-solid fa-circle-xmark">Error</option>
+                      <option value="fa-solid fa-message">Message</option>
+                      <option value="fa-solid fa-envelope">Envelope</option>
+                    </select>
+
+                    <div class="custom-icon-url mt-3">
+                      <label for="toast-custom-icon-url" class="form-label">
+                        Image URL
+                      </label>
+                      <input
+                        id="toast-custom-icon-url"
+                        class="form-control"
+                        type="url"
+                        placeholder="https://example.com/icon.png"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <div class="d-none" aria-hidden="true">
+                <input id="toast-include-onclick" type="checkbox" />
+                <input id="toast-include-onclose" type="checkbox" />
+              </div>
+            </div>
+
+            <!-- Right: Live Preview and Code -->
+            <div class="playground-results">
+              <section class="demo-panel demo-preview-panel">
+                <div class="demo-panel-header demo-panel-header-actions">
+                  <div class="demo-panel-heading">
+                    <div class="demo-panel-header-icon">
+                      <i class="fas fa-eye"></i>
+                    </div>
+                    <div>
+                      <h3>Live Preview</h3>
+                      <p>Your notification in action.</p>
+                    </div>
+                  </div>
+
+                  <button
+                    id="clear-preview"
+                    type="button"
+                    class="demo-small-button"
+                  >
+                    <i class="fas fa-trash-can" aria-hidden="true"></i>
+                    Clear
+                  </button>
+                </div>
+
+                <div class="demo-panel-content">
+                  <div class="demo-preview-frame">
+                    <div class="demo-preview-label">
+                      <span class="demo-status-dot"></span>
+                      PREVIEW ENVIRONMENT
+                    </div>
+                    <iframe
+                      id="toast-preview-frame"
+                      src="site-assets/preview.html"
+                      title="ZephyrToast notification preview"
+                      loading="eager"
+                    ></iframe>
+                  </div>
+
+                  <button
+                    id="generate-toast"
+                    type="button"
+                    class="demo-button demo-button-primary demo-generate-button"
+                  >
+                    <i class="fas fa-play" aria-hidden="true"></i>
+                    Show notification
+                  </button>
+
+                  <p class="demo-field-hint mt-3 mb-0">
+                    Notifications are rendered inside an isolated preview.
+                  </p>
+                </div>
+              </section>
+
+              <section class="demo-panel demo-code-panel">
+                <div class="demo-panel-header demo-panel-header-actions">
+                  <div class="demo-panel-heading">
+                    <div class="demo-panel-header-icon">
+                      <i class="fas fa-code"></i>
+                    </div>
+                    <div>
+                      <h3>Generated Code</h3>
+                      <p>Ready to use in your application.</p>
+                    </div>
+                  </div>
+
+                  <button
+                    id="copy-code"
+                    type="button"
+                    class="demo-small-button"
+                  >
+                    <i class="fas fa-copy" aria-hidden="true"></i>
+                    Copy
+                  </button>
+                </div>
+
+                <div class="demo-panel-content">
+                  <div class="code-container">
+                    <div class="demo-code-toolbar">
+                      <span class="demo-code-language">JAVASCRIPT</span>
+                      <span class="demo-code-filename"> notification.js </span>
+                    </div>
+                    <pre><code id="generated-code">// Configure your notification,
+// then click "Show notification" to generate code.</code></pre>
+                  </div>
+                  <p class="demo-field-hint mt-3 mb-0">
+                    Copy the configuration and use it with ZephyrToast.
+                  </p>
+                </div>
+              </section>
+
+              <div class="demo-playground-note">
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                All options use the same ZephyrToast browser bundle available
+                for your projects.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Call to Action -->
+      <section class="demo-cta-section">
+        <div class="container">
+          <div class="demo-cta-content">
+            <span class="demo-section-label">OPEN SOURCE · MIT LICENSE</span>
+            <h2>Build something delightful.</h2>
+            <p>
+              Explore the source, contribute improvements, or add ZephyrToast to
+              your next application.
+            </p>
+            <a
+              href="https://github.com/sarwaralamini/zephyr-toast"
+              class="demo-button demo-button-primary"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fab fa-github" aria-hidden="true"></i>
+              Explore on GitHub
+            </a>
+          </div>
+        </div>
+      </section>
     </main>
 
-    <!-- =====================================================
-         Features
-    ====================================================== -->
-
-    <section class="features-section">
-      <div class="container">
-        <div class="text-center mb-4">
-          <h2>Everything you need for notifications</h2>
-
-          <p class="demo-panel-subtitle">
-            Lightweight, customizable and easy to integrate.
-          </p>
+    <!-- Footer -->
+    <footer class="demo-footer">
+      <div class="container demo-footer-inner">
+        <div class="demo-footer-brand">
+          <strong>ZephyrToast</strong>
+          <span>A modern notification library for the web.</span>
         </div>
 
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="card feature-card h-100 p-4">
-              <div class="text-center">
-                <i class="fas fa-feather feature-icon"></i>
-
-                <h3 class="h5 mt-3">Lightweight</h3>
-
-                <p class="mb-0">
-                  Pure vanilla JavaScript with no runtime dependencies.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card feature-card h-100 p-4">
-              <div class="text-center">
-                <i class="fas fa-palette feature-icon"></i>
-
-                <h3 class="h5 mt-3">Customizable</h3>
-
-                <p class="mb-0">
-                  Configure colors, positions, icons, animations and behavior.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card feature-card h-100 p-4">
-              <div class="text-center">
-                <i class="fas fa-bolt feature-icon"></i>
-
-                <h3 class="h5 mt-3">Developer Friendly</h3>
-
-                <p class="mb-0">
-                  Use the browser bundle or import ZephyrToast into modern
-                  JavaScript applications.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- =====================================================
-         Footer
-    ====================================================== -->
-
-    <footer class="bg-dark py-4 mt-5">
-      <div class="container text-center">
-        <p class="mb-2">
-          ZephyrToast — A lightweight JavaScript notification library.
-        </p>
-
-        <p class="mb-2">Created by Md. Sarwar Alam</p>
-
-        <p class="mb-2">
+        <div class="demo-footer-links">
           <a
             href="https://github.com/sarwaralamini/zephyr-toast"
             target="_blank"
             rel="noopener noreferrer"
+            >GitHub</a
           >
-            <i class="fab fa-github me-1"></i>
-            GitHub Repository
-          </a>
-        </p>
+          <a
+            href="https://github.com/sarwaralamini/zephyr-toast/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Issues</a
+          >
+          <a
+            href="https://github.com/sarwaralamini/zephyr-toast/blob/main/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            >MIT License</a
+          >
+        </div>
 
-        <p class="small mb-0">Open Source · MIT License</p>
+        <div class="demo-footer-credit">Created by Md. Sarwar Alam</div>
       </div>
     </footer>
 
-    <!-- =====================================================
-         ZephyrToast Production Assets
-    ====================================================== -->
-
+    <!-- ZephyrToast -->
     <link rel="stylesheet" href="site-assets/zephyr-toast-animate.css" />
-
     <link rel="stylesheet" href="site-assets/zephyr-toast.css" />
 
     <script src="site-assets/zephyr-toast.js"></script>
-
-    <!-- Generator -->
     <script src="site-assets/generator.js" defer></script>
   </body>
 </html>

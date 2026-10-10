@@ -3,95 +3,282 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ZephyrToast Preview</title>
 
+    <title>ZephyrToast — Live Preview</title>
+
+    <!-- ZephyrToast production styles -->
     <link rel="stylesheet" href="zephyr-toast-animate.css" />
     <link rel="stylesheet" href="zephyr-toast.css" />
 
     <style>
+      /*
+       * ZephyrToast Demo Preview
+       *
+       * These styles apply only to the isolated preview iframe.
+       * The production library styles remain unchanged.
+       */
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
       html,
       body {
-        margin: 0;
         width: 100%;
         height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
         overflow: hidden;
       }
 
       body {
+        overflow: hidden;
         background: #111b2c;
+        color: #e4edfc;
       }
 
       body[data-theme="light"] {
         background: #eef3fa;
+        color: #172338;
+      }
+
+      /* ================================================
+         Notification Container
+      ================================================= */
+
+      .zephyr-toast-container {
+        box-sizing: border-box;
+        max-width: 100%;
+      }
+
+      /*
+       * The preview iframe can be narrower than 576px,
+       * even on a desktop screen.
+       *
+       * ZephyrToast normally centers all positions on
+       * mobile. Override that behavior inside this demo
+       * so all six positions remain independently visible.
+       */
+
+      @media (max-width: 576px) {
+        .zephyr-toast-container {
+          width: auto !important;
+          max-width: calc(100% - 12px) !important;
+          min-width: 0 !important;
+          padding: 10px !important;
+          box-sizing: border-box;
+        }
+
+        .zephyr-position-top-left,
+        .zephyr-position-bottom-left {
+          left: 0 !important;
+          right: auto !important;
+          transform: none !important;
+        }
+
+        .zephyr-position-top-right,
+        .zephyr-position-bottom-right {
+          right: 0 !important;
+          left: auto !important;
+          transform: none !important;
+        }
+
+        .zephyr-position-top-center,
+        .zephyr-position-bottom-center {
+          left: 50% !important;
+          right: auto !important;
+          transform: translateX(-50%) !important;
+        }
+      }
+
+      /* ================================================
+         Notification Width and Message Wrapping
+      ================================================= */
+
+      .zephyr-toast-notification {
+        width: max-content;
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .zephyr-toast-notification-body {
+        min-width: 0;
+      }
+
+      .zephyr-toast-notification-content {
+        min-width: 0;
+      }
+
+      /*
+       * Short notification messages should remain on
+       * a single line when sufficient space is available.
+       */
+
+      .zephyr-toast-notification-message {
+        white-space: nowrap;
+      }
+
+      /*
+       * Long messages should never overflow the preview.
+       * This rule also handles narrower mobile previews.
+       */
+
+      @media (max-width: 480px) {
+        .zephyr-toast-notification {
+          width: auto;
+          max-width: 100%;
+        }
+
+        .zephyr-toast-notification-message {
+          white-space: normal;
+          overflow-wrap: anywhere;
+        }
+      }
+
+      /* ================================================
+         Optional Reduced Motion
+      ================================================= */
+
+      @media (prefers-reduced-motion: reduce) {
+        .zephyr-toast-notification {
+          animation-duration: 0.01ms !important;
+        }
       }
     </style>
   </head>
+
   <body data-theme="dark">
+    <!-- ZephyrToast standalone production bundle -->
     <script src="zephyr-toast.js"></script>
+
     <script>
       /**
-       * @fileoverview Isolated ZephyrToast demo preview.
+       * @fileoverview Isolated ZephyrToast live preview.
+       *
+       * Receives notification commands from the parent
+       * demo generator using same-origin postMessage.
+       *
        * @author Md. Sarwar Alam
        * @license MIT
        */
 
       "use strict";
 
-      const toast = new ZephyrToast();
+      (() => {
+        const PREVIEW_CHANNEL = "zephyr-demo-preview";
 
-      window.addEventListener("message", (event) => {
-        if (
-          event.origin !== window.location.origin ||
-          event.source !== window.parent
-        ) {
-          return;
+        const ALLOWED_TYPES = [
+          "success",
+          "info",
+          "warning",
+          "error",
+          "zen",
+          "void",
+        ];
+
+        const toast = new ZephyrToast();
+
+        /**
+         * Validates communication from the parent page.
+         *
+         * @param {MessageEvent} event
+         * @returns {boolean}
+         */
+        function isTrustedMessage(event) {
+          return (
+            event.origin === window.location.origin &&
+            event.source === window.parent &&
+            event.data !== null &&
+            typeof event.data === "object" &&
+            event.data.channel === PREVIEW_CHANNEL
+          );
         }
 
-        const data = event.data;
-
-        if (!data || data.channel !== "zephyr-demo-preview") {
-          return;
+        /**
+         * Updates the preview's background appearance.
+         *
+         * @param {string} theme
+         * @returns {void}
+         */
+        function setPreviewTheme(theme) {
+          document.body.dataset.theme = theme === "light" ? "light" : "dark";
         }
 
-        if (data.action === "theme") {
-          document.body.dataset.theme =
-            data.theme === "light" ? "light" : "dark";
-          return;
-        }
+        /**
+         * Displays a notification in the preview.
+         *
+         * @param {string} message
+         * @param {Record<string, unknown>} options
+         * @returns {void}
+         */
+        function showNotification(message, options) {
+          if (
+            typeof message !== "string" ||
+            !options ||
+            typeof options !== "object" ||
+            !ALLOWED_TYPES.includes(options.type)
+          ) {
+            return;
+          }
 
-        if (data.action === "clear") {
-          toast.removeAll();
-          return;
-        }
-
-        if (data.action === "show") {
           try {
-            const options = data.options;
-
-            if (
-              typeof data.message !== "string" ||
-              !options ||
-              !["success", "info", "warning", "error", "zen", "void"].includes(
-                options.type,
-              )
-            ) {
-              return;
-            }
-
-            toast[options.type](data.message, options);
+            toast[options.type](message, options);
           } catch (error) {
-            console.error("Preview notification failed:", error);
+            console.error("ZephyrToast preview notification failed:", error);
           }
         }
-      });
 
-      window.parent.postMessage(
-        {
-          channel: "zephyr-demo-preview",
-          action: "ready",
-        },
-        window.location.origin,
-      );
+        /**
+         * Handles generator actions.
+         *
+         * @param {MessageEvent} event
+         * @returns {void}
+         */
+        function handleMessage(event) {
+          if (!isTrustedMessage(event)) {
+            return;
+          }
+
+          const data = event.data;
+
+          switch (data.action) {
+            case "theme":
+              setPreviewTheme(data.theme);
+              break;
+
+            case "clear":
+              toast.removeAll();
+              break;
+
+            case "show":
+              showNotification(data.message, data.options);
+              break;
+
+            default:
+              break;
+          }
+        }
+
+        window.addEventListener("message", handleMessage);
+
+        /**
+         * Tell the generator that this preview
+         * is ready to receive commands.
+         */
+        window.parent.postMessage(
+          {
+            channel: PREVIEW_CHANNEL,
+            action: "ready",
+          },
+          window.location.origin,
+        );
+      })();
     </script>
   </body>
 </html>
