@@ -1,9 +1,8 @@
 /**
- * @fileoverview Builds the ZephyrToast public demo website.
+ * @fileoverview Builds the ZephyrToast GitHub Pages website.
  *
- * Copies the latest production browser distribution into the
- * published demo asset directory, and publishes the demo HTML
- * from its maintained source location.
+ * Generates the production library distribution and publishes
+ * the demo HTML, JavaScript, and CSS to the docs directory.
  *
  * @module scripts/build-demo
  * @author Md. Sarwar Alam
@@ -17,7 +16,9 @@ const projectRoot = resolve(import.meta.dirname, "..");
 
 const distDirectory = resolve(projectRoot, "dist");
 const demoDirectory = resolve(projectRoot, "demo");
-const assetsDirectory = resolve(projectRoot, "site-assets");
+
+const publishDirectory = resolve(projectRoot, "docs");
+const assetsDirectory = resolve(publishDirectory, "site-assets");
 
 const libraryFiles = [
   "zephyr-toast.js",
@@ -26,53 +27,54 @@ const libraryFiles = [
 ];
 
 /**
- * Publishes the latest library assets and demo entry point.
+ * Copies a source file into the published asset directory.
+ *
+ * @param {string} source - Absolute source file path.
+ * @param {string} filename - Output filename.
+ * @returns {Promise<void>}
+ */
+async function publishAsset(source, filename) {
+  await copyFile(source, resolve(assetsDirectory, filename));
+
+  console.log(`Published: site-assets/${filename}`);
+}
+
+/**
+ * Builds the complete GitHub Pages website.
  *
  * @returns {Promise<void>}
  */
 async function buildDemo() {
   await mkdir(assetsDirectory, { recursive: true });
 
+  // Publish production ZephyrToast files.
   for (const filename of libraryFiles) {
-    await copyFile(
-      resolve(distDirectory, filename),
-      resolve(assetsDirectory, filename),
-    );
-
-    console.log(`Published library asset: ${filename}`);
+    await publishAsset(resolve(distDirectory, filename), filename);
   }
 
-  await copyFile(
-    resolve(demoDirectory, "css", "demo.css"),
-    resolve(assetsDirectory, "demo.css"),
-  );
+  // Publish the demo interface stylesheet.
+  await publishAsset(resolve(demoDirectory, "css", "demo.css"), "demo.css");
 
-  console.log("Published demo asset: demo.css");
-
-  await copyFile(
+  // Publish the demo generator JavaScript.
+  await publishAsset(
     resolve(demoDirectory, "js", "generator.js"),
-    resolve(assetsDirectory, "generator.js"),
+    "generator.js",
   );
 
-  console.log("Published demo asset: generator.js");
+  // Publish the isolated notification preview page.
+  await publishAsset(resolve(demoDirectory, "preview.html"), "preview.html");
 
-  await copyFile(
-    resolve(demoDirectory, "preview.html"),
-    resolve(assetsDirectory, "preview.html"),
-  );
-
-  console.log("Published demo asset: preview.html");
-
+  // Publish the website entry point.
   await copyFile(
     resolve(demoDirectory, "index.html"),
-    resolve(projectRoot, "index.html"),
+    resolve(publishDirectory, "index.html"),
   );
 
-  console.log("Published demo: index.html");
-  console.log("ZephyrToast demo build completed successfully.");
+  console.log("Published: docs/index.html");
+  console.log("ZephyrToast GitHub Pages build completed.");
 }
 
 buildDemo().catch((error) => {
-  console.error("Failed to build ZephyrToast demo:", error);
+  console.error("Demo build failed:", error);
   process.exitCode = 1;
 });
