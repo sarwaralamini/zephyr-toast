@@ -1,16 +1,29 @@
 /**
- * @fileoverview ES module architecture regression tests.
+ * @fileoverview ES module architecture and component regression tests.
  *
- * Verifies that extracted configuration modules preserve
- * their expected exports and that the public module entry
- * point exposes the ZephyrToast class.
+ * Verifies the modular structure of ZephyrToast, including:
  *
+ * - Public ES module exports.
+ * - Immutable configuration and independent instance defaults.
+ * - Notification types and animation mappings.
+ * - Configuration validation.
+ * - Secure SVG and icon rendering.
+ * - Supported image formats and URL restrictions.
+ * - Notification lifecycle and timer management.
+ * - DOM rendering and progress indicators.
+ *
+ * Tests source modules directly to ensure individual components
+ * behave correctly independently of the compiled browser bundle.
+ *
+ * @module tests/zephyr-toast.modules
  * @author Md. Sarwar Alam
  * @license MIT
  */
 
-import { describe, it, expect, vi } from "vitest";
 import { JSDOM } from "jsdom";
+import { describe, expect, it, vi } from "vitest";
+
+import ZephyrToast, { ZephyrToast as NamedZephyrToast } from "../src/index.js";
 
 import {
   DEFAULT_OPTIONS,
@@ -22,14 +35,14 @@ import {
   createNotificationTypes,
 } from "../src/config/types.js";
 
+import { ANIMATIONS } from "../src/config/animations.js";
+
 import {
   validateConfiguration,
   VALID_POSITIONS,
   VALID_ENTRANCE_ANIMATIONS,
   VALID_EXIT_ANIMATIONS,
 } from "../src/config/validation.js";
-
-import { ANIMATIONS } from "../src/config/animations.js";
 
 import { createSafeSvg } from "../src/renderers/svg.js";
 
@@ -43,14 +56,16 @@ import { renderToast } from "../src/renderers/toast.js";
 
 import { initializeLifecycle, dismissToast } from "../src/core/lifecycle.js";
 
-import ZephyrToast, { ZephyrToast as NamedZephyrToast } from "../src/index.js";
-
 /**
- * Verifies animation configuration and public module exports.
+ * Verifies public exports and internal module behavior.
  */
 describe("ZephyrToast Modular Architecture", () => {
+  // ----------------------------------------------------------
+  // 1. Animation Configuration
+  // ----------------------------------------------------------
+
   describe("Animation Configuration", () => {
-    it("exports all existing notification animations", () => {
+    it("exports all supported notification animations", () => {
       const expectedAnimations = [
         "fadeIn",
         "fadeOut",
@@ -79,7 +94,17 @@ describe("ZephyrToast Modular Architecture", () => {
     it("exports an immutable animation mapping", () => {
       expect(Object.isFrozen(ANIMATIONS)).toBe(true);
     });
+
+    it("maps every animation name to its CSS class", () => {
+      for (const [name, className] of Object.entries(ANIMATIONS)) {
+        expect(className).toBe(`zephyr_animate_${name}`);
+      }
+    });
   });
+
+  // ----------------------------------------------------------
+  // 2. Public ES Module Entry Point
+  // ----------------------------------------------------------
 
   describe("Public Entry Point", () => {
     it("exposes the same class through named and default exports", () => {
@@ -87,6 +112,10 @@ describe("ZephyrToast Modular Architecture", () => {
       expect(typeof ZephyrToast).toBe("function");
     });
   });
+
+  // ----------------------------------------------------------
+  // 3. Default Configuration
+  // ----------------------------------------------------------
 
   describe("Default Configuration", () => {
     it("exports the expected immutable default options", () => {
@@ -135,7 +164,9 @@ describe("ZephyrToast Modular Architecture", () => {
           </head>
           <body></body>
         </html>`,
-        { url: "http://localhost/" },
+        {
+          url: "http://localhost/",
+        },
       );
 
       vi.stubGlobal("document", dom.window.document);
@@ -162,6 +193,10 @@ describe("ZephyrToast Modular Architecture", () => {
     });
   });
 
+  // ----------------------------------------------------------
+  // 4. Notification Types and Themes
+  // ----------------------------------------------------------
+
   describe("Notification Types and Themes", () => {
     it("exports all six built-in notification types", () => {
       const expectedTypes = [
@@ -180,6 +215,7 @@ describe("ZephyrToast Modular Architecture", () => {
 
         expect(config.icon).toContain("<svg");
         expect(config.icon).toContain("</svg>");
+
         expect(config.bgColor).toMatch(/^#[0-9a-f]{6}$/i);
         expect(config.textColor).toMatch(/^#[0-9a-f]{6}$/i);
         expect(config.borderColor).toMatch(/^#[0-9a-f]{6}$/i);
@@ -210,7 +246,23 @@ describe("ZephyrToast Modular Architecture", () => {
       expect(NOTIFICATION_TYPES.success.bgColor).toBe("#e3f7ed");
       expect(NOTIFICATION_TYPES.info.textColor).toBe("#2385ba");
     });
+
+    it("keeps built-in icon definitions independent between copies", () => {
+      const first = createNotificationTypes();
+      const second = createNotificationTypes();
+
+      const originalIcon = second.success.icon;
+
+      first.success.icon = "<svg></svg>";
+
+      expect(second.success.icon).toBe(originalIcon);
+      expect(NOTIFICATION_TYPES.success.icon).toBe(originalIcon);
+    });
   });
+
+  // ----------------------------------------------------------
+  // 5. Configuration Validation
+  // ----------------------------------------------------------
 
   describe("Configuration Validation", () => {
     it("exports all supported positions", () => {
@@ -308,7 +360,45 @@ describe("ZephyrToast Modular Architecture", () => {
         });
       }).toThrow(/theme/i);
     });
+
+    it("rejects invalid boolean configuration values", () => {
+      expect(() => {
+        validateConfiguration({
+          pauseOnHover: "true",
+        });
+      }).toThrow(TypeError);
+
+      expect(() => {
+        validateConfiguration({
+          showProgress: 1,
+        });
+      }).toThrow(TypeError);
+    });
+
+    it("rejects non-string theme color values", () => {
+      expect(() => {
+        validateConfiguration({
+          theme: {
+            bgColor: 123,
+          },
+        });
+      }).toThrow(TypeError);
+    });
+
+    it("rejects unsupported structured icon properties", () => {
+      expect(() => {
+        validateConfiguration({
+          icon: {
+            unsupported: "value",
+          },
+        });
+      }).toThrow(TypeError);
+    });
   });
+
+  // ----------------------------------------------------------
+  // 6. Secure SVG Rendering
+  // ----------------------------------------------------------
 
   describe("Secure SVG Rendering", () => {
     it("creates supported SVG elements in the target document", () => {
@@ -322,6 +412,7 @@ describe("ZephyrToast Modular Architecture", () => {
 
         expect(svg.localName).toBe("svg");
         expect(svg.ownerDocument).toBe(dom.window.document);
+        expect(svg.namespaceURI).toBe("http://www.w3.org/2000/svg");
         expect(svg.getAttribute("viewBox")).toBe("0 0 24 24");
         expect(svg.querySelector("path")).not.toBeNull();
       } finally {
@@ -359,6 +450,10 @@ describe("ZephyrToast Modular Architecture", () => {
       }
     });
   });
+
+  // ----------------------------------------------------------
+  // 7. Icon Rendering
+  // ----------------------------------------------------------
 
   describe("Icon Rendering", () => {
     it("renders icon classes without interpreting HTML", () => {
@@ -592,6 +687,10 @@ describe("ZephyrToast Modular Architecture", () => {
     });
   });
 
+  // ----------------------------------------------------------
+  // 8. Lifecycle Management
+  // ----------------------------------------------------------
+
   describe("Lifecycle Management", () => {
     it("exports the lifecycle functions", () => {
       expect(typeof initializeLifecycle).toBe("function");
@@ -625,6 +724,7 @@ describe("ZephyrToast Modular Architecture", () => {
           dom.window.close();
         }
       } finally {
+        vi.clearAllTimers();
         vi.useRealTimers();
       }
     });
@@ -660,6 +760,7 @@ describe("ZephyrToast Modular Architecture", () => {
           dom.window.close();
         }
       } finally {
+        vi.clearAllTimers();
         vi.useRealTimers();
       }
     });
@@ -706,17 +807,22 @@ describe("ZephyrToast Modular Architecture", () => {
           dom.window.close();
         }
       } finally {
+        vi.clearAllTimers();
         vi.useRealTimers();
       }
     });
   });
 
+  // ----------------------------------------------------------
+  // 9. Toast DOM Rendering
+  // ----------------------------------------------------------
+
   describe("Toast DOM Rendering", () => {
     /**
-     * Builds a valid set of resolved notification options.
+     * Builds a valid resolved notification configuration.
      *
-     * @param {Object} overrides - Options to override.
-     * @returns {Object} Resolved options.
+     * @param {Object} overrides - Configuration overrides.
+     * @returns {Object} Resolved notification options.
      */
     function createOptions(overrides = {}) {
       return {
@@ -749,6 +855,7 @@ describe("ZephyrToast Modular Architecture", () => {
         );
 
         expect(toast.isConnected).toBe(false);
+
         expect(
           toast.querySelector(".zephyr-toast-notification-message"),
         ).not.toBeNull();
@@ -866,6 +973,7 @@ describe("ZephyrToast Modular Architecture", () => {
           dom.window.close();
         }
       } finally {
+        vi.clearAllTimers();
         vi.useRealTimers();
       }
     });

@@ -1,7 +1,8 @@
 # ZephyrToast Continuous Integration
 #
-# Runs automated tests, production builds, distribution
-# verification, and npm package checks.
+# Validates code quality, TypeScript declarations, automated
+# tests, production builds, distribution files, and npm
+# package contents.
 #
 # Author: Md. Sarwar Alam
 # License: MIT
@@ -34,12 +35,18 @@ jobs:
     name: Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
 
+    timeout-minutes: 15
+
     strategy:
       fail-fast: false
       matrix:
         node-version: [22, 24]
 
     steps:
+      # ------------------------------------------------------
+      # 1. Repository and Node.js Setup
+      # ------------------------------------------------------
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -49,26 +56,40 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
+      # ------------------------------------------------------
+      # 2. Dependency Installation
+      # ------------------------------------------------------
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Run automated tests
-        run: npm test
+      # ------------------------------------------------------
+      # 3. Complete Project Validation
+      # ------------------------------------------------------
 
-      - name: Build distribution
-        run: npm run build
+      - name: Run code quality, type, test, and package checks
+        run: npm run check
 
-      - name: Verify distribution
-        run: npm run verify:build
+      # ------------------------------------------------------
+      # 4. Distribution and Declaration Verification
+      # ------------------------------------------------------
 
-      - name: Validate npm package
-        run: npm pack --dry-run
-
-      - name: Verify TypeScript declaration
+      - name: Verify TypeScript declaration output
         run: |
           test -s dist/index.d.ts
           grep -q "class ZephyrToast" dist/index.d.ts
 
-      - name: Check Git working tree
+      - name: Verify required distribution files
+        run: |
+          test -s dist/zephyr-toast.js
+          test -s dist/zephyr-toast.es.js
+          test -s dist/zephyr-toast.css
+          test -s dist/zephyr-toast-animate.css
+
+      # ------------------------------------------------------
+      # 5. Repository Integrity
+      # ------------------------------------------------------
+
+      - name: Check dependency manifest integrity
         run: |
           git diff --exit-code -- package.json package-lock.json

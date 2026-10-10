@@ -1,18 +1,20 @@
 /*!
- * ZephyrToast - A Toast Notification Library
- * Version: 1.5.0
+ * @fileoverview Core notification styles for ZephyrToast.
  *
- * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
- * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
- * customizable notifications that gently appear and disappear, delivering a seamless
- * user experience.
+ * Defines notification container positioning, notification
+ * appearance, internal content layout, close buttons,
+ * progress indicators, and responsive mobile behavior.
  *
- * Author: Md.Sarwar Alam
- * GitHub: https://github.com/sarwaralamini
- * Library: https://github.com/sarwaralamini/zephyr-toast
+ * Animation keyframes are maintained separately in
+ * zephyr-toast-animate.css.
  *
- * Released under the MIT License
+ * @author Md. Sarwar Alam
+ * @license MIT
  */
+
+/* ----------------------------------------------------------
+   1. Notification Container
+   ---------------------------------------------------------- */
 
 .zephyr-toast-container {
   position: fixed;
@@ -22,6 +24,10 @@
   min-width: fit-content;
   box-sizing: border-box;
 }
+
+/* ----------------------------------------------------------
+   2. Container Positions
+   ---------------------------------------------------------- */
 
 .zephyr-position-top-right {
   top: 0px;
@@ -55,6 +61,10 @@
   transform: translateX(-50%);
 }
 
+/* ----------------------------------------------------------
+   3. Notification Appearance
+   ---------------------------------------------------------- */
+
 .zephyr-toast-notification {
   margin-bottom: 15px;
   border-radius: 6px;
@@ -71,19 +81,28 @@
   animation-fill-mode: both;
 }
 
+/* ----------------------------------------------------------
+   4. Notification Body and Content
+   ---------------------------------------------------------- */
+
 .zephyr-toast-notification-body {
-  padding: 0.75rem;
   display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.75rem;
 }
 
 .zephyr-toast-notification-icon {
-  margin-right: 12px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 0;
 }
 
 .zephyr-toast-notification-content {
   flex: 1;
+  min-width: 0;
 }
 
 .zephyr-toast-notification-title {
@@ -91,13 +110,23 @@
   margin-bottom: 0.25rem;
 }
 
+/* ----------------------------------------------------------
+   5. Close Button
+   ---------------------------------------------------------- */
+
 .zephyr-toast-notification-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: center;
+  margin-left: 0;
+  padding: 0;
+  width: 24px;
+  height: 24px;
   background: transparent;
   border: 0;
-  padding: 0 0.5rem;
   cursor: pointer;
-  align-self: flex-start;
-  margin-left: 0.5rem;
   font-size: 1.25rem;
   line-height: 1;
   opacity: 0.7;
@@ -106,6 +135,10 @@
 .zephyr-toast-notification-close:hover {
   opacity: 1;
 }
+
+/* ----------------------------------------------------------
+   6. Standard Progress Indicator
+   ---------------------------------------------------------- */
 
 .zephyr-toast-progress-bar {
   width: 100%;
@@ -126,6 +159,10 @@
   will-change: width;
 }
 
+/* ----------------------------------------------------------
+   7. Void Progress Indicator
+   ---------------------------------------------------------- */
+
 .zephyr-toast-progress-bar-void {
   width: 100%;
   height: 4px;
@@ -145,11 +182,14 @@
   will-change: width;
 }
 
-/*
- * Responsive adjustments for mobile view (max-width: 576px)
- * Applies full-width and centered alignment to all toast positions 
- * for better readability and appearance on small screens.
- */
+/* ----------------------------------------------------------
+   8. Mobile Responsive Layout
+   ----------------------------------------------------------
+   On viewports at or below 576px, notification containers
+   are centered and expanded to the available viewport width,
+   regardless of their configured horizontal position.
+   ---------------------------------------------------------- */
+
 @media (max-width: 576px) {
   .zephyr-position-top-right,
   .zephyr-position-top-left,

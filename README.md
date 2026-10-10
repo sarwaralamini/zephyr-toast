@@ -2,39 +2,40 @@
 
 A lightweight, customizable, dependency-free toast notification library built with vanilla JavaScript.
 
-ZephyrToast provides six notification styles, flexible positioning, customizable animations, progress indicators, custom icons, and configurable themes.
+ZephyrToast makes it easy to display elegant, responsive notifications with customizable themes, animations, icons, and interaction behavior—without relying on a JavaScript framework.
 
-**[Live Demo & Notification Generator](https://sarwaralamini.github.io/zephyr-toast)**
+[**Live Demo & Interactive Playground**](https://sarwaralamini.github.io/zephyr-toast/) · [**Report an Issue**](https://github.com/sarwaralamini/zephyr-toast/issues)
 
 ## Features
 
-- Six notification types: Success, Info, Warning, Error, Zen, and Void
-- Six notification positions
-- Entrance and exit animations
-- Automatic dismissal and persistent notifications
-- Pause and resume dismissal on hover
-- Optional progress indicators and close buttons
-- Custom colors, themes, titles, and icons
-- Safe text rendering by default
-- Restricted SVG rendering for custom icons
-- ES module and standalone browser distributions
-- TypeScript declarations with IDE autocomplete
-- No runtime dependencies
+- **Six notification types:** Success, Info, Warning, Error, Zen, and Void.
+- **Six positions:** Place notifications in any corner or at the top or bottom center.
+- **Custom animations:** Choose from supported entrance and exit effects.
+- **Automatic or manual dismissal:** Configure notification duration or keep notifications visible.
+- **Pause on hover:** Automatically pause and resume notification dismissal.
+- **Progress indicators:** Display a visual countdown for timed notifications.
+- **Custom appearance:** Configure colors, titles, icons, and close buttons.
+- **Flexible icons:** Use CSS classes, image URLs, or validated SVG markup.
+- **Safe defaults:** Render notification messages as text unless trusted HTML is explicitly enabled.
+- **TypeScript support:** Includes declaration files and editor autocomplete.
+- **Flexible integration:** Supports ES modules and standalone browser scripts.
+- **Zero runtime dependencies:** Built with vanilla JavaScript.
 
 ## Installation
 
 ### npm
 
-For Vite, React, Vue, and other applications supporting JavaScript modules:
+Install ZephyrToast:
 
 ```bash
 npm install zephyr-toast
 ```
 
-Import the library and its stylesheets:
+Import the library and stylesheets:
 
 ```javascript
 import ZephyrToast from "zephyr-toast";
+
 import "zephyr-toast/animations.css";
 import "zephyr-toast/style.css";
 
@@ -43,11 +44,26 @@ const toast = new ZephyrToast();
 toast.success("Operation completed successfully!");
 ```
 
-**Note:** npm installation applies once this package version is published. For testing unreleased changes, install a locally generated npm package.
+You can also use the named export:
 
-### Standalone browser
+```javascript
+import { ZephyrToast } from "zephyr-toast";
+```
 
-After running `npm run build`, the standalone browser files are generated inside the `dist/` directory. Copy these files together to your website:
+> **Release status:** The npm installation command will work once the package is published. Until then, you can build and install a local npm package for testing.
+
+### Standalone Browser
+
+For websites without a JavaScript bundler, use the standalone browser distribution.
+
+Build the library:
+
+```bash
+npm install
+npm run build
+```
+
+Copy these files from `dist/` into your website:
 
 ```text
 zephyr-toast.js
@@ -70,17 +86,25 @@ Include them in your HTML:
 </script>
 ```
 
-The standalone script can also discover its accompanying stylesheets when the files are hosted together. Explicit stylesheet links are recommended for predictable loading.
+The standalone script also supports automatic stylesheet discovery when its accompanying CSS files are hosted in the expected location.
+
+Explicit stylesheet imports are recommended for predictable loading.
 
 ## Quick Start
+
+Create a notification manager:
 
 ```javascript
 const toast = new ZephyrToast({
   position: "top-right",
   duration: 3000,
 });
+```
 
-toast.success("Saved successfully!");
+Display notifications:
+
+```javascript
+toast.success("Changes saved successfully.");
 toast.info("You have a new message.");
 toast.warning("Your session is about to expire.");
 toast.error("Unable to complete the request.");
@@ -88,14 +112,17 @@ toast.zen("Everything is running smoothly.");
 toast.void("A new update is available.");
 ```
 
+Each method returns the notification's HTML element.
+
 ## Configuration
 
-Configure defaults when creating a ZephyrToast instance:
+Configure default behavior when creating an instance:
 
 ```javascript
 const toast = new ZephyrToast({
   position: "top-right",
   duration: 4000,
+  newestOnTop: true,
   pauseOnHover: true,
   showProgress: true,
   showClose: true,
@@ -107,65 +134,68 @@ Override settings for an individual notification:
 ```javascript
 toast.success("Profile updated!", {
   title: "Success",
-  position: "top-center",
   duration: 5000,
   animation: {
     in: "zoomIn",
     out: "zoomOut",
   },
   onClose: () => {
-    console.log("Notification closed");
+    console.log("Notification closed.");
   },
 });
 ```
 
-Individual notification options override the corresponding instance defaults.
+Per-notification options take precedence over instance settings.
 
-### Available options
+### Configuration Options
 
-| Option          | Default       | Description                                    |
-| --------------- | ------------- | ---------------------------------------------- |
-| `position`      | `"top-right"` | Notification container position                |
-| `newestOnTop`   | `true`        | Insert newer notifications above existing ones |
-| `type`          | `"info"`      | Default notification type                      |
-| `duration`      | `3000`        | Automatic dismissal delay in milliseconds      |
-| `pauseOnHover`  | `true`        | Pause dismissal while hovering                 |
-| `showProgress`  | `true`        | Display the progress indicator                 |
-| `animation.in`  | `"fadeIn"`    | Entrance animation                             |
-| `animation.out` | `"fadeOut"`   | Exit animation                                 |
-| `message`       | `""`          | Default message value                          |
-| `title`         | `""`          | Optional title                                 |
-| `allowHtml`     | `false`       | Interpret messages as trusted HTML             |
-| `enableIcon`    | `true`        | Display notification icons                     |
-| `icon`          | `null`        | Custom icon configuration                      |
-| `isIcon`        | `false`       | Treat a string icon as CSS classes             |
-| `showClose`     | `true`        | Display the close button                       |
-| `onClose`       | `null`        | Callback after notification removal            |
-| `onClick`       | `null`        | Callback for supported notification clicks     |
-| `theme`         | Type defaults | Override notification colors                   |
+| Option          | Default       | Description                        |
+| --------------- | ------------- | ---------------------------------- |
+| `position`      | `"top-right"` | Notification container position    |
+| `newestOnTop`   | `true`        | Display newer notifications first  |
+| `type`          | `"info"`      | Default notification type          |
+| `duration`      | `3000`        | Dismissal delay in milliseconds    |
+| `pauseOnHover`  | `true`        | Pause dismissal while hovering     |
+| `showProgress`  | `true`        | Display a progress indicator       |
+| `animation.in`  | `"fadeIn"`    | Entrance animation                 |
+| `animation.out` | `"fadeOut"`   | Exit animation                     |
+| `message`       | `""`          | Message configuration value        |
+| `title`         | `""`          | Optional notification title        |
+| `allowHtml`     | `false`       | Enable trusted HTML content        |
+| `enableIcon`    | `true`        | Display a notification icon        |
+| `icon`          | `null`        | Custom icon configuration          |
+| `isIcon`        | `false`       | Control string icon interpretation |
+| `showClose`     | `true`        | Display the close button           |
+| `onClose`       | `null`        | Callback after dismissal           |
+| `onClick`       | `null`        | Callback for supported clicks      |
+| `theme`         | Type defaults | Custom notification colors         |
 
-Set `duration: 0` to prevent automatic dismissal.
+Set `duration: 0` to disable automatic dismissal.
+
+See [API Reference](API.md) for the complete API.
 
 ## Notification Types
 
-| Type    | Method            | Appearance |
-| ------- | ----------------- | ---------- |
-| Success | `toast.success()` | Green      |
-| Info    | `toast.info()`    | Blue       |
-| Warning | `toast.warning()` | Yellow     |
-| Error   | `toast.error()`   | Red        |
-| Zen     | `toast.zen()`     | Light      |
-| Void    | `toast.void()`    | Dark       |
+ZephyrToast provides six built-in notification types.
 
-For a dynamically selected notification type:
+| Type    | Method            | Default Appearance |
+| ------- | ----------------- | ------------------ |
+| Success | `toast.success()` | Green              |
+| Info    | `toast.info()`    | Blue               |
+| Warning | `toast.warning()` | Yellow             |
+| Error   | `toast.error()`   | Red                |
+| Zen     | `toast.zen()`     | Light              |
+| Void    | `toast.void()`    | Dark               |
+
+You can select the notification type dynamically:
 
 ```javascript
-toast.show("A notification", {
+toast.show("Please check your settings.", {
   type: "warning",
 });
 ```
 
-## Positioning
+## Notification Positions
 
 Supported positions:
 
@@ -176,35 +206,33 @@ Supported positions:
 - `bottom-left`
 - `bottom-center`
 
-Update the container position:
+Configure the initial position:
 
 ```javascript
-toast.updatePosition("bottom-left");
+const toast = new ZephyrToast({
+  position: "bottom-right",
+});
 ```
 
-You can also supply `position` in a notification's options.
+Update it programmatically:
+
+```javascript
+toast.updatePosition("top-center");
+```
+
+Position overrides in individual notifications update the shared notification container position.
+
+On narrow screens, the library may center notification containers according to its responsive stylesheet.
 
 ## Animations
 
-Supported entrance animations:
+### Entrance Animations
 
-- `fadeIn`
-- `slideInLeft`
-- `slideInRight`
-- `slideInDown`
-- `slideInUp`
-- `bounceIn`
-- `zoomIn`
+`fadeIn`, `slideInLeft`, `slideInRight`, `slideInDown`, `slideInUp`, `bounceIn`, `zoomIn`
 
-Supported exit animations:
+### Exit Animations
 
-- `fadeOut`
-- `slideOutLeft`
-- `slideOutRight`
-- `slideOutUp`
-- `slideOutDown`
-- `bounceOut`
-- `zoomOut`
+`fadeOut`, `slideOutLeft`, `slideOutRight`, `slideOutUp`, `slideOutDown`, `bounceOut`, `zoomOut`
 
 Example:
 
@@ -217,9 +245,11 @@ toast.info("Animation example", {
 });
 ```
 
+Make sure the ZephyrToast animation stylesheet is included.
+
 ## Custom Themes
 
-Change notification colors for an individual toast:
+Override notification colors:
 
 ```javascript
 toast.info("Custom themed notification", {
@@ -233,11 +263,11 @@ toast.info("Custom themed notification", {
 });
 ```
 
-You can also pass a `theme` object when creating the instance.
+Theme options can also be provided when creating the notification manager.
 
-## Duration and Hover Behavior
+## Duration and Dismissal
 
-Set a notification duration in milliseconds:
+### Automatic Dismissal
 
 ```javascript
 toast.success("Automatically dismisses", {
@@ -245,21 +275,31 @@ toast.success("Automatically dismisses", {
 });
 ```
 
-Create a persistent notification:
+The notification is dismissed automatically after the configured duration.
+
+### Persistent Notifications
 
 ```javascript
-toast.info("Remains until dismissed", {
+const notification = toast.info("Remains visible", {
   duration: 0,
 });
 ```
 
-Disable hover-based pausing:
+Dismiss it manually:
 
 ```javascript
-toast.info("Dismissal continues during hover", {
-  pauseOnHover: false,
+toast.removeToast(notification);
+```
+
+### Pause on Hover
+
+```javascript
+toast.info("Pause enabled", {
+  pauseOnHover: true,
 });
 ```
+
+When enabled, hovering pauses the dismissal timer and progress animation.
 
 ## Titles and Close Buttons
 
@@ -270,7 +310,7 @@ toast.warning("Please review your information.", {
 });
 ```
 
-Disable the close button:
+Hide the close button:
 
 ```javascript
 toast.info("No close button", {
@@ -280,7 +320,7 @@ toast.info("No close button", {
 
 ## Custom Icons
 
-ZephyrToast supports CSS class icons, HTTP/HTTPS image URLs, and restricted custom SVG markup.
+ZephyrToast supports built-in SVG icons, CSS class icons, image URLs, and restricted custom SVG markup.
 
 ### CSS Class Icons
 
@@ -290,7 +330,7 @@ toast.success("Saved successfully!", {
 });
 ```
 
-You can also use an object:
+Structured configuration:
 
 ```javascript
 toast.success("Saved successfully!", {
@@ -300,43 +340,49 @@ toast.success("Saved successfully!", {
 });
 ```
 
-External icon libraries such as Font Awesome must be loaded separately.
+External icon libraries, such as Font Awesome, must be loaded separately.
 
 ### Image Icons
 
 ```javascript
 toast.info("Image icon example", {
-  icon: "/images/info.png",
+  icon: "/images/info.webp",
 });
 ```
 
-For custom dimensions:
+String-based image recognition supports JPEG, JPG, PNG, GIF, WebP, AVIF, and SVG filename extensions.
+
+For custom dimensions or image URLs without recognized extensions, use an object:
 
 ```javascript
-toast.warning("Custom image dimensions", {
+toast.warning("Custom image icon", {
   icon: {
-    url: "/images/warning.png",
+    url: "/api/icons/warning",
     width: "24px",
     height: "24px",
   },
 });
 ```
 
-Image URLs must resolve to HTTP or HTTPS. Relative URLs are supported.
+Image URLs must resolve to HTTP or HTTPS resources. Relative URLs are supported.
 
-### SVG Icons
+SVG image URLs are rendered as image elements, not interpreted as inline SVG markup.
 
-Provide custom SVG markup using the `svg` property:
+### Custom SVG Markup
 
 ```javascript
 toast.success("Custom SVG icon", {
   icon: {
-    svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg>',
+    svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg>',
   },
 });
 ```
 
-Custom SVG is processed through a restricted renderer. Unsupported elements, attributes, and potentially unsafe values are rejected.
+ZephyrToast validates custom SVG markup using restricted element and attribute allowlists.
+
+Modified instance-level built-in SVG icons are subject to the same validation.
+
+Unsafe or unsupported SVG content is rejected.
 
 ### Disable Icons
 
@@ -348,15 +394,15 @@ toast.info("Notification without an icon", {
 
 ## HTML Content and Security
 
-Notification messages are rendered as text by default.
+By default, ZephyrToast renders notification messages as text.
 
 ```javascript
 toast.info("<strong>Important</strong>");
 ```
 
-The markup above is displayed as literal text.
+The HTML markup above is displayed as literal text.
 
-For trusted HTML:
+To render trusted HTML:
 
 ```javascript
 toast.success("<strong>Operation completed!</strong>", {
@@ -364,23 +410,27 @@ toast.success("<strong>Operation completed!</strong>", {
 });
 ```
 
-**Security warning:** `allowHtml: true` uses HTML interpretation. Never pass unsanitized user input or untrusted external content to this option.
+**Security warning:** `allowHtml: true` interprets the message using HTML rendering. Do not pass unsanitized user input or untrusted external data to this option.
 
-If you need to display user-generated content, keep `allowHtml` disabled or sanitize the content using a trusted HTML sanitizer first.
+If you need rich content from external sources, sanitize it with a trusted HTML sanitizer before passing it to ZephyrToast.
 
 ## Event Callbacks
 
-Execute a function when a notification is closed:
+### onClose
+
+Runs when a notification has been removed:
 
 ```javascript
 toast.success("Saved!", {
   onClose: () => {
-    console.log("The notification was removed.");
+    console.log("Notification removed.");
   },
 });
 ```
 
-Handle supported notification clicks:
+### onClick
+
+Runs when a supported notification area is clicked:
 
 ```javascript
 toast.info("Click this notification", {
@@ -390,9 +440,11 @@ toast.info("Click this notification", {
 });
 ```
 
+The click handler does not automatically fire for every descendant element, such as the close button.
+
 ## Managing Notifications
 
-Create a notification directly:
+Display and retain a notification element:
 
 ```javascript
 const notification = toast.success("Processing complete", {
@@ -400,7 +452,7 @@ const notification = toast.success("Processing complete", {
 });
 ```
 
-Dismiss it manually:
+Dismiss it:
 
 ```javascript
 toast.removeToast(notification);
@@ -412,7 +464,7 @@ Dismiss all notifications in the shared container:
 toast.removeAll();
 ```
 
-Removal uses the configured exit animation.
+Notifications are removed using their configured exit animations.
 
 ## TypeScript Support
 
@@ -443,27 +495,28 @@ const toast = new ZephyrToast(options);
 toast.success("TypeScript integration works!");
 ```
 
-Both default and named class exports are supported:
+The library supports both default and named class exports.
 
-```typescript
-import ZephyrToast, { ZephyrToast as NamedZephyrToast } from "zephyr-toast";
-```
+## API Reference
 
-## Public API
+The main methods are:
 
-| Method                       | Description                            |
-| ---------------------------- | -------------------------------------- |
-| `new ZephyrToast(options?)`  | Create a notification manager          |
-| `show(message, options?)`    | Display a notification                 |
-| `success(message, options?)` | Display a success notification         |
-| `info(message, options?)`    | Display an info notification           |
-| `warning(message, options?)` | Display a warning notification         |
-| `error(message, options?)`   | Display an error notification          |
-| `zen(message, options?)`     | Display a zen notification             |
-| `void(message, options?)`    | Display a void notification            |
-| `removeToast(element)`       | Dismiss one notification               |
-| `removeAll()`                | Dismiss notifications in the container |
-| `updatePosition(position)`   | Change the notification position       |
+| Method                           | Description                                 |
+| -------------------------------- | ------------------------------------------- |
+| `new ZephyrToast(options?)`      | Create a notification manager               |
+| `createToast(message, options?)` | Create and display a notification           |
+| `show(message, options?)`        | Display a notification with a selected type |
+| `success(message, options?)`     | Display a success notification              |
+| `info(message, options?)`        | Display an informational notification       |
+| `warning(message, options?)`     | Display a warning notification              |
+| `error(message, options?)`       | Display an error notification               |
+| `zen(message, options?)`         | Display a zen notification                  |
+| `void(message, options?)`        | Display a void notification                 |
+| `removeToast(element)`           | Dismiss a notification                      |
+| `removeAll()`                    | Dismiss notifications in the container      |
+| `updatePosition(position)`       | Update container position                   |
+
+For options, type definitions, callback behavior, and other available methods, see the [API Reference](API.md).
 
 ## Development
 
@@ -475,16 +528,16 @@ cd zephyr-toast
 npm install
 ```
 
-Run the automated tests:
-
-```bash
-npm test
-```
-
-Build the distribution:
+Build the production distribution:
 
 ```bash
 npm run build
+```
+
+Run automated tests:
+
+```bash
+npm test
 ```
 
 Verify distribution files and package exports:
@@ -493,30 +546,71 @@ Verify distribution files and package exports:
 npm run verify:build
 ```
 
-Run the complete package validation:
+Run the complete package checks:
 
 ```bash
 npm run check
 ```
 
-Inspect the npm package without publishing:
+Check source formatting:
+
+```bash
+npm run format:check
+```
+
+Run ESLint:
+
+```bash
+npm run lint
+```
+
+Validate the TypeScript declarations:
+
+```bash
+npm run test:types
+```
+
+The `test:types` command requires TypeScript to be installed as a development dependency and the corresponding script to be configured in `package.json`.
+
+### Build the Demo Website
+
+```bash
+npm run build:demo
+```
+
+The generated GitHub Pages website is written to the `docs/` directory.
+
+Serve it locally:
+
+```bash
+python3 -m http.server 4173 --directory docs
+```
+
+Visit `http://localhost:4173/`.
+
+### Inspect the npm Package
 
 ```bash
 npm pack --dry-run
 ```
 
+This shows which files would be included in the npm package without publishing it.
+
 ## Contributing
 
 Bug reports, feature requests, and pull requests are welcome.
 
-Before submitting code changes, run the automated tests and distribution checks.
+Please run the relevant tests, linting, formatting checks, and build verification before submitting changes.
+
+- [Report a bug](https://github.com/sarwaralamini/zephyr-toast/issues)
+- [Browse the repository](https://github.com/sarwaralamini/zephyr-toast)
 
 ## Author
 
 **Md. Sarwar Alam**
 
-[GitHub](https://github.com/sarwaralamini)
+GitHub: https://github.com/sarwaralamini
 
 ## License
 
-Released under the MIT License. See [LICENSE](LICENSE) for details.
+ZephyrToast is released under the [MIT License](LICENSE).

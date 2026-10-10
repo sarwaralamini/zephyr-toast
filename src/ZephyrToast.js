@@ -1,33 +1,62 @@
+/**
+ * @fileoverview Main ZephyrToast notification class.
+ *
+ * Provides the public API for creating, displaying, configuring,
+ * and dismissing toast notifications.
+ *
+ * Coordinates configuration validation, notification rendering,
+ * lifecycle management, container positioning, and stylesheet
+ * initialization through the library's modular components.
+ *
+ * Supports six built-in notification types and customizable
+ * appearance, animation, icons, and interaction behavior.
+ *
+ * @module ZephyrToast
+ * @author Md. Sarwar Alam
+ * @license MIT
+ */
+
 import { ANIMATIONS } from "./config/animations.js";
 import { createDefaultOptions } from "./config/defaults.js";
 import { createNotificationTypes } from "./config/types.js";
 import { validateConfiguration } from "./config/validation.js";
-import { createSafeSvg } from "./renderers/svg.js";
-import { renderToast } from "./renderers/toast.js";
+
 import { initializeLifecycle, dismissToast } from "./core/lifecycle.js";
 
-/**
- * ZephyrToast - A Toast Notification Library
- * Version: 1.5.0
- *
- * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
- * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
- * customizable notifications that gently appear and disappear, delivering a seamless
- * user experience.
- *
- * Author: Md.Sarwar Alam
- * GitHub: https://github.com/sarwaralamini
- * Library: https://github.com/sarwaralamini/zephyr-toast
- *
- * Released under the MIT License
- */
+import { createSafeSvg } from "./renderers/svg.js";
+import { renderToast } from "./renderers/toast.js";
 
+/**
+ * Main class for managing ZephyrToast notifications.
+ *
+ * Each instance maintains its own configuration and notification
+ * type definitions while sharing the library's immutable
+ * animation mappings.
+ *
+ * The constructor validates configuration, initializes the
+ * notification container, and attempts stylesheet injection
+ * for standalone browser usage.
+ */
 class ZephyrToast {
+  /**
+   * Creates a ZephyrToast instance.
+   *
+   * Combines user-provided configuration with the library defaults.
+   * Nested animation settings are merged independently to preserve
+   * unspecified default values.
+   *
+   * Configuration is validated before the notification container
+   * is initialized.
+   *
+   * @param {Object} [options={}] - Initial notification configuration.
+   * @throws {TypeError} If a configuration value has an invalid type.
+   * @throws {RangeError} If a configuration value is unsupported.
+   */
   constructor(options = {}) {
     // Create independent default configuration for this instance.
     this.defaults = createDefaultOptions();
 
-    // Merge options with defaults
+    // Merge constructor options with the library defaults.
     this.options = {
       ...this.defaults,
       ...options,
@@ -56,22 +85,24 @@ class ZephyrToast {
   /**
    * Creates a validated custom SVG icon.
    *
-   * Delegates parsing and security validation to the shared
-   * SVG renderer while preserving the existing class API.
+   * Delegates SVG parsing and validation to the shared secure
+   * SVG renderer while preserving the class-level API.
    *
-   * @param {string} markup - SVG markup to validate.
-   * @returns {SVGSVGElement} The validated SVG icon.
-   * @throws {TypeError} If the markup contains unsupported content.
+   * @param {string} markup - Custom SVG markup to validate.
+   * @returns {SVGSVGElement} A newly constructed, validated SVG element.
+   * @throws {TypeError} If the markup is invalid or contains
+   * unsupported SVG content.
    */
   createSafeSvg(markup) {
     return createSafeSvg(markup, document);
   }
 
   /**
-   * Validates notification configuration using the shared validator.
+   * Validates notification configuration.
    *
-   * Preserves the existing instance method while delegating validation
-   * to the DOM-independent configuration module.
+   * Delegates validation to the shared configuration validator.
+   * Can be used for constructor options, per-notification options,
+   * and notification container position updates.
    *
    * @param {Object} options - Configuration values to validate.
    * @returns {void}
@@ -83,29 +114,43 @@ class ZephyrToast {
   }
 
   /**
-   * Initialize the container for toast notifications
+   * Initializes or reuses the notification container.
+   *
+   * Locates the shared notification container in the document,
+   * creating one when necessary.
+   *
+   * Applies the configured position class to the container.
+   *
+   * @returns {void}
    */
   initializeContainer() {
-    // Get or create the container
+    // Get or create the notification container.
     this.container = document.getElementById("zephyr-toast-container");
+
     if (!this.container) {
       this.container = document.createElement("div");
       this.container.id = "zephyr-toast-container";
       document.body.appendChild(this.container);
     }
 
-    // Set position class
+    // Apply the configured notification position.
     this.container.className = `zephyr-toast-container zephyr-position-${this.options.position}`;
   }
 
   /**
    * Loads the library stylesheets for standalone browser usage.
    *
-   * When loaded through a traditional script element, CSS paths
-   * are resolved relative to the JavaScript file.
+   * Searches the document for the standalone ZephyrToast script
+   * and resolves stylesheet paths relative to its location.
    *
-   * ES module consumers should import the stylesheets explicitly.
-   * When no standalone script is present, no console error is emitted.
+   * When an existing stylesheet injection element is found,
+   * no additional styles are added.
+   *
+   * ES module consumers should import the library stylesheets
+   * explicitly through their bundler.
+   *
+   * If no standalone script is detected, the method returns
+   * without modifying the document.
    *
    * @returns {void}
    */
@@ -150,29 +195,39 @@ class ZephyrToast {
   }
 
   /**
-   * Create a new toast notification
-   * @param {string} message - The message to display
-   * @param {object} options - Custom options for this notification
-   * @returns {HTMLElement} The created toast notification element
+   * Creates and displays a toast notification.
+   *
+   * Validates the provided notification options and combines them
+   * with the instance configuration and notification type defaults.
+   *
+   * Configuration precedence:
+   * 1. Library defaults.
+   * 2. Notification type theme defaults.
+   * 3. Constructor-level configuration.
+   * 4. Per-notification configuration.
+   *
+   * Animation and theme settings are resolved independently to
+   * preserve unspecified properties.
+   *
+   * The notification is rendered, inserted into its container,
+   * and initialized with visibility and lifecycle behavior.
+   *
+   * @param {string} message - Message to display in the notification.
+   * @param {Object} [options={}] - Per-notification configuration.
+   * @returns {HTMLElement} The created notification DOM element.
+   * @throws {TypeError} If a configuration value is invalid or
+   * icon rendering encounters unsupported content.
+   * @throws {RangeError} If a configuration value is unsupported.
    */
   createToast(message, options = {}) {
     // Validate user-provided options before merging and normalizing them.
     this.validateConfiguration(options);
 
-    /**
-     * Resolves notification configuration using the following priority:
-     *
-     * 1. Library defaults
-     * 2. Notification type defaults
-     * 3. Constructor-level configuration
-     * 4. Per-notification configuration
-     *
-     * Nested animation and theme objects are merged independently
-     * to preserve unspecified configuration properties.
-     */
+    // Resolve the notification type and its default theme.
     const toastType = options.type ?? this.options.type;
     const typeTheme = this.types[toastType] ?? this.types.info;
 
+    // Merge instance and per-notification configuration.
     const toastOptions = {
       ...this.options,
       ...options,
@@ -211,12 +266,8 @@ class ZephyrToast {
     // Validate the resolved configuration before creating DOM elements.
     this.validateConfiguration(toastOptions);
 
-    // Update position if provided in options
-    if (options.position && options.position !== this.options.position) {
-      this.updatePosition(options.position);
-    }
-
-    // Create the notification using the shared DOM renderer.
+    // Render the notification before modifying shared container state.
+    // If rendering fails, the existing position remains unchanged.
     const toast = renderToast(
       toastOptions,
       this.types,
@@ -225,17 +276,22 @@ class ZephyrToast {
       (element) => this.removeToast(element),
     );
 
-    // Store options with the toast
+    // Update the container position only after successful rendering.
+    if (options.position && options.position !== this.options.position) {
+      this.updatePosition(options.position);
+    }
+
+    // Store the resolved configuration on the notification.
     toast._options = toastOptions;
 
-    // Add to container
+    // Insert the notification using the configured ordering.
     if (toastOptions.newestOnTop) {
       this.container.prepend(toast);
     } else {
       this.container.appendChild(toast);
     }
 
-    // Make the toast visible after insertion.
+    // Make the notification visible after insertion.
     // Retain the timer so dismissal can cancel pending DOM updates.
     toast._visibilityTimeoutId = setTimeout(() => {
       toast._visibilityTimeoutId = null;
@@ -257,10 +313,10 @@ class ZephyrToast {
   }
 
   /**
-   * Dismisses a toast notification.
+   * Dismisses a notification using its configured exit animation.
    *
-   * Delegates lifecycle state management, animation, timer
-   * cleanup, and removal to the shared lifecycle module.
+   * Delegates timer cancellation, animation handling, event-listener
+   * cleanup, and DOM removal to the shared lifecycle manager.
    *
    * @param {HTMLElement} toast - Notification element to dismiss.
    * @returns {void}
@@ -270,80 +326,96 @@ class ZephyrToast {
   }
 
   /**
-   * Remove all toast notifications
+   * Dismisses all notifications in the current container.
+   *
+   * Each notification is dismissed through the standard
+   * lifecycle manager, preserving its exit animation behavior.
+   *
+   * @returns {void}
    */
   removeAll() {
     const toasts = this.container.querySelectorAll(
       ".zephyr-toast-notification",
     );
+
     toasts.forEach((toast) => this.removeToast(toast));
   }
 
   /**
-   * Show a toast notification with specified type
-   * @param {string} message - The message to display
-   * @param {object} options - Custom options for this notification
-   * @returns {HTMLElement} The created toast notification element
+   * Displays a notification using the resolved notification type.
+   *
+   * Uses the instance's configured default type unless a different
+   * type is supplied through the notification options.
+   *
+   * @param {string} message - Notification message.
+   * @param {Object} [options={}] - Per-notification configuration.
+   * @returns {HTMLElement} The created notification element.
    */
   show(message, options = {}) {
     return this.createToast(message, options);
   }
 
   /**
-   * Show a success toast notification
-   * @param {string} message - The message to display
-   * @param {object} options - Custom options for this notification
-   * @returns {HTMLElement} The created toast notification element
+   * Displays a success notification.
+   *
+   * @param {string} message - Notification message.
+   * @param {Object} [options={}] - Per-notification configuration.
+   * @returns {HTMLElement} The created notification element.
    */
   success(message, options = {}) {
     return this.createToast(message, { ...options, type: "success" });
   }
 
   /**
-   * Show an info toast notification
-   * @param {string} message - The message to display
-   * @param {object} options - Custom options for this notification
-   * @returns {HTMLElement} The created toast notification element
+   * Displays an informational notification.
+   *
+   * @param {string} message - Notification message.
+   * @param {Object} [options={}] - Per-notification configuration.
+   * @returns {HTMLElement} The created notification element.
    */
   info(message, options = {}) {
     return this.createToast(message, { ...options, type: "info" });
   }
 
   /**
-   * Show a warning toast notification
-   * @param {string} message - The message to display
-   * @param {object} options - Custom options for this notification
-   * @returns {HTMLElement} The created toast notification element
+   * Displays a warning notification.
+   *
+   * @param {string} message - Notification message.
+   * @param {Object} [options={}] - Per-notification configuration.
+   * @returns {HTMLElement} The created notification element.
    */
   warning(message, options = {}) {
     return this.createToast(message, { ...options, type: "warning" });
   }
 
   /**
-   * Show an error toast notification
-   * @param {string} message - The message to display
-   * @param {object} options - Custom options for this notification
-   * @returns {HTMLElement} The created toast notification element
+   * Displays an error notification.
+   *
+   * @param {string} message - Notification message.
+   * @param {Object} [options={}] - Per-notification configuration.
+   * @returns {HTMLElement} The created notification element.
    */
   error(message, options = {}) {
     return this.createToast(message, { ...options, type: "error" });
   }
 
   /**
-   * Show a zen toast notification
-   * @param {string} message - The message to display
-   * @param {object} options - Custom options for this notification
-   * @returns {HTMLElement} The created toast notification element
+   * Displays a zen-style notification.
+   *
+   * @param {string} message - Notification message.
+   * @param {Object} [options={}] - Per-notification configuration.
+   * @returns {HTMLElement} The created notification element.
    */
   zen(message, options = {}) {
     return this.createToast(message, { ...options, type: "zen" });
   }
 
   /**
-   * Show a void toast notification
-   * @param {string} message - The message to display
-   * @param {object} options - Custom options for this notification
-   * @returns {HTMLElement} The created toast notification element
+   * Displays a void-style notification.
+   *
+   * @param {string} message - Notification message.
+   * @param {Object} [options={}] - Per-notification configuration.
+   * @returns {HTMLElement} The created notification element.
    */
   void(message, options = {}) {
     return this.createToast(message, { ...options, type: "void" });
@@ -352,10 +424,10 @@ class ZephyrToast {
   /**
    * Updates the notification container position.
    *
-   * Validates the requested position before modifying the
-   * instance configuration or container CSS classes.
+   * Validates the requested position before updating the
+   * instance configuration and container CSS classes.
    *
-   * @param {string} position - The new notification position.
+   * @param {string} position - New notification container position.
    * @returns {void}
    * @throws {RangeError} If the position is unsupported.
    */
@@ -369,12 +441,5 @@ class ZephyrToast {
   }
 }
 
-/**
- * Exports the ZephyrToast class for ES module consumers.
- *
- * @module ZephyrToast
- * @author Md. Sarwar Alam
- * @license MIT
- */
 export { ZephyrToast };
 export default ZephyrToast;

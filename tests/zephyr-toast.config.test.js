@@ -1,25 +1,31 @@
 /**
- * @fileoverview Configuration and theme regression tests for ZephyrToast.
+ * @fileoverview Configuration and theme integration tests for ZephyrToast.
  *
- * Verifies default configuration, nested animation settings,
- * notification type resolution, theme inheritance, and
+ * Verifies configuration inheritance, nested animation settings,
+ * notification type resolution, theme precedence, and
  * per-notification customization.
  *
- * Tests define the expected configuration behavior before
- * the existing implementation is refactored.
+ * Tests execute the compiled standalone browser distribution
+ * inside isolated JSDOM environments to verify behavior through
+ * the public browser API.
+ *
+ * Input validation is covered separately by the dedicated
+ * configuration validation and guard test suites.
  *
  * @author Md. Sarwar Alam
  * @license MIT
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-
-import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
 import { runInContext } from "node:vm";
 
+import { JSDOM } from "jsdom";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 /**
- * Source code of the standalone ZephyrToast library.
+ * Compiled standalone browser distribution.
+ *
+ * The production bundle must be built before these tests run.
  *
  * @type {string}
  */
@@ -31,11 +37,11 @@ const source = readFileSync(
 /**
  * Creates an isolated browser environment and loads ZephyrToast.
  *
- * The existing browser script is evaluated directly without
- * requiring an ES module export or loading external resources.
+ * Evaluates the compiled IIFE inside JSDOM's VM context and
+ * retrieves the constructor registered on window.ZephyrToast.
  *
- * @returns {{dom: JSDOM, ZephyrToast: Function}}
- *   An initialized DOM and library constructor.
+ * @returns {{ dom: JSDOM, ZephyrToast: Function }}
+ *   Initialized browser environment and library constructor.
  */
 function createTestEnvironment() {
   const dom = new JSDOM(
@@ -52,7 +58,6 @@ function createTestEnvironment() {
     },
   );
 
-  // The generated IIFE bundle registers window.ZephyrToast itself.
   runInContext(source, dom.getInternalVMContext());
 
   return {
@@ -62,7 +67,8 @@ function createTestEnvironment() {
 }
 
 /**
- * Tests configuration inheritance and notification theme resolution.
+ * Verifies configuration inheritance, notification type colors,
+ * and theme resolution in the standalone browser distribution.
  */
 describe("ZephyrToast Configuration and Themes", () => {
   /** @type {JSDOM} */
@@ -72,7 +78,9 @@ describe("ZephyrToast Configuration and Themes", () => {
   let ZephyrToast;
 
   /**
-   * Initializes an independent browser environment for each test.
+   * Initializes an independent browser environment.
+   *
+   * @returns {void}
    */
   beforeEach(() => {
     const environment = createTestEnvironment();
@@ -83,10 +91,16 @@ describe("ZephyrToast Configuration and Themes", () => {
 
   /**
    * Releases browser resources after each test.
+   *
+   * @returns {void}
    */
   afterEach(() => {
     dom.window.close();
   });
+
+  // ----------------------------------------------------------
+  // 1. Animation Configuration
+  // ----------------------------------------------------------
 
   describe("Animation Configuration", () => {
     it("preserves the default exit animation when only entrance is configured", () => {
@@ -136,7 +150,29 @@ describe("ZephyrToast Configuration and Themes", () => {
       expect(toast.options.animation.in).toBe("fadeIn");
       expect(toast.options.animation.out).toBe("fadeOut");
     });
+
+    it("applies the configured entrance animation class", () => {
+      const toast = new ZephyrToast({
+        animation: {
+          in: "slideInRight",
+        },
+      });
+
+      const element = toast.info("Entrance animation", {
+        duration: 0,
+      });
+
+      expect(element.classList.contains("zephyr_animate")).toBe(true);
+
+      expect(element.classList.contains("zephyr_animate_slideInRight")).toBe(
+        true,
+      );
+    });
   });
+
+  // ----------------------------------------------------------
+  // 2. Notification Type Resolution
+  // ----------------------------------------------------------
 
   describe("Notification Type Resolution", () => {
     it("uses success colors for success notifications", () => {
@@ -163,7 +199,27 @@ describe("ZephyrToast Configuration and Themes", () => {
       expect(element._options.type).toBe("warning");
       expect(element.style.backgroundColor).toBe("rgb(255, 245, 218)");
     });
+
+    it("resolves per-notification types independently", () => {
+      const toast = new ZephyrToast({
+        type: "warning",
+      });
+
+      const element = toast.show("Saved successfully", {
+        type: "success",
+        duration: 0,
+      });
+
+      expect(element._options.type).toBe("success");
+      expect(element.style.backgroundColor).toBe("rgb(227, 247, 237)");
+
+      expect(toast.options.type).toBe("warning");
+    });
   });
+
+  // ----------------------------------------------------------
+  // 3. Theme Configuration
+  // ----------------------------------------------------------
 
   describe("Theme Configuration", () => {
     it("applies constructor-level theme overrides", () => {
@@ -210,6 +266,42 @@ describe("ZephyrToast Configuration and Themes", () => {
       });
 
       expect(element.style.backgroundColor).toBe("rgb(34, 34, 34)");
+    });
+
+    it("inherits constructor theme properties not overridden per notification", () => {
+      const toast = new ZephyrToast({
+        theme: {
+          bgColor: "#111111",
+          textColor: "#abcdef",
+        },
+      });
+
+      const element = toast.info("Partial per-toast theme", {
+        duration: 0,
+        theme: {
+          bgColor: "#222222",
+        },
+      });
+
+      expect(element.style.backgroundColor).toBe("rgb(34, 34, 34)");
+      expect(element.style.color).toBe("rgb(171, 205, 239)");
+    });
+
+    it("does not mutate constructor theme settings", () => {
+      const toast = new ZephyrToast({
+        theme: {
+          bgColor: "#111111",
+        },
+      });
+
+      toast.info("Temporary override", {
+        duration: 0,
+        theme: {
+          bgColor: "#222222",
+        },
+      });
+
+      expect(toast.options.theme.bgColor).toBe("#111111");
     });
   });
 });

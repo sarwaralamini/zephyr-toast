@@ -1,25 +1,29 @@
 /**
- * @fileoverview Hover and timer regression tests for ZephyrToast.
+ * @fileoverview Hover pause and resume integration tests for ZephyrToast.
  *
- * Verifies that notification dismissal timers pause when the
- * pointer enters a toast and resume using the remaining time
- * when the pointer leaves.
+ * Verifies that automatic dismissal pauses while a notification
+ * is hovered and resumes using its remaining lifetime.
  *
- * Tests cover notifications with and without progress bars,
- * including repeated hover interactions.
+ * Covers repeated hover cycles, progress indicators, disabled
+ * hover handling, persistent notifications, and timer cleanup.
+ *
+ * Executes the compiled standalone browser distribution using
+ * an isolated JSDOM environment and deterministic timers.
  *
  * @author Md. Sarwar Alam
  * @license MIT
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-
-import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
 import { runInContext } from "node:vm";
 
+import { JSDOM } from "jsdom";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 /**
- * Loads the existing standalone library source.
+ * Compiled standalone browser distribution.
+ *
+ * The production bundle must be built before these tests run.
  *
  * @type {string}
  */
@@ -29,26 +33,31 @@ const source = readFileSync(
 );
 
 /**
- * Creates a deterministic browser timer implementation.
+ * Creates deterministic timers for an isolated browser window.
  *
- * Scheduled callbacks are executed in chronological order,
- * allowing tests to advance time without real delays.
+ * Synchronizes performance.now() with simulated time so that
+ * hover-based remaining-duration calculations are predictable.
  *
- * @param {Window} window - The isolated browser window.
- * @returns {{advance: (milliseconds: number) => void}}
- *   Controller for advancing simulated time.
+ * Executes scheduled callbacks chronologically, including
+ * callbacks that register additional timers.
+ *
+ * @param {Window} window - Isolated browser window.
+ * @returns {{
+ *   advance: (milliseconds: number) => void,
+ *   pending: () => number,
+ *   clear: () => void
+ * }} Deterministic timer controller.
  */
 function createTestClock(window) {
   let now = 0;
   let nextId = 1;
 
-  // Keep the browser's monotonic clock synchronized with fake timers.
   Object.defineProperty(window.performance, "now", {
     configurable: true,
     value: () => now,
   });
 
-  /** @type {Map<number, {time: number, callback: Function}>} */
+  /** @type {Map<number, { time: number, callback: Function }>} */
   const timers = new Map();
 
   window.setTimeout = (callback, delay = 0) => {
@@ -68,9 +77,9 @@ function createTestClock(window) {
 
   return {
     /**
-     * Executes all scheduled callbacks up to the target time.
+     * Advances simulated time and executes due callbacks.
      *
-     * @param {number} milliseconds - Milliseconds to advance.
+     * @param {number} milliseconds - Non-negative time increment.
      * @returns {void}
      */
     advance(milliseconds) {
@@ -87,7 +96,9 @@ function createTestClock(window) {
           .filter(([, timer]) => timer.time <= target)
           .sort((a, b) => a[1].time - b[1].time || a[0] - b[0])[0];
 
-        if (!next) break;
+        if (!next) {
+          break;
+        }
 
         const [id, timer] = next;
 
@@ -99,17 +110,38 @@ function createTestClock(window) {
 
       now = target;
     },
+
+    /**
+     * Returns the number of pending timers.
+     *
+     * @returns {number} Pending timer count.
+     */
+    pending() {
+      return timers.size;
+    },
+
+    /**
+     * Discards pending timers.
+     *
+     * @returns {void}
+     */
+    clear() {
+      timers.clear();
+    },
   };
 }
 
 /**
- * Creates a standalone browser environment and loads ZephyrToast.
+ * Creates an isolated browser environment and loads ZephyrToast.
+ *
+ * The script reference supports automatic stylesheet discovery
+ * without loading external resources.
  *
  * @returns {{
  *   dom: JSDOM,
  *   ZephyrToast: Function,
  *   clock: ReturnType<typeof createTestClock>
- * }} The isolated testing environment.
+ * }} Initialized browser testing environment.
  */
 function createTestEnvironment() {
   const dom = new JSDOM(
@@ -128,7 +160,6 @@ function createTestEnvironment() {
 
   const clock = createTestClock(dom.window);
 
-  // The generated IIFE bundle registers window.ZephyrToast itself.
   runInContext(source, dom.getInternalVMContext());
 
   return {
@@ -139,7 +170,7 @@ function createTestEnvironment() {
 }
 
 /**
- * Tests the pause-on-hover dismissal behavior.
+ * Verifies hover interactions through the standalone browser API.
  */
 describe("ZephyrToast Hover Behavior", () => {
   /** @type {JSDOM} */
@@ -152,7 +183,9 @@ describe("ZephyrToast Hover Behavior", () => {
   let clock;
 
   /**
-   * Creates a fresh DOM and timer controller before each test.
+   * Creates a fresh DOM and timer controller.
+   *
+   * @returns {void}
    */
   beforeEach(() => {
     const environment = createTestEnvironment();
@@ -163,17 +196,20 @@ describe("ZephyrToast Hover Behavior", () => {
   });
 
   /**
-   * Releases browser resources after each test.
+   * Clears pending timers and releases browser resources.
+   *
+   * @returns {void}
    */
   afterEach(() => {
+    clock.clear();
     dom.window.close();
   });
 
   /**
-   * Dispatches a mouse event on a notification.
+   * Dispatches a mouse event on a notification element.
    *
-   * @param {HTMLElement} element - The notification element.
-   * @param {string} type - The mouse event type.
+   * @param {HTMLElement} element - Notification element.
+   * @param {string} type - Mouse event type.
    * @returns {void}
    */
   function dispatchMouseEvent(element, type) {
@@ -184,90 +220,273 @@ describe("ZephyrToast Hover Behavior", () => {
     );
   }
 
-  it("does not dismiss a notification while hovered", () => {
-    const toast = new ZephyrToast();
+  // ----------------------------------------------------------
+  // 1. Hover Pause
+  // ----------------------------------------------------------
 
-    const element = toast.info("Hover test", {
-      duration: 1000,
-      showProgress: false,
-      pauseOnHover: true,
+  describe("Hover Pause", () => {
+    it("does not dismiss a notification while hovered", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Hover test", {
+        duration: 1000,
+        showProgress: false,
+        pauseOnHover: true,
+      });
+
+      clock.advance(400);
+
+      dispatchMouseEvent(element, "mouseenter");
+
+      clock.advance(2000);
+
+      expect(toast.container.contains(element)).toBe(true);
+      expect(element._lifecycleState).not.toBe("closing");
     });
 
-    clock.advance(400);
+    it("does not pause dismissal when pauseOnHover is disabled", () => {
+      const toast = new ZephyrToast();
 
-    dispatchMouseEvent(element, "mouseenter");
+      const element = toast.info("Hover disabled", {
+        duration: 1000,
+        showProgress: false,
+        pauseOnHover: false,
+      });
 
-    clock.advance(2000);
+      clock.advance(400);
 
-    expect(toast.container.contains(element)).toBe(true);
+      dispatchMouseEvent(element, "mouseenter");
+
+      clock.advance(600);
+
+      expect(element._lifecycleState).toBe("closing");
+
+      clock.advance(500);
+
+      expect(element.isConnected).toBe(false);
+    });
+
+    it("does not schedule automatic dismissal for persistent notifications", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Persistent notification", {
+        duration: 0,
+        showProgress: false,
+        pauseOnHover: true,
+      });
+
+      dispatchMouseEvent(element, "mouseenter");
+
+      clock.advance(10000);
+
+      dispatchMouseEvent(element, "mouseleave");
+
+      clock.advance(10000);
+
+      expect(element.isConnected).toBe(true);
+      expect(element._timeoutId).toBeUndefined();
+      expect(clock.pending()).toBe(0);
+    });
   });
 
-  it("resumes using remaining time without a progress bar", () => {
-    const toast = new ZephyrToast();
+  // ----------------------------------------------------------
+  // 2. Hover Resume
+  // ----------------------------------------------------------
 
-    const element = toast.info("Remaining time test", {
-      duration: 1000,
-      showProgress: false,
-      pauseOnHover: true,
+  describe("Hover Resume", () => {
+    it("resumes using remaining time without a progress bar", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Remaining time test", {
+        duration: 1000,
+        showProgress: false,
+        pauseOnHover: true,
+      });
+
+      clock.advance(400);
+
+      dispatchMouseEvent(element, "mouseenter");
+
+      clock.advance(2000);
+
+      dispatchMouseEvent(element, "mouseleave");
+
+      clock.advance(599);
+
+      expect(element._lifecycleState).not.toBe("closing");
+      expect(element.isConnected).toBe(true);
+
+      clock.advance(1);
+
+      expect(element._lifecycleState).toBe("closing");
+
+      expect(element.classList.contains("zephyr_animate_fadeOut")).toBe(true);
+
+      clock.advance(500);
+
+      expect(element.isConnected).toBe(false);
     });
 
-    clock.advance(400);
+    it("preserves remaining time across repeated hover cycles", () => {
+      const toast = new ZephyrToast();
 
-    dispatchMouseEvent(element, "mouseenter");
+      const element = toast.info("Repeated hover test", {
+        duration: 1000,
+        showProgress: false,
+        pauseOnHover: true,
+      });
 
-    clock.advance(2000);
+      clock.advance(300);
 
-    dispatchMouseEvent(element, "mouseleave");
+      dispatchMouseEvent(element, "mouseenter");
 
-    // Only 600ms should remain after resuming.
-    clock.advance(599);
+      clock.advance(1500);
 
-    expect(toast.container.contains(element)).toBe(true);
+      dispatchMouseEvent(element, "mouseleave");
 
-    clock.advance(1);
+      clock.advance(200);
 
-    expect(element.classList.contains("zephyr_animate_fadeOut")).toBe(true);
+      dispatchMouseEvent(element, "mouseenter");
 
-    // Allow the existing exit animation to finish.
-    clock.advance(500);
+      clock.advance(1500);
 
-    expect(toast.container.contains(element)).toBe(false);
+      dispatchMouseEvent(element, "mouseleave");
+
+      clock.advance(499);
+
+      expect(element._lifecycleState).not.toBe("closing");
+      expect(element.isConnected).toBe(true);
+
+      clock.advance(1);
+
+      expect(element._lifecycleState).toBe("closing");
+
+      clock.advance(500);
+
+      expect(element.isConnected).toBe(false);
+    });
+
+    it("ignores repeated mouseleave events after resuming", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Repeated leave", {
+        duration: 1000,
+        showProgress: false,
+        pauseOnHover: true,
+      });
+
+      clock.advance(400);
+
+      dispatchMouseEvent(element, "mouseenter");
+      dispatchMouseEvent(element, "mouseleave");
+
+      const pendingAfterResume = clock.pending();
+
+      dispatchMouseEvent(element, "mouseleave");
+      dispatchMouseEvent(element, "mouseleave");
+
+      expect(clock.pending()).toBe(pendingAfterResume);
+
+      clock.advance(600);
+
+      expect(element._lifecycleState).toBe("closing");
+
+      clock.advance(500);
+
+      expect(element.isConnected).toBe(false);
+    });
   });
 
-  it("preserves remaining time across repeated hover cycles", () => {
-    const toast = new ZephyrToast();
+  // ----------------------------------------------------------
+  // 3. Progress Indicator Synchronization
+  // ----------------------------------------------------------
 
-    const element = toast.info("Repeated hover test", {
-      duration: 1000,
-      showProgress: false,
-      pauseOnHover: true,
+  describe("Progress Indicator Synchronization", () => {
+    it("freezes the progress bar at the remaining percentage", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Progress pause", {
+        duration: 1000,
+        showProgress: true,
+        pauseOnHover: true,
+      });
+
+      clock.advance(400);
+
+      dispatchMouseEvent(element, "mouseenter");
+
+      const progressFill = element.querySelector(
+        ".zephyr-toast-progress-bar-fill",
+      );
+
+      expect(progressFill).not.toBeNull();
+      expect(progressFill.style.transition).toBe("none");
+      expect(progressFill.style.width).toBe("60%");
     });
 
-    // First active period: 300ms elapsed.
-    clock.advance(300);
+    it("resumes progress with the remaining notification lifetime", () => {
+      const toast = new ZephyrToast();
 
-    dispatchMouseEvent(element, "mouseenter");
-    clock.advance(1500);
-    dispatchMouseEvent(element, "mouseleave");
+      const element = toast.info("Progress resume", {
+        duration: 1000,
+        showProgress: true,
+        pauseOnHover: true,
+      });
 
-    // Second active period: another 200ms elapsed.
-    clock.advance(200);
+      clock.advance(400);
 
-    dispatchMouseEvent(element, "mouseenter");
-    clock.advance(1500);
-    dispatchMouseEvent(element, "mouseleave");
+      dispatchMouseEvent(element, "mouseenter");
+      dispatchMouseEvent(element, "mouseleave");
 
-    // Exactly 500ms should remain.
-    clock.advance(499);
+      const progressFill = element.querySelector(
+        ".zephyr-toast-progress-bar-fill",
+      );
 
-    expect(toast.container.contains(element)).toBe(true);
+      expect(progressFill.style.transition).toBe("width 600ms linear");
+      expect(progressFill.style.width).toBe("0%");
 
-    clock.advance(1);
+      clock.advance(600);
 
-    expect(element.classList.contains("zephyr_animate_fadeOut")).toBe(true);
+      expect(element._lifecycleState).toBe("closing");
 
-    clock.advance(500);
+      clock.advance(500);
 
-    expect(toast.container.contains(element)).toBe(false);
+      expect(element.isConnected).toBe(false);
+    });
+  });
+
+  // ----------------------------------------------------------
+  // 4. Timer Cleanup
+  // ----------------------------------------------------------
+
+  describe("Timer Cleanup", () => {
+    it("removes hover listeners when a notification is dismissed", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Cleanup test", {
+        duration: 1000,
+        showProgress: false,
+        pauseOnHover: true,
+      });
+
+      clock.advance(200);
+
+      toast.removeToast(element);
+
+      expect(element._lifecycleState).toBe("closing");
+      expect(element._hoverCleanup).toBeNull();
+
+      const pendingAfterDismissal = clock.pending();
+
+      dispatchMouseEvent(element, "mouseenter");
+      dispatchMouseEvent(element, "mouseleave");
+
+      expect(clock.pending()).toBe(pendingAfterDismissal);
+
+      clock.advance(500);
+
+      expect(element.isConnected).toBe(false);
+      expect(clock.pending()).toBe(0);
+    });
   });
 });

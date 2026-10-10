@@ -4,18 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <meta
+      name="description"
+      content="Isolated notification preview for the ZephyrToast interactive demo."
+    />
+
     <title>ZephyrToast — Live Preview</title>
 
-    <!-- ZephyrToast production styles -->
+    <!-- Production ZephyrToast styles -->
     <link rel="stylesheet" href="zephyr-toast-animate.css" />
     <link rel="stylesheet" href="zephyr-toast.css" />
 
     <style>
       /*
-       * ZephyrToast Demo Preview
+       * ZephyrToast Isolated Preview
        *
-       * These styles apply only to the isolated preview iframe.
-       * The production library styles remain unchanged.
+       * Styles in this document apply only to the preview
+       * iframe and do not modify the production library.
+       *
+       * Author: Md. Sarwar Alam
+       * License: MIT
        */
 
       *,
@@ -47,9 +55,9 @@
         color: #172338;
       }
 
-      /* ================================================
+      /* -----------------------------------------------
          Notification Container
-      ================================================= */
+      ------------------------------------------------ */
 
       .zephyr-toast-container {
         box-sizing: border-box;
@@ -57,12 +65,12 @@
       }
 
       /*
-       * The preview iframe can be narrower than 576px,
-       * even on a desktop screen.
+       * The preview iframe may be narrower than 576px
+       * even when viewed on a desktop computer.
        *
-       * ZephyrToast normally centers all positions on
-       * mobile. Override that behavior inside this demo
-       * so all six positions remain independently visible.
+       * Override the library's mobile position rules
+       * so all six notification positions can still
+       * be demonstrated independently.
        */
 
       @media (max-width: 576px) {
@@ -71,7 +79,6 @@
           max-width: calc(100% - 12px) !important;
           min-width: 0 !important;
           padding: 10px !important;
-          box-sizing: border-box;
         }
 
         .zephyr-position-top-left,
@@ -96,9 +103,9 @@
         }
       }
 
-      /* ================================================
-         Notification Width and Message Wrapping
-      ================================================= */
+      /* -----------------------------------------------
+         Notification Width and Content
+      ------------------------------------------------ */
 
       .zephyr-toast-notification {
         width: max-content;
@@ -111,13 +118,19 @@
         min-width: 0;
       }
 
+      .zephyr-toast-notification-icon,
+      .zephyr-toast-notification-close {
+        flex-shrink: 0;
+      }
+
       .zephyr-toast-notification-content {
+        flex: 1;
         min-width: 0;
       }
 
       /*
-       * Short notification messages should remain on
-       * a single line when sufficient space is available.
+       * Keep short messages on one line when there
+       * is enough available horizontal space.
        */
 
       .zephyr-toast-notification-message {
@@ -125,8 +138,8 @@
       }
 
       /*
-       * Long messages should never overflow the preview.
-       * This rule also handles narrower mobile previews.
+       * Allow long messages to wrap inside narrow
+       * preview frames without horizontal overflow.
        */
 
       @media (max-width: 480px) {
@@ -141,9 +154,9 @@
         }
       }
 
-      /* ================================================
-         Optional Reduced Motion
-      ================================================= */
+      /* -----------------------------------------------
+         Reduced Motion
+      ------------------------------------------------ */
 
       @media (prefers-reduced-motion: reduce) {
         .zephyr-toast-notification {
@@ -154,16 +167,20 @@
   </head>
 
   <body data-theme="dark">
-    <!-- ZephyrToast standalone production bundle -->
+    <!-- Standalone ZephyrToast browser bundle -->
     <script src="zephyr-toast.js"></script>
 
     <script>
       /**
        * @fileoverview Isolated ZephyrToast live preview.
        *
-       * Receives notification commands from the parent
-       * demo generator using same-origin postMessage.
+       * Receives validated notification commands from
+       * the parent demo generator through postMessage.
        *
+       * Communication is restricted to the same origin
+       * and the immediate parent browsing context.
+       *
+       * @module demo/preview
        * @author Md. Sarwar Alam
        * @license MIT
        */
@@ -171,59 +188,125 @@
       "use strict";
 
       (() => {
+        // ---------------------------------------------
+        // 1. Configuration
+        // ---------------------------------------------
+
         const PREVIEW_CHANNEL = "zephyr-demo-preview";
 
-        const ALLOWED_TYPES = [
+        const ALLOWED_TYPES = new Set([
           "success",
           "info",
           "warning",
           "error",
           "zen",
           "void",
-        ];
+        ]);
 
-        const toast = new ZephyrToast();
+        const ALLOWED_THEMES = new Set(["light", "dark"]);
+
+        // ---------------------------------------------
+        // 2. Library Initialization
+        // ---------------------------------------------
+
+        if (typeof window.ZephyrToast !== "function") {
+          console.error(
+            "ZephyrToast preview initialization failed: browser bundle is missing.",
+          );
+
+          return;
+        }
+
+        const toast = new window.ZephyrToast();
+
+        // ---------------------------------------------
+        // 3. Message Validation
+        // ---------------------------------------------
 
         /**
-         * Validates communication from the parent page.
+         * Checks whether a value is a plain data object.
          *
-         * @param {MessageEvent} event
-         * @returns {boolean}
+         * @param {unknown} value - Value to inspect.
+         * @returns {boolean} Whether the value is a plain object.
+         */
+        function isPlainObject(value) {
+          if (
+            value === null ||
+            typeof value !== "object" ||
+            Array.isArray(value)
+          ) {
+            return false;
+          }
+
+          const prototype = Object.getPrototypeOf(value);
+
+          return prototype === Object.prototype || prototype === null;
+        }
+
+        /**
+         * Validates the source, origin, and channel
+         * of an incoming preview message.
+         *
+         * @param {MessageEvent} event - Incoming message.
+         * @returns {boolean} Whether the message is trusted.
          */
         function isTrustedMessage(event) {
           return (
             event.origin === window.location.origin &&
             event.source === window.parent &&
-            event.data !== null &&
-            typeof event.data === "object" &&
+            isPlainObject(event.data) &&
             event.data.channel === PREVIEW_CHANNEL
           );
         }
 
         /**
-         * Updates the preview's background appearance.
+         * Validates a notification request before passing
+         * it to the ZephyrToast public API.
          *
-         * @param {string} theme
+         * @param {unknown} message - Notification message.
+         * @param {unknown} options - Notification options.
+         * @returns {boolean} Whether the request is valid.
+         */
+        function isValidNotification(message, options) {
+          return (
+            typeof message === "string" &&
+            isPlainObject(options) &&
+            ALLOWED_TYPES.has(options.type)
+          );
+        }
+
+        // ---------------------------------------------
+        // 4. Preview Theme
+        // ---------------------------------------------
+
+        /**
+         * Updates the appearance of the preview frame.
+         *
+         * @param {unknown} theme - Requested theme.
          * @returns {void}
          */
         function setPreviewTheme(theme) {
-          document.body.dataset.theme = theme === "light" ? "light" : "dark";
+          if (!ALLOWED_THEMES.has(theme)) {
+            return;
+          }
+
+          document.body.dataset.theme = theme;
         }
 
+        // ---------------------------------------------
+        // 5. Notification Rendering
+        // ---------------------------------------------
+
         /**
-         * Displays a notification in the preview.
+         * Displays a validated notification using the
+         * existing ZephyrToast notification API.
          *
-         * @param {string} message
-         * @param {Record<string, unknown>} options
+         * @param {unknown} message - Notification message.
+         * @param {unknown} options - Notification options.
          * @returns {void}
          */
         function showNotification(message, options) {
-          if (
-            typeof message !== "string" ||
-            !options ||
-            typeof options !== "object" ||
-            !ALLOWED_TYPES.includes(options.type)
-          ) {
+          if (!isValidNotification(message, options)) {
             return;
           }
 
@@ -234,10 +317,15 @@
           }
         }
 
+        // ---------------------------------------------
+        // 6. Parent Communication
+        // ---------------------------------------------
+
         /**
-         * Handles generator actions.
+         * Processes supported commands from the
+         * parent demo application.
          *
-         * @param {MessageEvent} event
+         * @param {MessageEvent} event - Incoming message.
          * @returns {void}
          */
         function handleMessage(event) {
@@ -267,17 +355,31 @@
 
         window.addEventListener("message", handleMessage);
 
+        // ---------------------------------------------
+        // 7. Preview Ready Notification
+        // ---------------------------------------------
+
         /**
-         * Tell the generator that this preview
-         * is ready to receive commands.
+         * Announces that the preview is initialized
+         * and can receive commands from the generator.
+         *
+         * @returns {void}
          */
-        window.parent.postMessage(
-          {
-            channel: PREVIEW_CHANNEL,
-            action: "ready",
-          },
-          window.location.origin,
-        );
+        function announceReady() {
+          if (window.parent === window) {
+            return;
+          }
+
+          window.parent.postMessage(
+            {
+              channel: PREVIEW_CHANNEL,
+              action: "ready",
+            },
+            window.location.origin,
+          );
+        }
+
+        announceReady();
       })();
     </script>
   </body>

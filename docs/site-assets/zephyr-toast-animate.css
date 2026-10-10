@@ -1,26 +1,33 @@
 /*!
- * ZephyrToast - A Toast Notification Library
- * Version: 1.5.0
+ * @fileoverview Notification animation styles for ZephyrToast.
  *
- * ZephyrToast is a lightweight, pure vanilla JavaScript toast notification library,
- * inspired by Bootstrap 5 styling and free from dependencies. It offers elegant,
- * customizable notifications that gently appear and disappear, delivering a seamless
- * user experience.
+ * Defines the entrance and exit animation effects used by
+ * ZephyrToast notifications.
  *
- * Author: Md.Sarwar Alam
- * GitHub: https://github.com/sarwaralamini
- * Library: https://github.com/sarwaralamini/zephyr-toast
+ * Includes fade, directional slide, bounce, and zoom effects.
+ * Each animation is exposed through a zephyr_animate_* class
+ * corresponding to the animation names configured in JavaScript.
  *
- * Released under the MIT License
+ * Core notification layout and appearance are defined separately
+ * in zephyr-toast.css.
+ *
+ * @author Md. Sarwar Alam
+ * @license MIT
  */
 
-/* Base animation class */
+/* ----------------------------------------------------------
+   1. Base Animation Configuration
+   ---------------------------------------------------------- */
+
 .zephyr_animate {
-  animation-duration: 0.75s;
+  animation-duration: 0.5s;
   animation-fill-mode: both;
 }
 
-/* Fade Animations */
+/* ----------------------------------------------------------
+   2. Fade Animations
+   ---------------------------------------------------------- */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -49,7 +56,10 @@
   animation-name: fadeOut;
 }
 
-/* Slide Left Animations */
+/* ----------------------------------------------------------
+   3. Slide Left Animations
+   ---------------------------------------------------------- */
+
 @keyframes slideInLeft {
   from {
     transform: translate3d(-100%, 0, 0);
@@ -80,7 +90,10 @@
   animation-name: slideOutLeft;
 }
 
-/* Slide Right Animations */
+/* ----------------------------------------------------------
+   4. Slide Right Animations
+   ---------------------------------------------------------- */
+
 @keyframes slideInRight {
   from {
     transform: translate3d(100%, 0, 0);
@@ -111,7 +124,10 @@
   animation-name: slideOutRight;
 }
 
-/* Slide Down/Up Animations */
+/* ----------------------------------------------------------
+   5. Slide Down and Up Animations
+   ---------------------------------------------------------- */
+
 @keyframes slideInDown {
   from {
     transform: translate3d(0, -100%, 0);
@@ -142,7 +158,10 @@
   animation-name: slideOutUp;
 }
 
-/* Slide Up/Down Animations */
+/* ----------------------------------------------------------
+   6. Slide Up and Down Animations
+   ---------------------------------------------------------- */
+
 @keyframes slideInUp {
   from {
     transform: translate3d(0, 100%, 0);
@@ -173,7 +192,10 @@
   animation-name: slideOutDown;
 }
 
-/* Bounce Animations */
+/* ----------------------------------------------------------
+   7. Bounce Animations
+   ---------------------------------------------------------- */
+
 @keyframes bounceIn {
   from,
   20%,
@@ -214,7 +236,7 @@
 
 .zephyr_animate_bounceIn {
   animation-name: bounceIn;
-  animation-duration: 0.75s;
+  animation-duration: 0.5s;
 }
 
 @keyframes bounceOut {
@@ -236,10 +258,13 @@
 
 .zephyr_animate_bounceOut {
   animation-name: bounceOut;
-  animation-duration: 0.75s;
+  animation-duration: 0.5s;
 }
 
-/* Zoom Animations */
+/* ----------------------------------------------------------
+   8. Zoom Animations
+   ---------------------------------------------------------- */
+
 @keyframes zoomIn {
   from {
     opacity: 0;

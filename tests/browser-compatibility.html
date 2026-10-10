@@ -3,239 +3,673 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ZephyrToast Browser Compatibility Test</title>
+
+    <title>ZephyrToast | Browser Compatibility Tests</title>
 
     <link rel="stylesheet" href="../dist/zephyr-toast-animate.css" />
     <link rel="stylesheet" href="../dist/zephyr-toast.css" />
 
     <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
       * {
         box-sizing: border-box;
       }
 
       body {
         margin: 0;
-        padding: 24px;
-        font-family: system-ui, sans-serif;
-        background: #f5f7fa;
+        padding: 32px 20px;
+        background: #f5f7fb;
         color: #172033;
+        line-height: 1.6;
       }
 
       main {
-        max-width: 900px;
+        width: 100%;
+        max-width: 960px;
         margin: 0 auto;
       }
 
+      h1,
+      h2 {
+        line-height: 1.3;
+      }
+
       h1 {
-        font-size: 1.6rem;
+        margin: 0 0 12px;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: 1.1rem;
+      }
+
+      p {
+        margin: 0 0 20px;
+        color: #475569;
+      }
+
+      .panel {
+        margin-top: 20px;
+        padding: 24px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #fff;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      label {
+        font-weight: 600;
+        font-size: 0.9rem;
       }
 
       .controls {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        margin: 20px 0;
+        margin-top: 16px;
       }
 
       button,
       select {
+        min-height: 42px;
         padding: 10px 14px;
         border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        background: white;
+        border-radius: 7px;
+        background: #fff;
         color: #172033;
         font: inherit;
+        font-size: 0.9rem;
+      }
+
+      button {
         cursor: pointer;
+        transition:
+          background 150ms ease,
+          border-color 150ms ease;
       }
 
       button:hover {
-        background: #e8f0fc;
+        border-color: #94a3b8;
+        background: #f1f5f9;
+      }
+
+      button:focus-visible,
+      select:focus-visible {
+        outline: 3px solid #93c5fd;
+        outline-offset: 2px;
+      }
+
+      .button-primary {
+        border-color: #2563eb;
+        background: #2563eb;
+        color: #fff;
+      }
+
+      .button-primary:hover {
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+      }
+
+      .button-danger {
+        border-color: #fecaca;
+        color: #b91c1c;
+      }
+
+      .button-danger:hover {
+        background: #fef2f2;
+      }
+
+      .environment {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+      }
+
+      .environment-item {
+        min-width: 0;
+        padding: 12px;
+        border-radius: 8px;
+        background: #f8fafc;
+      }
+
+      .environment-label {
+        display: block;
+        margin-bottom: 4px;
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .environment-value {
+        display: block;
+        overflow-wrap: anywhere;
+        font-size: 0.88rem;
       }
 
       #results {
+        min-height: 120px;
+        margin: 16px 0 0;
         padding: 16px;
         border: 1px solid #cbd5e1;
         border-radius: 8px;
-        background: white;
+        background: #f8fafc;
+        color: #172033;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.85rem;
+        line-height: 1.8;
         white-space: pre-wrap;
         overflow-wrap: anywhere;
-        min-height: 110px;
       }
 
-      .pass {
-        color: #167346;
+      #results.pass {
+        border-color: #86efac;
+        background: #f0fdf4;
+        color: #166534;
       }
 
-      .fail {
-        color: #b42318;
+      #results.fail {
+        border-color: #fca5a5;
+        background: #fef2f2;
+        color: #991b1b;
+      }
+
+      .hint {
+        margin-top: 12px;
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 20px 12px;
+        }
+
+        .panel {
+          padding: 16px;
+        }
+
+        .controls {
+          gap: 8px;
+        }
+
+        .controls button {
+          flex: 1 1 120px;
+        }
+
+        select {
+          width: 100%;
+        }
+
+        .field {
+          align-items: stretch;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        button {
+          transition: none;
+        }
       }
     </style>
   </head>
 
   <body>
     <main>
-      <h1>ZephyrToast Browser Compatibility</h1>
+      <header>
+        <h1>ZephyrToast Browser Compatibility</h1>
 
-      <p>
-        Test the standalone distribution in Chrome, Firefox, Safari, Edge, and
-        mobile browser viewports.
-      </p>
+        <p>
+          Test the standalone browser distribution in Chrome, Firefox, Safari,
+          Edge, and mobile browser viewports. This page loads the compiled files
+          from the local <code>dist</code> directory.
+        </p>
+      </header>
 
-      <label for="position">Notification position:</label>
+      <section class="panel" aria-labelledby="environment-title">
+        <h2 id="environment-title">Browser Environment</h2>
 
-      <select id="position">
-        <option value="top-right">Top Right</option>
-        <option value="top-left">Top Left</option>
-        <option value="top-center">Top Center</option>
-        <option value="bottom-right">Bottom Right</option>
-        <option value="bottom-left">Bottom Left</option>
-        <option value="bottom-center">Bottom Center</option>
-      </select>
+        <div class="environment">
+          <div class="environment-item">
+            <span class="environment-label">Browser</span>
+            <span class="environment-value" id="browser-name">Detecting…</span>
+          </div>
 
-      <div class="controls">
-        <button data-toast="success">Success</button>
-        <button data-toast="info">Info</button>
-        <button data-toast="warning">Warning</button>
-        <button data-toast="error">Error</button>
-        <button data-toast="zen">Zen</button>
-        <button data-toast="void">Void</button>
-      </div>
+          <div class="environment-item">
+            <span class="environment-label">Viewport</span>
+            <span class="environment-value" id="viewport-size">Detecting…</span>
+          </div>
 
-      <div class="controls">
-        <button id="long-message">Long Message</button>
-        <button id="persistent">Persistent</button>
-        <button id="custom-icon">Custom SVG Icon</button>
-        <button id="remove-all">Remove All</button>
-        <button id="run-checks">Run Automated Checks</button>
-      </div>
+          <div class="environment-item">
+            <span class="environment-label">Device Pixel Ratio</span>
+            <span class="environment-value" id="pixel-ratio">Detecting…</span>
+          </div>
 
-      <pre id="results" aria-live="polite">Ready for testing.</pre>
+          <div class="environment-item">
+            <span class="environment-label">Bundle Status</span>
+            <span class="environment-value" id="bundle-status">Checking…</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="notifications-title">
+        <h2 id="notifications-title">Notification Testing</h2>
+
+        <div class="field">
+          <label for="position">Notification position</label>
+
+          <select id="position">
+            <option value="top-right">Top Right</option>
+            <option value="top-left">Top Left</option>
+            <option value="top-center">Top Center</option>
+            <option value="bottom-right">Bottom Right</option>
+            <option value="bottom-left">Bottom Left</option>
+            <option value="bottom-center">Bottom Center</option>
+          </select>
+        </div>
+
+        <div class="controls">
+          <button type="button" data-toast="success">Success</button>
+          <button type="button" data-toast="info">Info</button>
+          <button type="button" data-toast="warning">Warning</button>
+          <button type="button" data-toast="error">Error</button>
+          <button type="button" data-toast="zen">Zen</button>
+          <button type="button" data-toast="void">Void</button>
+        </div>
+
+        <div class="controls">
+          <button type="button" id="long-message">Long Message</button>
+          <button type="button" id="persistent">Persistent</button>
+          <button type="button" id="custom-icon">Custom SVG Icon</button>
+          <button type="button" id="remove-all" class="button-danger">
+            Remove All
+          </button>
+        </div>
+
+        <p class="hint">
+          Also test notification wrapping, close buttons, hover pause, automatic
+          dismissal, and positioning at different viewport widths.
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="checks-title">
+        <h2 id="checks-title">Automated Browser Checks</h2>
+
+        <button type="button" id="run-checks" class="button-primary">
+          Run Automated Checks
+        </button>
+
+        <pre id="results" aria-live="polite">Ready for testing.</pre>
+
+        <p class="hint">
+          Automated checks verify basic functionality and DOM safety. Visual
+          appearance and browser-specific behavior still require manual testing.
+        </p>
+      </section>
     </main>
 
     <script src="../dist/zephyr-toast.js"></script>
 
     <script>
+      "use strict";
+
+      // ------------------------------------------------------
+      // 1. DOM References and Browser Information
+      // ------------------------------------------------------
+
       const results = document.getElementById("results");
-
-      if (typeof window.ZephyrToast !== "function") {
-        results.textContent = "FAIL: Browser bundle did not load.";
-        throw new Error("ZephyrToast global is missing.");
-      }
-
-      const toast = new ZephyrToast();
-
       const positionSelect = document.getElementById("position");
+      const browserName = document.getElementById("browser-name");
+      const viewportSize = document.getElementById("viewport-size");
+      const pixelRatio = document.getElementById("pixel-ratio");
+      const bundleStatus = document.getElementById("bundle-status");
 
-      positionSelect.addEventListener("change", () => {
-        toast.updatePosition(positionSelect.value);
-      });
+      /**
+       * Returns a descriptive browser family name.
+       *
+       * @returns {string} Browser name.
+       */
+      function detectBrowser() {
+        const userAgent = navigator.userAgent;
 
-      document.querySelectorAll("[data-toast]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const type = button.dataset.toast;
-
-          toast[type]("Testing " + type + " notification", {
-            duration: 3500,
-          });
-        });
-      });
-
-      document.getElementById("long-message").addEventListener("click", () => {
-        toast.info(
-          "This is a long notification intended to test wrapping, " +
-            "mobile screen boundaries, and responsive positioning.",
-          {
-            duration: 5000,
-            title: "Responsive Layout Test",
-          },
-        );
-      });
-
-      document.getElementById("persistent").addEventListener("click", () => {
-        toast.info("This notification remains until closed.", {
-          duration: 0,
-          showClose: true,
-        });
-      });
-
-      document.getElementById("custom-icon").addEventListener("click", () => {
-        toast.success("Secure SVG icon test", {
-          duration: 3500,
-          icon: {
-            svg:
-              '<svg xmlns="http://www.w3.org/2000/svg" ' +
-              'viewBox="0 0 24 24" width="24" height="24">' +
-              '<circle cx="12" cy="12" r="9" ' +
-              'fill="currentColor"/></svg>',
-          },
-        });
-      });
-
-      document.getElementById("remove-all").addEventListener("click", () => {
-        toast.removeAll();
-      });
-
-      document.getElementById("run-checks").addEventListener("click", () => {
-        const checks = [];
-
-        function check(name, condition) {
-          checks.push({
-            name,
-            passed: Boolean(condition),
-          });
+        if (/Edg\//.test(userAgent)) {
+          return "Microsoft Edge";
         }
 
-        check("Global constructor", typeof window.ZephyrToast === "function");
+        if (/Firefox\//.test(userAgent)) {
+          return "Mozilla Firefox";
+        }
 
-        check("Notification container", toast.container instanceof HTMLElement);
+        if (/CriOS\//.test(userAgent)) {
+          return "Google Chrome (iOS)";
+        }
 
-        const element = toast.success("Automated check", {
-          duration: 0,
+        if (/FxiOS\//.test(userAgent)) {
+          return "Mozilla Firefox (iOS)";
+        }
+
+        if (/Chrome\//.test(userAgent)) {
+          return "Google Chrome";
+        }
+
+        if (/Safari\//.test(userAgent)) {
+          return "Apple Safari";
+        }
+
+        return "Other / Unknown";
+      }
+
+      /**
+       * Updates viewport and device information.
+       *
+       * @returns {void}
+       */
+      function updateEnvironment() {
+        browserName.textContent = detectBrowser();
+
+        viewportSize.textContent =
+          window.innerWidth + " × " + window.innerHeight;
+
+        pixelRatio.textContent = String(window.devicePixelRatio || 1);
+      }
+
+      updateEnvironment();
+
+      window.addEventListener("resize", updateEnvironment);
+
+      // ------------------------------------------------------
+      // 2. Browser Bundle Initialization
+      // ------------------------------------------------------
+
+      const bundleLoaded = typeof window.ZephyrToast === "function";
+
+      bundleStatus.textContent = bundleLoaded ? "Loaded" : "Not Loaded";
+
+      if (!bundleLoaded) {
+        results.className = "fail";
+        results.textContent =
+          "FAIL: ZephyrToast browser bundle did not load.\n\n" +
+          "Run npm run build and serve this test page through a local HTTP server.";
+      } else {
+        const toast = new window.ZephyrToast();
+
+        // ----------------------------------------------------
+        // 3. Manual Notification Controls
+        // ----------------------------------------------------
+
+        positionSelect.value = toast.options.position;
+
+        positionSelect.addEventListener("change", () => {
+          toast.updatePosition(positionSelect.value);
         });
 
-        check("Notification creation", toast.container.contains(element));
+        document.querySelectorAll("[data-toast]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const type = button.dataset.toast;
 
-        check("Success notification type", element._options.type === "success");
-
-        check(
-          "Built-in icon rendering",
-          element.querySelector(".zephyr-toast-notification-icon svg") !== null,
-        );
-
-        const message = toast.info("<img src=x onerror=alert(1)>", {
-          duration: 0,
+            toast[type]("Testing " + type + " notification", {
+              duration: 3500,
+            });
+          });
         });
 
-        check("HTML rendered as text", message.querySelector("img") === null);
+        document
+          .getElementById("long-message")
+          .addEventListener("click", () => {
+            toast.info(
+              "This is a long notification intended to test wrapping, " +
+                "mobile screen boundaries, and responsive positioning.",
+              {
+                duration: 5000,
+                title: "Responsive Layout Test",
+              },
+            );
+          });
 
-        check(
-          "CSS loaded",
-          getComputedStyle(toast.container).position === "fixed",
-        );
+        document.getElementById("persistent").addEventListener("click", () => {
+          toast.info("This notification remains until closed.", {
+            duration: 0,
+            showClose: true,
+          });
+        });
 
-        check(
-          "No horizontal overflow",
-          document.documentElement.scrollWidth <= window.innerWidth,
-        );
+        document.getElementById("custom-icon").addEventListener("click", () => {
+          toast.success("Secure SVG icon test", {
+            duration: 3500,
+            icon: {
+              svg:
+                '<svg xmlns="http://www.w3.org/2000/svg" ' +
+                'viewBox="0 0 24 24" width="24" height="24">' +
+                '<circle cx="12" cy="12" r="9" ' +
+                'fill="currentColor" /></svg>',
+            },
+          });
+        });
 
-        toast.removeToast(element);
-        toast.removeToast(message);
+        document.getElementById("remove-all").addEventListener("click", () => {
+          toast.removeAll();
+        });
 
-        results.textContent = checks
-          .map((item) => (item.passed ? "PASS: " : "FAIL: ") + item.name)
-          .join("\n");
+        // ----------------------------------------------------
+        // 4. Automated Browser Checks
+        // ----------------------------------------------------
 
-        const failed = checks.filter((item) => !item.passed);
+        /**
+         * Executes browser compatibility checks.
+         *
+         * @returns {void}
+         */
+        function runChecks() {
+          const checks = [];
+          const createdNotifications = [];
 
-        results.className = failed.length ? "fail" : "pass";
+          /**
+           * Adds a named test result.
+           *
+           * @param {string} name - Check description.
+           * @param {boolean} condition - Expected condition.
+           * @returns {void}
+           */
+          function check(name, condition) {
+            checks.push({
+              name,
+              passed: Boolean(condition),
+            });
+          }
 
-        results.textContent +=
-          "\n\n" +
-          (checks.length - failed.length) +
-          "/" +
-          checks.length +
-          " checks passed.";
-      });
+          /**
+           * Tracks a temporary test notification.
+           *
+           * @param {HTMLElement} element - Notification element.
+           * @returns {HTMLElement} The same element.
+           */
+          function track(element) {
+            createdNotifications.push(element);
+            return element;
+          }
+
+          try {
+            check(
+              "Global constructor",
+              typeof window.ZephyrToast === "function",
+            );
+
+            check(
+              "Notification container",
+              toast.container instanceof HTMLElement,
+            );
+
+            const element = track(
+              toast.success("Automated check", {
+                duration: 0,
+              }),
+            );
+
+            check("Notification creation", toast.container.contains(element));
+
+            check(
+              "Success notification type",
+              element._options.type === "success",
+            );
+
+            check(
+              "Built-in SVG icon rendering",
+              element.querySelector(".zephyr-toast-notification-icon svg") !==
+                null,
+            );
+
+            const messageText = '<img src="x" onerror="alert(1)">';
+
+            const message = track(
+              toast.info(messageText, {
+                duration: 0,
+              }),
+            );
+
+            const messageElement = message.querySelector(
+              ".zephyr-toast-notification-message",
+            );
+
+            check(
+              "HTML rendered as text",
+              message.querySelector("img") === null &&
+                messageElement !== null &&
+                messageElement.textContent === messageText,
+            );
+
+            const safeSvg = track(
+              toast.info("Safe SVG", {
+                duration: 0,
+                icon: {
+                  svg:
+                    '<svg viewBox="0 0 24 24">' +
+                    '<circle cx="12" cy="12" r="8" />' +
+                    "</svg>",
+                },
+              }),
+            );
+
+            check(
+              "Custom SVG rendering",
+              safeSvg.querySelector(".zephyr-toast-notification-icon svg") !==
+                null,
+            );
+
+            const countBeforeInvalid = toast.container.children.length;
+            const positionBeforeInvalid = toast.options.position;
+            const classBeforeInvalid = toast.container.className;
+
+            let unsafeSvgRejected = false;
+
+            try {
+              const invalid = toast.info("Unsafe SVG", {
+                duration: 0,
+                icon: {
+                  svg: '<svg onload="alert(1)"></svg>',
+                },
+              });
+
+              if (invalid) {
+                track(invalid);
+              }
+            } catch {
+              unsafeSvgRejected = true;
+            }
+
+            check("Unsafe SVG rejected", unsafeSvgRejected);
+
+            check(
+              "Rejected SVG does not add notifications",
+              toast.container.children.length === countBeforeInvalid,
+            );
+
+            check(
+              "Rejected SVG preserves container position",
+              toast.options.position === positionBeforeInvalid &&
+                toast.container.className === classBeforeInvalid,
+            );
+
+            const persistent = track(
+              toast.info("Persistent notification", {
+                duration: 0,
+                showProgress: true,
+              }),
+            );
+
+            check(
+              "Persistent notification has no progress indicator",
+              persistent.querySelector(".zephyr-toast-progress-bar") === null,
+            );
+
+            const timed = track(
+              toast.info("Timed notification", {
+                duration: 3000,
+                showProgress: true,
+              }),
+            );
+
+            check(
+              "Timed notification has a progress indicator",
+              timed.querySelector(".zephyr-toast-progress-bar") !== null,
+            );
+
+            check(
+              "Notification CSS loaded",
+              getComputedStyle(toast.container).position === "fixed",
+            );
+
+            check(
+              "No horizontal page overflow",
+              document.documentElement.scrollWidth <= window.innerWidth,
+            );
+          } catch (error) {
+            check(
+              "Unexpected test error: " +
+                (error instanceof Error ? error.message : String(error)),
+              false,
+            );
+          } finally {
+            for (const element of createdNotifications) {
+              toast.removeToast(element);
+            }
+          }
+
+          const failed = checks.filter((item) => !item.passed);
+          const passedCount = checks.length - failed.length;
+
+          results.className = failed.length ? "fail" : "pass";
+
+          results.textContent =
+            checks
+              .map((item) => (item.passed ? "PASS: " : "FAIL: ") + item.name)
+              .join("\n") +
+            "\n\n" +
+            passedCount +
+            "/" +
+            checks.length +
+            " checks passed.";
+        }
+
+        document
+          .getElementById("run-checks")
+          .addEventListener("click", runChecks);
+      }
     </script>
   </body>
 </html>

@@ -1,11 +1,17 @@
 /**
- * @fileoverview Secure SVG icon rendering for ZephyrToast.
+ * @fileoverview Secure SVG icon parsing and rendering for ZephyrToast.
  *
- * Parses custom SVG markup and reconstructs it using an explicit
- * allowlist of drawing elements and attributes.
+ * Provides a restricted SVG renderer for custom notification icons.
  *
- * Unsupported elements, event handlers, external references,
- * and unsafe attribute values are rejected.
+ * SVG markup is parsed into a detached DOM fragment, validated
+ * against explicit element and attribute allowlists, and rebuilt
+ * using DOM APIs.
+ *
+ * The renderer rejects unsupported elements, event handler
+ * attributes, external resource references, potentially unsafe
+ * attribute values, and unexpected child nodes.
+ *
+ * Only validated SVG elements are returned to the caller.
  *
  * @module renderers/svg
  * @author Md. Sarwar Alam
@@ -13,23 +19,42 @@
  */
 
 /**
- * Creates a restricted SVG icon from supplied markup.
+ * Parses, validates, and reconstructs custom SVG markup.
  *
- * Uses a detached template for parsing and constructs an entirely
- * new SVG tree containing only approved elements and attributes.
+ * The supplied markup must contain exactly one root SVG element.
+ * Only a restricted set of SVG drawing elements and attributes
+ * is permitted.
  *
- * @param {string} markup - Custom SVG markup.
- * @param {Document} [documentRef=document] - Target DOM document.
- * @returns {SVGSVGElement} The validated SVG element.
- * @throws {TypeError} If the SVG contains unsupported content.
+ * Validation includes:
+ * - Root element and SVG namespace verification.
+ * - Allowlisted SVG elements and attributes.
+ * - Rejection of unsupported or namespaced attributes.
+ * - Rejection of URL references and script-related URI schemes.
+ * - Rejection of control characters and HTML-like characters
+ *   in attribute values.
+ * - Rejection of unsupported child nodes and content.
+ *
+ * Approved elements are recreated using createElementNS(),
+ * preventing the original parsed elements from being inserted
+ * directly into the document.
+ *
+ * @param {string} markup - SVG markup to validate and reconstruct.
+ * @param {Document} [documentRef=document] - Document used for
+ * parsing and creating the validated SVG elements.
+ * @returns {SVGSVGElement} A newly constructed, validated SVG element.
+ * @throws {TypeError} If the markup is empty, malformed, or contains
+ * unsupported SVG elements, attributes, or values.
  */
 export function createSafeSvg(markup, documentRef = document) {
+  // Validate the supplied SVG markup.
   if (typeof markup !== "string" || !markup.trim()) {
     throw new TypeError("SVG icon markup must be a non-empty string.");
   }
 
+  // SVG namespace used for validation and element creation.
   const svgNamespace = "http://www.w3.org/2000/svg";
 
+  // Only these SVG drawing elements are permitted.
   const allowedElements = new Set([
     "svg",
     "g",
@@ -42,6 +67,7 @@ export function createSafeSvg(markup, documentRef = document) {
     "polygon",
   ]);
 
+  // Only these SVG attributes are permitted.
   const allowedAttributes = new Set([
     "viewBox",
     "width",
@@ -79,10 +105,12 @@ export function createSafeSvg(markup, documentRef = document) {
   const template = documentRef.createElement("template");
   template.innerHTML = markup;
 
+  // Ignore insignificant whitespace between parsed nodes.
   const nodes = Array.from(template.content.childNodes).filter(
     (node) => node.nodeType !== 3 || node.textContent.trim() !== "",
   );
 
+  // Verify that the markup contains one valid SVG root.
   if (
     nodes.length !== 1 ||
     nodes[0].nodeType !== 1 ||
@@ -93,13 +121,19 @@ export function createSafeSvg(markup, documentRef = document) {
   }
 
   /**
-   * Recursively copies approved SVG elements and attributes.
+   * Recursively validates and reconstructs an SVG element.
    *
-   * @param {Element} source - Source SVG element.
-   * @returns {SVGElement} A validated SVG element.
-   * @throws {TypeError} If unsupported content is encountered.
+   * Rejects unsupported elements and attributes, validates
+   * attribute values, and copies approved child elements into
+   * a newly created SVG node.
+   *
+   * @param {Element} source - Parsed SVG element to validate.
+   * @returns {SVGElement} A newly constructed, validated SVG element.
+   * @throws {TypeError} If an unsafe or unsupported SVG element,
+   * attribute, value, or child node is encountered.
    */
   const copySafeNode = (source) => {
+    // Reject unsupported elements and non-SVG namespaces.
     if (
       source.namespaceURI !== svgNamespace ||
       !allowedElements.has(source.localName)
@@ -109,8 +143,10 @@ export function createSafeSvg(markup, documentRef = document) {
       );
     }
 
+    // Create an independent SVG element.
     const target = documentRef.createElementNS(svgNamespace, source.localName);
 
+    // Validate and copy explicitly permitted attributes.
     for (const attribute of Array.from(source.attributes)) {
       const name = attribute.name;
       const value = attribute.value;
@@ -133,6 +169,7 @@ export function createSafeSvg(markup, documentRef = document) {
         throw new TypeError(`Unsafe SVG attribute value: ${name}.`);
       }
 
+      // Validate the SVG namespace declaration.
       if (name === "xmlns") {
         if (value !== svgNamespace) {
           throw new TypeError("Invalid SVG namespace.");
@@ -141,9 +178,11 @@ export function createSafeSvg(markup, documentRef = document) {
         continue;
       }
 
+      // Copy validated attributes to the new SVG element.
       target.setAttribute(name, value);
     }
 
+    // Validate and recursively reconstruct child elements.
     for (const child of Array.from(source.childNodes)) {
       if (child.nodeType === 3 && child.textContent.trim() === "") {
         continue;
@@ -159,5 +198,6 @@ export function createSafeSvg(markup, documentRef = document) {
     return target;
   };
 
+  // Return the reconstructed SVG tree.
   return copySafeNode(nodes[0]);
 }

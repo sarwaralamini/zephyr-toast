@@ -1,25 +1,30 @@
 /**
- * @fileoverview Security regression tests for ZephyrToast.
+ * @fileoverview Icon rendering security tests for ZephyrToast.
  *
- * Verifies that custom icon classes and image URLs are handled
- * without introducing unintended HTML elements or executable
- * event-handler attributes.
+ * Verifies that custom icon class names and image URLs are
+ * rendered safely without interpreting their contents as HTML.
  *
- * These tests establish safe DOM rendering requirements before
- * the icon rendering implementation is refactored.
+ * Tests protect against attribute injection, unintended DOM
+ * element creation, and executable event-handler attributes.
  *
+ * The compiled standalone browser distribution is evaluated
+ * in isolated JSDOM environments to verify production behavior.
+ *
+ * @module tests/zephyr-toast.security
  * @author Md. Sarwar Alam
  * @license MIT
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-
-import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
 import { runInContext } from "node:vm";
 
+import { JSDOM } from "jsdom";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 /**
- * Source code of the standalone ZephyrToast library.
+ * Compiled standalone browser distribution.
+ *
+ * The browser bundle must be built before running these tests.
  *
  * @type {string}
  */
@@ -29,13 +34,16 @@ const source = readFileSync(
 );
 
 /**
- * Creates an isolated DOM and evaluates the existing library.
+ * Creates an isolated browser environment and loads ZephyrToast.
  *
- * The document includes the browser script reference required
- * by the current stylesheet discovery implementation.
+ * Evaluates the production IIFE in JSDOM's VM context and
+ * retrieves the public constructor from window.ZephyrToast.
  *
- * @returns {{dom: JSDOM, ZephyrToast: Function}}
- *   The initialized testing environment.
+ * The script reference supports stylesheet discovery without
+ * loading external JavaScript resources.
+ *
+ * @returns {{ dom: JSDOM, ZephyrToast: Function }}
+ *   Initialized browser environment and constructor.
  */
 function createTestEnvironment() {
   const dom = new JSDOM(
@@ -52,7 +60,6 @@ function createTestEnvironment() {
     },
   );
 
-  // The generated IIFE bundle registers window.ZephyrToast itself.
   runInContext(source, dom.getInternalVMContext());
 
   return {
@@ -64,8 +71,8 @@ function createTestEnvironment() {
 /**
  * Verifies secure rendering of custom notification icons.
  *
- * The tests inspect generated DOM structure and attributes.
- * They do not rely on executing malicious payloads.
+ * Tests inspect generated DOM elements and attributes
+ * rather than executing potentially unsafe payloads.
  */
 describe("ZephyrToast Icon Security", () => {
   /** @type {JSDOM} */
@@ -75,7 +82,9 @@ describe("ZephyrToast Icon Security", () => {
   let ZephyrToast;
 
   /**
-   * Creates a fresh test environment before each test.
+   * Initializes a fresh browser environment before each test.
+   *
+   * @returns {void}
    */
   beforeEach(() => {
     const environment = createTestEnvironment();
@@ -85,11 +94,31 @@ describe("ZephyrToast Icon Security", () => {
   });
 
   /**
-   * Releases the browser environment after each test.
+   * Releases browser resources after each test.
+   *
+   * @returns {void}
    */
   afterEach(() => {
     dom.window.close();
   });
+
+  /**
+   * Returns the icon container of a notification.
+   *
+   * @param {HTMLElement} element - Notification element.
+   * @returns {HTMLElement} Icon container.
+   */
+  function getIconContainer(element) {
+    const container = element.querySelector(".zephyr-toast-notification-icon");
+
+    expect(container).not.toBeNull();
+
+    return container;
+  }
+
+  // ----------------------------------------------------------
+  // 1. Icon Class Safety
+  // ----------------------------------------------------------
 
   describe("Icon Class Safety", () => {
     it("does not interpret icon class strings as HTML", () => {
@@ -100,12 +129,12 @@ describe("ZephyrToast Icon Security", () => {
         icon: 'custom-icon"><img src=x onerror=alert(1)>',
       });
 
-      const container = element.querySelector(
-        ".zephyr-toast-notification-icon",
-      );
+      const container = getIconContainer(element);
 
       expect(container.querySelector("img")).toBeNull();
       expect(container.querySelector("[onerror]")).toBeNull();
+
+      expect(container.querySelector("script")).toBeNull();
     });
 
     it("does not create HTML elements from FontAwesome classes", () => {
@@ -118,12 +147,12 @@ describe("ZephyrToast Icon Security", () => {
         },
       });
 
-      const container = element.querySelector(
-        ".zephyr-toast-notification-icon",
-      );
+      const container = getIconContainer(element);
 
       expect(container.querySelector("svg")).toBeNull();
       expect(container.querySelector("[onload]")).toBeNull();
+
+      expect(container.querySelector("script")).toBeNull();
     });
 
     it("renders valid icon class names normally", () => {
@@ -134,13 +163,44 @@ describe("ZephyrToast Icon Security", () => {
         icon: "fas fa-check-circle",
       });
 
-      const icon = element.querySelector(".zephyr-toast-notification-icon i");
+      const container = getIconContainer(element);
+      const icon = container.querySelector("i");
 
       expect(icon).not.toBeNull();
+
       expect(icon.classList.contains("fas")).toBe(true);
       expect(icon.classList.contains("fa-check-circle")).toBe(true);
+
+      expect(icon.hasAttribute("onerror")).toBe(false);
+      expect(icon.hasAttribute("onload")).toBe(false);
+    });
+
+    it("renders structured FontAwesome classes safely", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("FontAwesome icon", {
+        duration: 0,
+        icon: {
+          fontAwesome: "fas fa-info-circle",
+        },
+      });
+
+      const container = getIconContainer(element);
+      const icon = container.querySelector("i");
+
+      expect(icon).not.toBeNull();
+
+      expect(icon.classList.contains("fas")).toBe(true);
+      expect(icon.classList.contains("fa-info-circle")).toBe(true);
+
+      expect(container.querySelector("[onclick]")).toBeNull();
+      expect(container.querySelector("[onload]")).toBeNull();
     });
   });
+
+  // ----------------------------------------------------------
+  // 2. Image URL Safety
+  // ----------------------------------------------------------
 
   describe("Image URL Safety", () => {
     it("does not create event attributes from image URLs", () => {
@@ -153,15 +213,18 @@ describe("ZephyrToast Icon Security", () => {
         },
       });
 
-      const image = element.querySelector(
-        ".zephyr-toast-notification-icon img",
-      );
+      const container = getIconContainer(element);
+      const image = container.querySelector("img");
 
       expect(image).not.toBeNull();
+
       expect(image.hasAttribute("onerror")).toBe(false);
+      expect(image.hasAttribute("onload")).toBe(false);
+
+      expect(container.querySelector("[onerror]")).toBeNull();
     });
 
-    it("preserves valid image URLs", () => {
+    it("preserves valid HTTPS image URLs", () => {
       const toast = new ZephyrToast();
 
       const element = toast.info("Valid image", {
@@ -173,9 +236,8 @@ describe("ZephyrToast Icon Security", () => {
         },
       });
 
-      const image = element.querySelector(
-        ".zephyr-toast-notification-icon img",
-      );
+      const container = getIconContainer(element);
+      const image = container.querySelector("img");
 
       expect(image).not.toBeNull();
 
@@ -183,6 +245,64 @@ describe("ZephyrToast Icon Security", () => {
 
       expect(image.style.width).toBe("24px");
       expect(image.style.height).toBe("24px");
+
+      expect(image.hasAttribute("onerror")).toBe(false);
+    });
+
+    it("preserves query parameters in valid image URLs", () => {
+      const toast = new ZephyrToast();
+
+      const url = "https://example.com/icon.png?v=2&size=24";
+
+      const element = toast.info("Image with query string", {
+        duration: 0,
+        icon: { url },
+      });
+
+      const image = getIconContainer(element).querySelector("img");
+
+      expect(image).not.toBeNull();
+      expect(image.getAttribute("src")).toBe(url);
+    });
+  });
+
+  // ----------------------------------------------------------
+  // 3. DOM Integrity
+  // ----------------------------------------------------------
+
+  describe("DOM Integrity", () => {
+    it("does not create unrelated elements from icon class input", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("DOM safety", {
+        duration: 0,
+        icon: 'fas fa-info"><button onclick="alert(1)">',
+      });
+
+      const container = getIconContainer(element);
+
+      expect(container.querySelector("button")).toBeNull();
+      expect(container.querySelector("[onclick]")).toBeNull();
+
+      expect(element.isConnected).toBe(true);
+    });
+
+    it("preserves notification content when rendering a custom icon", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Original message", {
+        duration: 0,
+        icon: "fas fa-info-circle",
+      });
+
+      const message = element.querySelector(
+        ".zephyr-toast-notification-message",
+      );
+
+      expect(message).not.toBeNull();
+      expect(message.textContent).toBe("Original message");
+
+      expect(getIconContainer(element).querySelector("i")).not.toBeNull();
     });
   });
 });

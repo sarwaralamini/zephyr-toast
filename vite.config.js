@@ -1,27 +1,50 @@
 /**
- * @fileoverview Vite library build configuration for ZephyrToast.
+ * @fileoverview Vite production build configuration for ZephyrToast.
  *
- * Creates separate ES module and standalone IIFE distributions.
- * The standalone build also emits the existing CSS stylesheets.
+ * Configures two distribution formats:
  *
+ * - ES module (ESM) for modern JavaScript applications and bundlers.
+ * - Standalone browser bundle (IIFE) for traditional script usage.
+ *
+ * The browser build also publishes the library's CSS stylesheets
+ * and TypeScript declarations into the distribution directory.
+ *
+ * The builds are executed sequentially. The ES module build
+ * initializes the distribution directory, while the browser
+ * build preserves the existing ES module artifacts.
+ *
+ * @module vite.config
  * @author Md. Sarwar Alam
  * @license MIT
  */
 
-import { defineConfig } from "vite";
 import { readFileSync } from "node:fs";
 
+import { defineConfig } from "vite";
+
 /**
- * Creates a Vite plugin that includes the library stylesheets
- * in the distribution without modifying their contents.
+ * Creates a Vite plugin that emits additional distribution assets.
  *
- * @returns {import("vite").Plugin} Stylesheet emission plugin.
+ * Copies the library's existing CSS stylesheets and public
+ * TypeScript declaration file without modifying their contents.
+ *
+ * Assets are emitted during Rollup's generateBundle lifecycle.
+ *
+ * This plugin is enabled only for the standalone browser build
+ * to avoid emitting duplicate assets during the ES module build.
+ *
+ * @returns {import("vite").Plugin} Vite plugin for publishing
+ * stylesheets and TypeScript declarations.
  */
 function copyStylesheets() {
   return {
     name: "zephyr-copy-styles",
 
     generateBundle() {
+      // ------------------------------------------------------
+      // 1. Publish Library Stylesheets
+      // ------------------------------------------------------
+
       // Copy the library stylesheets into the distribution.
       for (const filename of ["zephyr-toast.css", "zephyr-toast-animate.css"]) {
         this.emitFile({
@@ -32,6 +55,10 @@ function copyStylesheets() {
           ),
         });
       }
+
+      // ------------------------------------------------------
+      // 2. Publish TypeScript Declarations
+      // ------------------------------------------------------
 
       // Include public TypeScript declarations in the npm package.
       this.emitFile({
@@ -44,7 +71,15 @@ function copyStylesheets() {
 }
 
 /**
- * Resolves the distribution configuration by build mode.
+ * Creates the Vite configuration for the requested build mode.
+ *
+ * The module build clears the distribution directory and emits
+ * the ESM bundle. The subsequent browser build preserves those
+ * files and emits the standalone IIFE bundle and additional assets.
+ *
+ * Source maps are enabled for both JavaScript distributions.
+ *
+ * @returns {import("vite").UserConfig} Resolved Vite configuration.
  */
 export default defineConfig(({ mode }) => {
   const browserBuild = mode === "browser";

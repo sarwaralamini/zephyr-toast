@@ -2,24 +2,24 @@
 # Dependencies
 node_modules/
 
-# Build output
+# Production build output
 dist/
 
-# Test coverage
+# Test coverage reports
 coverage/
 
-# Local environment
+# Local environment files
 .env
 .env.*
 !.env.example
 
-# macOS
+# macOS system files
 .DS_Store
 
-# Editors
+# Editor configuration
 .vscode/
 .idea/
 
-# Logs
+# Log files
 *.log
 npm-debug.log*

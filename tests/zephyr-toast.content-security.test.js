@@ -1,24 +1,28 @@
 /**
- * @fileoverview HTML, SVG, and image URL security regression tests.
+ * @fileoverview Content and icon security integration tests for ZephyrToast.
  *
- * Covers untrusted message rendering, custom SVG handling,
- * unsupported image protocols, and DOM cleanup after errors.
+ * Verifies safe rendering of untrusted messages, explicitly
+ * enabled HTML content, custom SVG validation, image URL
+ * restrictions, and DOM integrity after rejected input.
  *
- * These tests establish the expected security behavior before
- * changing the production implementation.
+ * Tests execute the compiled standalone browser distribution
+ * in isolated JSDOM environments.
  *
+ * @module tests/zephyr-toast.content-security
  * @author Md. Sarwar Alam
  * @license MIT
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-
-import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
 import { runInContext } from "node:vm";
 
+import { JSDOM } from "jsdom";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 /**
- * Standalone browser implementation under test.
+ * Compiled standalone browser distribution.
+ *
+ * The browser bundle must be built before running these tests.
  *
  * @type {string}
  */
@@ -28,10 +32,16 @@ const source = readFileSync(
 );
 
 /**
- * Creates an isolated browser environment with the library loaded.
+ * Creates an isolated browser environment and loads ZephyrToast.
  *
- * @returns {{dom: JSDOM, ZephyrToast: Function}}
- *   Browser environment and ZephyrToast constructor.
+ * Evaluates the compiled IIFE in JSDOM's VM context and
+ * retrieves the constructor exposed through window.ZephyrToast.
+ *
+ * The script reference supports automatic stylesheet discovery
+ * without loading external JavaScript resources.
+ *
+ * @returns {{ dom: JSDOM, ZephyrToast: Function }}
+ *   Initialized browser environment and constructor.
  */
 function createTestEnvironment() {
   const dom = new JSDOM(
@@ -48,7 +58,6 @@ function createTestEnvironment() {
     },
   );
 
-  // The generated IIFE bundle registers window.ZephyrToast itself.
   runInContext(source, dom.getInternalVMContext());
 
   return {
@@ -58,7 +67,8 @@ function createTestEnvironment() {
 }
 
 /**
- * Verifies the security behavior of notification content and icons.
+ * Verifies message rendering, icon validation, and DOM integrity
+ * through the standalone browser API.
  */
 describe("ZephyrToast Content Security", () => {
   /** @type {JSDOM} */
@@ -68,7 +78,9 @@ describe("ZephyrToast Content Security", () => {
   let ZephyrToast;
 
   /**
-   * Initializes a new browser for every test.
+   * Initializes an independent browser environment.
+   *
+   * @returns {void}
    */
   beforeEach(() => {
     const environment = createTestEnvironment();
@@ -78,11 +90,17 @@ describe("ZephyrToast Content Security", () => {
   });
 
   /**
-   * Releases browser resources after testing.
+   * Releases browser resources after each test.
+   *
+   * @returns {void}
    */
   afterEach(() => {
     dom.window.close();
   });
+
+  // ----------------------------------------------------------
+  // 1. Default Message Safety
+  // ----------------------------------------------------------
 
   describe("Default Message Safety", () => {
     it("renders HTML-like messages as plain text by default", () => {
@@ -92,11 +110,16 @@ describe("ZephyrToast Content Security", () => {
         duration: 0,
       });
 
-      expect(element.querySelector("img")).toBeNull();
-      expect(element.textContent).toContain("<img");
+      const message = element.querySelector(
+        ".zephyr-toast-notification-message",
+      );
+
+      expect(message).not.toBeNull();
+      expect(message.querySelector("img")).toBeNull();
+      expect(message.textContent).toBe('<img src="x" onerror="alert(1)">');
     });
 
-    it("does not create scripts from untrusted messages", () => {
+    it("does not create script elements from untrusted messages", () => {
       const toast = new ZephyrToast();
 
       const element = toast.info('<script>alert("unsafe")</script>', {
@@ -104,12 +127,52 @@ describe("ZephyrToast Content Security", () => {
         allowHtml: false,
       });
 
-      expect(element.querySelector("script")).toBeNull();
+      const message = element.querySelector(
+        ".zephyr-toast-notification-message",
+      );
+
+      expect(message.querySelector("script")).toBeNull();
+      expect(message.textContent).toBe('<script>alert("unsafe")</script>');
+    });
+
+    it("does not create event-handler elements from untrusted messages", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info('<button onclick="alert(1)">Click</button>', {
+        duration: 0,
+      });
+
+      const message = element.querySelector(
+        ".zephyr-toast-notification-message",
+      );
+
+      expect(message.querySelector("button")).toBeNull();
+      expect(message.textContent).toContain("onclick");
+    });
+
+    it("preserves harmless special characters as text", () => {
+      const toast = new ZephyrToast();
+
+      const text = 'Price < 100 & value > 10 "quoted"';
+
+      const element = toast.info(text, {
+        duration: 0,
+      });
+
+      const message = element.querySelector(
+        ".zephyr-toast-notification-message",
+      );
+
+      expect(message.textContent).toBe(text);
     });
   });
 
+  // ----------------------------------------------------------
+  // 2. Explicitly Enabled HTML
+  // ----------------------------------------------------------
+
   describe("Trusted HTML Mode", () => {
-    it("supports explicitly enabled trusted HTML", () => {
+    it("renders HTML when explicitly enabled", () => {
       const toast = new ZephyrToast();
 
       const element = toast.info("<strong>Important message</strong>", {
@@ -117,23 +180,72 @@ describe("ZephyrToast Content Security", () => {
         allowHtml: true,
       });
 
-      expect(element.querySelector("strong")).not.toBeNull();
-      expect(element.textContent).toContain("Important message");
+      const message = element.querySelector(
+        ".zephyr-toast-notification-message",
+      );
+
+      const strong = message.querySelector("strong");
+
+      expect(strong).not.toBeNull();
+      expect(strong.textContent).toBe("Important message");
+    });
+
+    it("supports nested trusted HTML markup", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("<p><strong>Notice</strong> updated</p>", {
+        duration: 0,
+        allowHtml: true,
+      });
+
+      const message = element.querySelector(
+        ".zephyr-toast-notification-message",
+      );
+
+      expect(message.querySelector("p strong")).not.toBeNull();
+      expect(message.textContent).toBe("Notice updated");
+    });
+
+    it("does not enable HTML rendering on subsequent notifications", () => {
+      const toast = new ZephyrToast();
+
+      const trusted = toast.info("<strong>Trusted</strong>", {
+        duration: 0,
+        allowHtml: true,
+      });
+
+      const untrusted = toast.info("<strong>Untrusted</strong>", {
+        duration: 0,
+      });
+
+      expect(trusted.querySelector("strong")).not.toBeNull();
+
+      const message = untrusted.querySelector(
+        ".zephyr-toast-notification-message",
+      );
+
+      expect(message.querySelector("strong")).toBeNull();
+      expect(message.textContent).toBe("<strong>Untrusted</strong>");
     });
   });
 
+  // ----------------------------------------------------------
+  // 3. Custom SVG Security
+  // ----------------------------------------------------------
+
   describe("Custom SVG Security", () => {
-    it("rejects SVG containing event-handler attributes", () => {
+    it.each([
+      '<svg onload="alert(1)"></svg>',
+      '<svg><path onclick="alert(1)" d="M2 2L12 12" /></svg>',
+    ])("rejects SVG event-handler attributes", (svg) => {
       const toast = new ZephyrToast();
 
       expect(() => {
         toast.info("Unsafe SVG", {
           duration: 0,
-          icon: {
-            svg: '<svg onload="alert(1)"></svg>',
-          },
+          icon: { svg },
         });
-      }).toThrow(/svg|unsafe|security/i);
+      }).toThrow(/svg|unsafe|security|attribute/i);
     });
 
     it("rejects SVG containing script elements", () => {
@@ -146,7 +258,7 @@ describe("ZephyrToast Content Security", () => {
             svg: "<svg><script>alert(1)</script></svg>",
           },
         });
-      }).toThrow(/svg|unsafe|security/i);
+      }).toThrow(/svg|unsafe|security|element/i);
     });
 
     it("supports ordinary SVG icon markup", () => {
@@ -165,35 +277,85 @@ describe("ZephyrToast Content Security", () => {
       expect(svg.querySelector("path")).not.toBeNull();
       expect(svg.hasAttribute("onload")).toBe(false);
     });
+
+    it("does not append unsafe SVG after rejection", () => {
+      const toast = new ZephyrToast();
+
+      expect(() => {
+        toast.info("Unsafe SVG", {
+          duration: 0,
+          icon: {
+            svg: '<svg onload="alert(1)"></svg>',
+          },
+        });
+      }).toThrow();
+
+      expect(toast.container.children).toHaveLength(0);
+      expect(dom.window.document.querySelector("svg")).toBeNull();
+    });
   });
+
+  // ----------------------------------------------------------
+  // 4. Image URL Security
+  // ----------------------------------------------------------
 
   describe("Image URL Security", () => {
-    it("rejects javascript URLs", () => {
+    it.each(["javascript:alert(1)", "data:image/svg+xml,<svg></svg>"])(
+      "rejects unsafe image URL schemes",
+      (url) => {
+        const toast = new ZephyrToast();
+
+        expect(() => {
+          toast.info("Unsafe image", {
+            duration: 0,
+            icon: { url },
+          });
+        }).toThrow(/url|http|protocol/i);
+      },
+    );
+
+    it("accepts HTTPS image URLs", () => {
       const toast = new ZephyrToast();
 
-      expect(() => {
-        toast.info("Unsafe image", {
-          duration: 0,
-          icon: {
-            url: "javascript:alert(1)",
-          },
-        });
-      }).toThrow(/url|http|protocol/i);
+      const element = toast.info("Safe image", {
+        duration: 0,
+        icon: {
+          url: "https://example.com/icon.png",
+        },
+      });
+
+      const image = element.querySelector(
+        ".zephyr-toast-notification-icon img",
+      );
+
+      expect(image).not.toBeNull();
+
+      expect(image.getAttribute("src")).toBe("https://example.com/icon.png");
     });
 
-    it("rejects data URLs for image icons", () => {
+    it("accepts HTTP image URLs", () => {
       const toast = new ZephyrToast();
 
-      expect(() => {
-        toast.info("Data image", {
-          duration: 0,
-          icon: {
-            url: "data:image/svg+xml,<svg></svg>",
-          },
-        });
-      }).toThrow(/url|http|protocol/i);
+      const element = toast.info("HTTP image", {
+        duration: 0,
+        icon: {
+          url: "http://example.com/icon.png",
+        },
+      });
+
+      const image = element.querySelector(
+        ".zephyr-toast-notification-icon img",
+      );
+
+      expect(image).not.toBeNull();
+
+      expect(image.getAttribute("src")).toBe("http://example.com/icon.png");
     });
   });
+
+  // ----------------------------------------------------------
+  // 5. DOM Integrity After Errors
+  // ----------------------------------------------------------
 
   describe("Error Cleanup", () => {
     it("does not insert a notification when icon validation fails", () => {
@@ -211,6 +373,46 @@ describe("ZephyrToast Content Security", () => {
       }).toThrow();
 
       expect(toast.container.children.length).toBe(before);
+    });
+
+    it("preserves existing notifications when a new icon is rejected", () => {
+      const toast = new ZephyrToast();
+
+      const existing = toast.info("Existing notification", {
+        duration: 0,
+      });
+
+      expect(() => {
+        toast.info("Invalid notification", {
+          duration: 0,
+          icon: {
+            url: "javascript:alert(1)",
+          },
+        });
+      }).toThrow();
+
+      expect(toast.container.children).toHaveLength(1);
+      expect(toast.container.contains(existing)).toBe(true);
+    });
+
+    it("allows valid notifications after an icon validation error", () => {
+      const toast = new ZephyrToast();
+
+      expect(() => {
+        toast.info("Invalid notification", {
+          duration: 0,
+          icon: {
+            url: "javascript:alert(1)",
+          },
+        });
+      }).toThrow();
+
+      const element = toast.success("Valid notification", {
+        duration: 0,
+      });
+
+      expect(element.isConnected).toBe(true);
+      expect(toast.container.children).toHaveLength(1);
     });
   });
 });

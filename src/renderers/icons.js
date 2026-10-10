@@ -182,8 +182,9 @@ export function renderIcon(options, types, documentRef) {
       iconDiv.appendChild(createSafeSvg(icon.svg, documentRef));
     }
   } else {
-    // Built-in SVG strings are controlled by the library.
-    iconDiv.innerHTML = types[options.type].icon;
+    // Validate built-in SVG markup before adding it to the DOM.
+    // Instance-level notification type definitions may be customized.
+    iconDiv.appendChild(createSafeSvg(types[options.type].icon, documentRef));
   }
 
   return iconDiv;

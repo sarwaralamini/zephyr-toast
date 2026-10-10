@@ -1,25 +1,30 @@
 /**
- * @fileoverview Configuration validation tests for ZephyrToast.
+ * @fileoverview Configuration validation integration tests for ZephyrToast.
  *
- * Verifies that invalid notification types, animation names,
- * durations, positions, and configuration structures are rejected
- * with meaningful errors.
+ * Verifies that the standalone browser distribution rejects
+ * invalid notification types, durations, animation names,
+ * positions, and configuration structures.
  *
- * The tests establish expected validation behavior before
- * refactoring the standalone JavaScript implementation.
+ * Also verifies that valid configuration values are accepted
+ * and invalid updates do not modify existing instance state.
+ *
+ * Detailed boolean, theme-property, and structured-icon guards
+ * are tested separately in zephyr-toast.config-guards.test.js.
  *
  * @author Md. Sarwar Alam
  * @license MIT
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-
-import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
 import { runInContext } from "node:vm";
 
+import { JSDOM } from "jsdom";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 /**
- * Source code of the existing standalone library.
+ * Compiled standalone browser distribution.
+ *
+ * The browser bundle must be generated before running these tests.
  *
  * @type {string}
  */
@@ -29,13 +34,14 @@ const source = readFileSync(
 );
 
 /**
- * Creates an isolated DOM and evaluates the browser library.
+ * Creates an isolated browser environment and evaluates the
+ * compiled standalone ZephyrToast distribution.
  *
- * A script reference is included to support the current stylesheet
- * discovery mechanism without executing external resources.
+ * The script reference supports stylesheet path discovery
+ * without allowing external scripts to execute.
  *
- * @returns {{dom: JSDOM, ZephyrToast: Function}}
- *   The browser environment and notification constructor.
+ * @returns {{ dom: JSDOM, ZephyrToast: Function }}
+ *   Initialized browser environment and library constructor.
  */
 function createTestEnvironment() {
   const dom = new JSDOM(
@@ -52,7 +58,6 @@ function createTestEnvironment() {
     },
   );
 
-  // The generated IIFE bundle registers window.ZephyrToast itself.
   runInContext(source, dom.getInternalVMContext());
 
   return {
@@ -62,7 +67,8 @@ function createTestEnvironment() {
 }
 
 /**
- * Verifies validation of public notification configuration.
+ * Verifies configuration validation through the public
+ * standalone browser API.
  */
 describe("ZephyrToast Configuration Validation", () => {
   /** @type {JSDOM} */
@@ -72,7 +78,9 @@ describe("ZephyrToast Configuration Validation", () => {
   let ZephyrToast;
 
   /**
-   * Initializes an independent browser context before each test.
+   * Initializes a fresh browser context for each test.
+   *
+   * @returns {void}
    */
   beforeEach(() => {
     const environment = createTestEnvironment();
@@ -82,11 +90,17 @@ describe("ZephyrToast Configuration Validation", () => {
   });
 
   /**
-   * Releases DOM resources after each test.
+   * Releases browser resources after each test.
+   *
+   * @returns {void}
    */
   afterEach(() => {
     dom.window.close();
   });
+
+  // ----------------------------------------------------------
+  // 1. Notification Type Validation
+  // ----------------------------------------------------------
 
   describe("Notification Type Validation", () => {
     it("rejects unsupported notification types", () => {
@@ -100,21 +114,44 @@ describe("ZephyrToast Configuration Validation", () => {
       }).toThrow(/type/i);
     });
 
-    it("accepts all supported notification types", () => {
+    it.each(["success", "info", "warning", "error", "zen", "void"])(
+      "accepts the %s notification type",
+      (type) => {
+        const toast = new ZephyrToast();
+
+        const element = toast.show(`${type} notification`, {
+          type,
+          duration: 0,
+        });
+
+        expect(element._options.type).toBe(type);
+        expect(element.isConnected).toBe(true);
+      },
+    );
+
+    it("preserves the existing container after an invalid type", () => {
       const toast = new ZephyrToast();
 
-      const types = ["success", "info", "warning", "error", "zen", "void"];
+      expect(() => {
+        toast.show("Invalid type", {
+          type: "unknown",
+          duration: 0,
+        });
+      }).toThrow();
 
-      for (const type of types) {
-        expect(() => {
-          toast.show(`${type} notification`, {
-            type,
-            duration: 0,
-          });
-        }).not.toThrow();
-      }
+      expect(toast.container.children).toHaveLength(0);
+
+      const element = toast.info("Valid notification", {
+        duration: 0,
+      });
+
+      expect(element.isConnected).toBe(true);
     });
   });
+
+  // ----------------------------------------------------------
+  // 2. Duration Validation
+  // ----------------------------------------------------------
 
   describe("Duration Validation", () => {
     it("rejects negative durations", () => {
@@ -137,6 +174,17 @@ describe("ZephyrToast Configuration Validation", () => {
       }).toThrow(/duration/i);
     });
 
+    it.each([NaN, Infinity, -Infinity])(
+      "rejects non-finite duration %s",
+      (duration) => {
+        const toast = new ZephyrToast();
+
+        expect(() => {
+          toast.info("Invalid duration", { duration });
+        }).toThrow(/duration/i);
+      },
+    );
+
     it("accepts zero duration for persistent notifications", () => {
       const toast = new ZephyrToast();
 
@@ -147,7 +195,22 @@ describe("ZephyrToast Configuration Validation", () => {
       expect(element._options.duration).toBe(0);
       expect(element._timeoutId).toBeUndefined();
     });
+
+    it("accepts a positive numeric duration", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Timed notification", {
+        duration: 5000,
+      });
+
+      expect(element._options.duration).toBe(5000);
+      expect(element.isConnected).toBe(true);
+    });
   });
+
+  // ----------------------------------------------------------
+  // 3. Animation Validation
+  // ----------------------------------------------------------
 
   describe("Animation Validation", () => {
     it("rejects unsupported entrance animations", () => {
@@ -189,11 +252,36 @@ describe("ZephyrToast Configuration Validation", () => {
 
       expect(element._options.animation.in).toBe("slideInRight");
       expect(element._options.animation.out).toBe("slideOutRight");
+
+      expect(element.classList.contains("zephyr_animate_slideInRight")).toBe(
+        true,
+      );
+    });
+
+    it("does not mutate instance animations after rejection", () => {
+      const toast = new ZephyrToast();
+
+      expect(() => {
+        toast.info("Invalid animation", {
+          duration: 0,
+          animation: {
+            in: "unknownAnimation",
+          },
+        });
+      }).toThrow();
+
+      expect(toast.options.animation.in).toBe("fadeIn");
+      expect(toast.options.animation.out).toBe("fadeOut");
+      expect(toast.container.children).toHaveLength(0);
     });
   });
 
+  // ----------------------------------------------------------
+  // 4. Position Validation
+  // ----------------------------------------------------------
+
   describe("Position Validation", () => {
-    it("rejects unsupported positions", () => {
+    it("rejects unsupported constructor positions", () => {
       expect(() => {
         new ZephyrToast({
           position: "center-middle",
@@ -201,23 +289,19 @@ describe("ZephyrToast Configuration Validation", () => {
       }).toThrow(/position/i);
     });
 
-    it("accepts every supported position", () => {
-      const positions = [
-        "top-right",
-        "top-left",
-        "bottom-right",
-        "bottom-left",
-        "top-center",
-        "bottom-center",
-      ];
+    it.each([
+      "top-right",
+      "top-left",
+      "bottom-right",
+      "bottom-left",
+      "top-center",
+      "bottom-center",
+    ])("accepts the %s position", (position) => {
+      const toast = new ZephyrToast({ position });
 
-      for (const position of positions) {
-        const toast = new ZephyrToast({ position });
-
-        expect(
-          toast.container.classList.contains(`zephyr-position-${position}`),
-        ).toBe(true);
-      }
+      expect(
+        toast.container.classList.contains(`zephyr-position-${position}`),
+      ).toBe(true);
     });
 
     it("rejects invalid position updates", () => {
@@ -227,7 +311,26 @@ describe("ZephyrToast Configuration Validation", () => {
         toast.updatePosition("invalid-position");
       }).toThrow(/position/i);
     });
+
+    it("preserves the existing position after an invalid update", () => {
+      const toast = new ZephyrToast({
+        position: "bottom-right",
+      });
+
+      const previousClassName = toast.container.className;
+
+      expect(() => {
+        toast.updatePosition("invalid-position");
+      }).toThrow(/position/i);
+
+      expect(toast.options.position).toBe("bottom-right");
+      expect(toast.container.className).toBe(previousClassName);
+    });
   });
+
+  // ----------------------------------------------------------
+  // 5. Theme Validation
+  // ----------------------------------------------------------
 
   describe("Theme Validation", () => {
     it("rejects a non-object theme configuration", () => {
@@ -254,10 +357,21 @@ describe("ZephyrToast Configuration Validation", () => {
       });
 
       expect(element.style.backgroundColor).toBe("rgb(18, 52, 86)");
-
       expect(element.style.color).toBe("rgb(255, 255, 255)");
-
       expect(element.style.borderColor).toBe("rgb(51, 51, 51)");
+    });
+
+    it("rejects invalid themes without appending a notification", () => {
+      const toast = new ZephyrToast();
+
+      expect(() => {
+        toast.info("Invalid theme", {
+          duration: 0,
+          theme: "invalid",
+        });
+      }).toThrow(/theme/i);
+
+      expect(toast.container.children).toHaveLength(0);
     });
   });
 });

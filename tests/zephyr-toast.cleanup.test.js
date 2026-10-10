@@ -1,24 +1,27 @@
 /**
- * @fileoverview Notification lifecycle and cleanup tests for ZephyrToast.
+ * @fileoverview Notification cleanup integration tests for ZephyrToast.
  *
- * Verifies idempotent dismissal, timer cleanup, close callbacks,
+ * Verifies idempotent dismissal, cancellation of active timers,
+ * cleanup of pending rendering updates, close callbacks,
  * and safe removal of multiple notifications.
  *
- * Uses an isolated jsdom environment with deterministic timers
- * to validate asynchronous cleanup without real-time delays.
+ * Tests execute the compiled standalone browser distribution
+ * inside isolated JSDOM environments with deterministic timers.
  *
  * @author Md. Sarwar Alam
  * @license MIT
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-
-import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
 import { runInContext } from "node:vm";
 
+import { JSDOM } from "jsdom";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 /**
- * Original standalone ZephyrToast source.
+ * Compiled standalone browser distribution.
+ *
+ * The production bundle must be built before these tests run.
  *
  * @type {string}
  */
@@ -28,19 +31,26 @@ const source = readFileSync(
 );
 
 /**
- * Creates a deterministic timer controller for the DOM.
+ * Creates deterministic timers for an isolated browser window.
  *
- * @param {Window} window - The isolated browser window.
+ * Synchronizes performance.now() with the simulated clock
+ * and executes scheduled callbacks in chronological order.
+ *
+ * Timers scheduled for the same deadline execute in
+ * registration order.
+ *
+ * @param {Window} window - Isolated JSDOM window.
  * @returns {{
  *   advance: (milliseconds: number) => void,
- *   pending: () => number
- * }} Timer control and inspection methods.
+ *   pending: () => number,
+ *   clear: () => void
+ * }} Timer controller.
  */
 function createTestClock(window) {
   let now = 0;
   let nextId = 1;
 
-  /** @type {Map<number, {time: number, callback: Function}>} */
+  /** @type {Map<number, { time: number, callback: Function }>} */
   const timers = new Map();
 
   window.setTimeout = (callback, delay = 0) => {
@@ -65,9 +75,9 @@ function createTestClock(window) {
 
   return {
     /**
-     * Advances simulated time and runs scheduled callbacks.
+     * Advances simulated time and executes due callbacks.
      *
-     * @param {number} milliseconds - Milliseconds to advance.
+     * @param {number} milliseconds - Non-negative time increment.
      * @returns {void}
      */
     advance(milliseconds) {
@@ -84,7 +94,9 @@ function createTestClock(window) {
           .filter(([, timer]) => timer.time <= target)
           .sort((a, b) => a[1].time - b[1].time || a[0] - b[0])[0];
 
-        if (!next) break;
+        if (!next) {
+          break;
+        }
 
         const [id, timer] = next;
 
@@ -100,22 +112,34 @@ function createTestClock(window) {
     /**
      * Returns the number of pending timers.
      *
-     * @returns {number} Number of scheduled callbacks.
+     * @returns {number} Scheduled callback count.
      */
     pending() {
       return timers.size;
+    },
+
+    /**
+     * Discards all pending timers.
+     *
+     * @returns {void}
+     */
+    clear() {
+      timers.clear();
     },
   };
 }
 
 /**
- * Creates an isolated DOM environment and loads the library.
+ * Creates an isolated browser environment and loads ZephyrToast.
+ *
+ * The standalone script reference enables stylesheet discovery
+ * without loading external scripts or resources.
  *
  * @returns {{
  *   dom: JSDOM,
  *   ZephyrToast: Function,
  *   clock: ReturnType<typeof createTestClock>
- * }} Initialized testing environment.
+ * }} Initialized test environment.
  */
 function createTestEnvironment() {
   const dom = new JSDOM(
@@ -134,7 +158,6 @@ function createTestEnvironment() {
 
   const clock = createTestClock(dom.window);
 
-  // The generated IIFE bundle registers window.ZephyrToast itself.
   runInContext(source, dom.getInternalVMContext());
 
   return {
@@ -145,7 +168,8 @@ function createTestEnvironment() {
 }
 
 /**
- * Tests notification dismissal and resource cleanup.
+ * Verifies notification dismissal and resource cleanup
+ * through the standalone browser distribution.
  */
 describe("ZephyrToast Cleanup", () => {
   /** @type {JSDOM} */
@@ -158,7 +182,9 @@ describe("ZephyrToast Cleanup", () => {
   let clock;
 
   /**
-   * Initializes a fresh test environment.
+   * Initializes an independent test environment.
+   *
+   * @returns {void}
    */
   beforeEach(() => {
     const environment = createTestEnvironment();
@@ -169,12 +195,19 @@ describe("ZephyrToast Cleanup", () => {
   });
 
   /**
-   * Releases DOM resources and restores mocks.
+   * Clears pending timers, restores mocks, and releases the DOM.
+   *
+   * @returns {void}
    */
   afterEach(() => {
+    clock.clear();
     vi.restoreAllMocks();
     dom.window.close();
   });
+
+  // ----------------------------------------------------------
+  // 1. Idempotent Dismissal
+  // ----------------------------------------------------------
 
   describe("Idempotent Dismissal", () => {
     it("schedules only one removal when dismissed repeatedly", () => {
@@ -185,18 +218,19 @@ describe("ZephyrToast Cleanup", () => {
         showProgress: false,
       });
 
-      // Flush the initial visibility timer.
       clock.advance(10);
 
       toast.removeToast(element);
       toast.removeToast(element);
       toast.removeToast(element);
 
+      expect(element._lifecycleState).toBe("closing");
       expect(clock.pending()).toBe(1);
 
       clock.advance(500);
 
       expect(toast.container.contains(element)).toBe(false);
+      expect(element._lifecycleState).toBe("closed");
       expect(clock.pending()).toBe(0);
     });
 
@@ -212,9 +246,12 @@ describe("ZephyrToast Cleanup", () => {
       toast.removeToast(element);
       toast.removeToast(element);
 
+      expect(onClose).not.toHaveBeenCalled();
+
       clock.advance(500);
 
       expect(onClose).toHaveBeenCalledTimes(1);
+      expect(element._lifecycleState).toBe("closed");
     });
 
     it("safely ignores dismissal after removal is complete", () => {
@@ -225,12 +262,40 @@ describe("ZephyrToast Cleanup", () => {
       });
 
       toast.removeToast(element);
+
       clock.advance(500);
 
+      expect(element.isConnected).toBe(false);
+
       expect(() => toast.removeToast(element)).not.toThrow();
+
+      expect(element._lifecycleState).toBe("closed");
       expect(clock.pending()).toBe(0);
     });
+
+    it("does not schedule removal for a detached notification", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Detached notification", {
+        duration: 0,
+        showProgress: false,
+      });
+
+      clock.advance(10);
+
+      element.remove();
+
+      const pendingBeforeDismissal = clock.pending();
+
+      expect(() => toast.removeToast(element)).not.toThrow();
+
+      expect(clock.pending()).toBe(pendingBeforeDismissal);
+    });
   });
+
+  // ----------------------------------------------------------
+  // 2. Timer Cleanup
+  // ----------------------------------------------------------
 
   describe("Timer Cleanup", () => {
     it("cancels automatic dismissal after manual closing", () => {
@@ -252,13 +317,64 @@ describe("ZephyrToast Cleanup", () => {
       expect(toast.container.contains(element)).toBe(false);
       expect(onClose).toHaveBeenCalledTimes(1);
 
-      // The original automatic dismissal must not run later.
       clock.advance(2000);
 
       expect(onClose).toHaveBeenCalledTimes(1);
       expect(clock.pending()).toBe(0);
     });
+
+    it("cancels the pending visibility update during dismissal", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Immediate dismissal", {
+        duration: 0,
+        showProgress: false,
+      });
+
+      expect(clock.pending()).toBe(1);
+
+      toast.removeToast(element);
+
+      expect(element._visibilityTimeoutId).toBeNull();
+      expect(clock.pending()).toBe(1);
+
+      clock.advance(10);
+
+      expect(element._lifecycleState).toBe("closing");
+
+      clock.advance(490);
+
+      expect(element.isConnected).toBe(false);
+      expect(clock.pending()).toBe(0);
+    });
+
+    it("cancels the pending progress update during dismissal", () => {
+      const toast = new ZephyrToast();
+
+      const element = toast.info("Progress cleanup", {
+        duration: 1000,
+        showProgress: true,
+      });
+
+      expect(element._progressTimeoutId).toBeDefined();
+
+      toast.removeToast(element);
+
+      expect(element._progressTimeoutId).toBeNull();
+      expect(element._timeoutId).toBeNull();
+
+      expect(clock.pending()).toBe(1);
+
+      clock.advance(500);
+
+      expect(element.isConnected).toBe(false);
+      expect(clock.pending()).toBe(0);
+    });
   });
+
+  // ----------------------------------------------------------
+  // 3. Bulk Dismissal
+  // ----------------------------------------------------------
 
   describe("Bulk Dismissal", () => {
     it("does not schedule duplicate removals when removeAll is repeated", () => {
@@ -276,13 +392,11 @@ describe("ZephyrToast Cleanup", () => {
         duration: 0,
       });
 
-      // Flush all initial visibility timers.
       clock.advance(10);
 
       toast.removeAll();
       toast.removeAll();
 
-      // Each notification requires only one removal timer.
       expect(clock.pending()).toBe(3);
 
       clock.advance(500);
@@ -317,6 +431,26 @@ describe("ZephyrToast Cleanup", () => {
 
       expect(onCloseFirst).toHaveBeenCalledTimes(1);
       expect(onCloseSecond).toHaveBeenCalledTimes(1);
+    });
+
+    it("preserves notifications created after removeAll", () => {
+      const toast = new ZephyrToast();
+
+      const first = toast.info("First", {
+        duration: 0,
+      });
+
+      toast.removeAll();
+
+      const second = toast.info("Second", {
+        duration: 0,
+      });
+
+      clock.advance(500);
+
+      expect(first.isConnected).toBe(false);
+      expect(second.isConnected).toBe(true);
+      expect(second._lifecycleState).not.toBe("closing");
     });
   });
 });

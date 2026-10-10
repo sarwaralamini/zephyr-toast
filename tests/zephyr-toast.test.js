@@ -1,28 +1,30 @@
 /**
- * @fileoverview Unit tests for the ZephyrToast notification library.
+ * @fileoverview Standalone browser integration tests for ZephyrToast.
  *
- * Provides regression coverage for the standalone browser implementation,
+ * Provides regression coverage for the compiled browser distribution,
  * including initialization, notification rendering, configuration,
  * content handling, positioning, and public convenience methods.
  *
- * The library is evaluated inside an isolated jsdom environment to
- * preserve its browser-global API without modifying the source.
+ * The production IIFE bundle is evaluated inside an isolated JSDOM
+ * environment to verify the public browser-global API.
  *
  * @author Md. Sarwar Alam
  * @license MIT
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-
-import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
 import { runInContext } from "node:vm";
 
+import { JSDOM } from "jsdom";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 /**
- * Absolute location of the existing standalone library.
+ * Compiled standalone browser distribution.
  *
- * Resolving the path relative to this test module ensures that
- * tests work regardless of the terminal's working directory.
+ * Resolving the path relative to this test module allows tests
+ * to run independently of the terminal's working directory.
+ *
+ * The production bundle must be built before running these tests.
  *
  * @type {string}
  */
@@ -32,34 +34,35 @@ const source = readFileSync(
 );
 
 /**
- * Evaluates the standalone JavaScript library inside a jsdom window.
+ * Loads the compiled standalone browser bundle into an isolated DOM.
  *
- * The current ZephyrToast source defines a top-level class without
- * exporting it as an ES module. This helper exposes that class through
- * the isolated window so the tests can instantiate it.
+ * Evaluates the generated IIFE using the JSDOM VM context and
+ * retrieves the constructor exposed through window.ZephyrToast.
  *
- * @param {JSDOM} dom - The isolated DOM environment.
+ * This verifies the public browser-global API independently
+ * of the source ES module entry point.
+ *
+ * @param {JSDOM} dom - Isolated browser environment.
  * @returns {Function} The ZephyrToast constructor.
  */
 function loadZephyrToast(dom) {
   const context = dom.getInternalVMContext();
 
-  // The generated IIFE bundle registers window.ZephyrToast.
   runInContext(source, context);
 
   return dom.window.ZephyrToast;
 }
 
 /**
- * Creates an isolated browser-like environment for a test.
+ * Creates an isolated browser-like environment for each test.
  *
- * Includes the standalone library script reference so the existing
- * CSS discovery mechanism can resolve its stylesheet paths.
+ * Includes the standalone script reference so that the CSS
+ * discovery mechanism can resolve its stylesheet paths.
  *
- * Script execution remains manually controlled to prevent external
- * resources from running during unit tests.
+ * Script execution is controlled manually to prevent external
+ * resources from executing during integration tests.
  *
- * @returns {JSDOM} A fresh DOM environment.
+ * @returns {JSDOM} A fresh browser-like DOM environment.
  */
 function createTestDOM() {
   return new JSDOM(
@@ -78,6 +81,9 @@ function createTestDOM() {
   );
 }
 
+/**
+ * Verifies the compiled standalone browser implementation.
+ */
 describe("ZephyrToast", () => {
   /** @type {JSDOM} */
   let dom;
@@ -86,8 +92,9 @@ describe("ZephyrToast", () => {
   let ZephyrToast;
 
   /**
-   * Creates a new DOM environment and loads the original library
-   * before each test to prevent shared state between test cases.
+   * Initializes an isolated DOM and loads the browser bundle.
+   *
+   * @returns {void}
    */
   beforeEach(() => {
     dom = createTestDOM();
@@ -95,13 +102,18 @@ describe("ZephyrToast", () => {
   });
 
   /**
-   * Releases DOM resources and restores mocked functions after
-   * each test.
+   * Releases browser resources and restores mocked functions.
+   *
+   * @returns {void}
    */
   afterEach(() => {
     vi.restoreAllMocks();
     dom.window.close();
   });
+
+  // ----------------------------------------------------------
+  // 1. Initialization
+  // ----------------------------------------------------------
 
   describe("Initialization", () => {
     it("creates a notification container", () => {
@@ -144,10 +156,6 @@ describe("ZephyrToast", () => {
       expect(containers).toHaveLength(1);
     });
 
-    /**
-     * Verifies that stylesheet imports are injected only once,
-     * even when multiple ZephyrToast instances are created.
-     */
     it("injects the required stylesheet imports only once", () => {
       new ZephyrToast();
       new ZephyrToast();
@@ -163,6 +171,10 @@ describe("ZephyrToast", () => {
       expect(styles[0].textContent).toContain("zephyr-toast-animate.css");
     });
   });
+
+  // ----------------------------------------------------------
+  // 2. Notification Rendering
+  // ----------------------------------------------------------
 
   describe("Notification Rendering", () => {
     it("creates a notification element", () => {
@@ -231,11 +243,11 @@ describe("ZephyrToast", () => {
     });
   });
 
+  // ----------------------------------------------------------
+  // 3. Notification Types
+  // ----------------------------------------------------------
+
   describe("Notification Types", () => {
-    /**
-     * Verifies that every public notification helper creates
-     * an element containing the supplied message.
-     */
     it.each(["success", "info", "warning", "error", "zen", "void"])(
       "supports the %s notification type",
       (type) => {
@@ -251,6 +263,10 @@ describe("ZephyrToast", () => {
       },
     );
   });
+
+  // ----------------------------------------------------------
+  // 4. HTML Content Handling
+  // ----------------------------------------------------------
 
   describe("HTML Content Handling", () => {
     it("escapes HTML content by default", () => {
@@ -288,6 +304,10 @@ describe("ZephyrToast", () => {
     });
   });
 
+  // ----------------------------------------------------------
+  // 5. Close Button
+  // ----------------------------------------------------------
+
   describe("Close Button", () => {
     it("displays the close button by default", () => {
       const toast = new ZephyrToast();
@@ -315,6 +335,10 @@ describe("ZephyrToast", () => {
       ).toBeNull();
     });
   });
+
+  // ----------------------------------------------------------
+  // 6. Notification Icons
+  // ----------------------------------------------------------
 
   describe("Notification Icons", () => {
     it("renders the default icon", () => {
@@ -376,6 +400,10 @@ describe("ZephyrToast", () => {
     });
   });
 
+  // ----------------------------------------------------------
+  // 7. Progress Bar
+  // ----------------------------------------------------------
+
   describe("Progress Bar", () => {
     it("renders a progress bar for timed notifications", () => {
       const toast = new ZephyrToast();
@@ -413,6 +441,10 @@ describe("ZephyrToast", () => {
     });
   });
 
+  // ----------------------------------------------------------
+  // 8. Notification Positioning
+  // ----------------------------------------------------------
+
   describe("Notification Positioning", () => {
     it("updates the notification container position", () => {
       const toast = new ZephyrToast();
@@ -439,6 +471,10 @@ describe("ZephyrToast", () => {
       ).toBe(true);
     });
   });
+
+  // ----------------------------------------------------------
+  // 9. Notification Ordering
+  // ----------------------------------------------------------
 
   describe("Notification Ordering", () => {
     it("places newer notifications first by default", () => {
@@ -474,6 +510,10 @@ describe("ZephyrToast", () => {
     });
   });
 
+  // ----------------------------------------------------------
+  // 10. Callbacks
+  // ----------------------------------------------------------
+
   describe("Callbacks", () => {
     it("invokes the click callback when the toast is clicked", () => {
       const onClick = vi.fn();
@@ -499,6 +539,10 @@ describe("ZephyrToast", () => {
       expect(() => element.click()).not.toThrow();
     });
   });
+
+  // ----------------------------------------------------------
+  // 11. Configuration
+  // ----------------------------------------------------------
 
   describe("Configuration", () => {
     it("applies default configuration values", () => {
@@ -534,7 +578,7 @@ describe("ZephyrToast", () => {
 
       expect(element._options.duration).toBe(7000);
 
-      // Per-toast configuration must not mutate constructor defaults.
+      // Per-notification overrides must not mutate instance defaults.
       expect(toast.options.duration).toBe(3000);
     });
   });
