@@ -1,11 +1,16 @@
 /**
- * @fileoverview Notification icon rendering for ZephyrToast.
+ * @fileoverview Notification icon creation and rendering for ZephyrToast.
  *
- * Supports built-in icons, CSS class icons, image icons,
- * and restricted custom SVG markup.
+ * Provides utilities for rendering notification icons from CSS class
+ * names, image URLs, built-in SVG markup, and custom SVG definitions.
  *
- * Uses DOM APIs for untrusted attribute values and delegates
- * custom SVG validation to the secure SVG renderer.
+ * Icon selection is determined by the resolved notification options.
+ * CSS class names and image attributes are assigned through DOM APIs
+ * rather than interpolated into HTML strings.
+ *
+ * Image URLs are restricted to HTTP and HTTPS protocols, including
+ * relative URLs that resolve to those protocols. Custom SVG markup
+ * is delegated to the secure SVG renderer for validation.
  *
  * @module renderers/icons
  * @author Md. Sarwar Alam
@@ -15,14 +20,17 @@
 import { createSafeSvg } from "./svg.js";
 
 /**
- * Creates an icon element from CSS class names.
+ * Creates an icon element using CSS class names.
  *
- * Class names are assigned as an attribute rather than parsed
- * as HTML, preventing injected markup from creating elements.
+ * Constructs an HTML <i> element and assigns the provided class names
+ * through setAttribute(), without interpreting them as HTML markup.
  *
- * @param {string} className - CSS classes for the icon.
- * @param {Document} documentRef - Target document.
- * @returns {HTMLElement} The icon element.
+ * The required icon font or stylesheet must be available in the
+ * consuming application for the icon to appear correctly.
+ *
+ * @param {string} className - CSS class names representing the icon.
+ * @param {Document} documentRef - Document used to create the element.
+ * @returns {HTMLElement} The constructed icon element.
  */
 export function createClassIcon(className, documentRef) {
   const element = documentRef.createElement("i");
@@ -32,17 +40,26 @@ export function createClassIcon(className, documentRef) {
 }
 
 /**
- * Creates an image icon with a validated URL.
+ * Creates an image-based notification icon.
  *
- * Accepts URLs resolving to HTTP or HTTPS, including relative
- * paths. Unsupported URL protocols are rejected.
+ * Accepts a non-empty URL string that resolves to an HTTP or HTTPS
+ * resource. Relative URLs are resolved against the target document's
+ * base URI for protocol validation.
  *
- * @param {string} url - Image source URL.
- * @param {Document} documentRef - Target document.
- * @param {string} [width="16px"] - Image width.
- * @param {string} [height="16px"] - Image height.
- * @returns {HTMLImageElement} The image element.
- * @throws {TypeError} If the URL is invalid or unsupported.
+ * Unsupported protocols and invalid URL values are rejected.
+ * The original URL string is assigned to the image's src attribute.
+ *
+ * Image dimensions can be customized through optional width and
+ * height arguments. The image is decorative and receives an
+ * empty alt attribute.
+ *
+ * @param {string} url - Absolute or relative image source URL.
+ * @param {Document} documentRef - Document used to create the image.
+ * @param {string} [width="16px"] - CSS width of the image.
+ * @param {string} [height="16px"] - CSS height of the image.
+ * @returns {HTMLImageElement} The constructed image element.
+ * @throws {TypeError} If the URL is empty, invalid, or uses an
+ * unsupported protocol.
  */
 export function createImageIcon(
   url,
@@ -79,29 +96,55 @@ export function createImageIcon(
 }
 
 /**
- * Creates the icon container for a notification.
+ * Creates and populates the icon container for a notification.
  *
- * Preserves existing icon selection behavior. A null return
- * value indicates that icon rendering is disabled.
+ * Returns null when icon rendering is explicitly disabled.
+ * Otherwise, creates a notification icon container and selects
+ * the appropriate rendering method based on the icon configuration.
  *
- * @param {Object} options - Resolved notification options.
- * @param {Object} types - Notification type definitions.
- * @param {Document} documentRef - Target document.
- * @returns {HTMLElement|null} The icon container, or null.
- * @throws {TypeError} If an icon value is invalid or unsafe.
+ * Supported icon configurations include:
+ *
+ * - A CSS class string, rendered using an HTML <i> element.
+ * - A recognized image filename string (JPEG, PNG, GIF, WebP,
+ *   AVIF, or SVG), rendered as an image when isIcon is false.
+ * - An object containing a URL and optional image dimensions.
+ * - An object containing fontAwesome CSS class names.
+ * - An object containing custom SVG markup.
+ * - A built-in SVG icon when no custom icon is provided.
+ *
+ * Custom SVG markup is processed by createSafeSvg() before
+ * insertion into the notification.
+ *
+ * Built-in SVG strings originate from library-controlled
+ * notification type definitions.
+ *
+ * @param {Object} options - Resolved notification configuration,
+ * including type, icon, isIcon, and enableIcon.
+ * @param {Object} types - Built-in notification type definitions
+ * containing their associated SVG icons.
+ * @param {Document} documentRef - Document used to create elements.
+ * @returns {HTMLElement|null} The populated icon container,
+ * or null when icons are disabled.
+ * @throws {TypeError} If an icon configuration is invalid or an
+ * unsupported image URL is provided.
  */
 export function renderIcon(options, types, documentRef) {
+  // Skip icon construction when explicitly disabled.
   if (options.enableIcon === false) {
     return null;
   }
 
+  // Create the notification icon container.
   const iconDiv = documentRef.createElement("div");
   iconDiv.className = "zephyr-toast-notification-icon";
 
   const icon = options.icon;
 
+  // Render string-based icon configurations.
   if (typeof icon === "string" && icon.length > 0) {
-    const isImageUrl = /\.(jpeg|jpg|gif|png)(?:[?#].*)?$/i.test(icon);
+    const isImageUrl = /\.(jpeg|jpg|gif|png|webp|avif|svg)(?:[?#].*)?$/i.test(
+      icon,
+    );
 
     if (options.isIcon && isImageUrl) {
       throw new TypeError("An image URL cannot be used when isIcon is true.");
@@ -113,12 +156,14 @@ export function renderIcon(options, types, documentRef) {
       iconDiv.appendChild(createClassIcon(icon, documentRef));
     }
   } else if (icon && typeof icon === "object") {
+    // Reject array-based configurations.
     if (Array.isArray(icon)) {
       throw new TypeError(
         "Icon configuration must be a string or a non-array object.",
       );
     }
 
+    // Render structured image, CSS class, or SVG configurations.
     if (icon.url !== undefined) {
       iconDiv.appendChild(
         createImageIcon(icon.url, documentRef, icon.width, icon.height),
