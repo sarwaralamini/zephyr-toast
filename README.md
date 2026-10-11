@@ -598,12 +598,16 @@ This shows which files would be included in the npm package without publishing i
 
 ## Contributing
 
-Bug reports, feature requests, and pull requests are welcome.
+## Bug Reports & Feedback
 
-Please run the relevant tests, linting, formatting checks, and build verification before submitting changes.
+ZephyrToast is currently maintained by its author, and external pull requests are not being accepted at this time.
 
-- [Report a bug](https://github.com/sarwaralamini/zephyr-toast/issues)
-- [Browse the repository](https://github.com/sarwaralamini/zephyr-toast)
+If you encounter a bug, unexpected behavior, or compatibility issue, please open a GitHub Issue with a clear description and steps to reproduce the problem.
+
+Feature suggestions and feedback are also welcome. All development, code changes, and releases are currently managed by the maintainer.
+
+- [Report a Bug](https://github.com/sarwaralamini/zephyr-toast/issues/new)
+- [View Existing Issues](https://github.com/sarwaralamini/zephyr-toast/issues)
 
 ## Author
 
