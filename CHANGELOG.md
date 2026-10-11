@@ -1,10 +1,16 @@
 # Changelog
 
-Notable changes to ZephyrToast are documented in this file.
+All notable changes to ZephyrToast are documented in this file.
 
-This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and intends to use [Semantic Versioning](https://semver.org/). Entries are grouped by release; unreleased changes remain under **Unreleased** until a version is published.
+This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+
+No changes documented yet.
+
+## [1.6.0] - 2026-10-11
+
+A major internal refactoring of ZephyrToast, improving maintainability, reliability, security, documentation, and package distribution while preserving the existing public notification API.
 
 ### Added
 
@@ -38,11 +44,30 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 - Prevented notification container position changes when rendering fails.
 - Improved robustness of notification cleanup after dismissal.
 
-## Release notes policy
+### Compatibility
 
-- This changelog does not designate the refactoring work as a published release yet.
-- The `package.json` currently identifies version `1.5.0`, but the first npm publication version has not been finalized.
-- Before publishing, move the appropriate items from **Unreleased** to a dated version heading such as `## [X.Y.Z] - YYYY-MM-DD`, after confirming the chosen version and actual release date.
-- Avoid retroactively assigning publication dates or version history without supporting release records.
+- Preserved the existing `ZephyrToast` class and its primary notification methods.
+- Maintained support for standalone browser integration.
+- Added ES module distribution and TypeScript declarations for modern development environments.
 
-[Unreleased]: https://github.com/sarwaralamini/zephyr-toast/compare/main...refactor/v2-architecture
+## [1.5.0] - 2025-04-16
+
+### Added
+
+- `pauseOnHover` option, enabled by default, to pause automatic dismissal when hovering over a notification.
+- `allowHtml` option, disabled by default, to enable HTML message rendering.
+
+### Changed
+
+- Updated documentation for the new configuration options.
+- Improved the notification generator to support the additional settings.
+
+### Compatibility
+
+- No breaking changes reported relative to v1.4.0.
+
+---
+
+[Unreleased]: https://github.com/sarwaralamini/zephyr-toast/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/sarwaralamini/zephyr-toast/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/sarwaralamini/zephyr-toast/releases/tag/v1.5.0
