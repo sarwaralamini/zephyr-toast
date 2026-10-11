@@ -596,8 +596,6 @@ npm pack --dry-run
 
 This shows which files would be included in the npm package without publishing it.
 
-## Contributing
-
 ## Bug Reports & Feedback
 
 ZephyrToast is currently maintained by its author, and external pull requests are not being accepted at this time.
