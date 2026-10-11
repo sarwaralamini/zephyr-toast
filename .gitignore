@@ -1,0 +1,25 @@
+
+# Dependencies
+node_modules/
+
+# Production build output
+dist/
+
+# Test coverage reports
+coverage/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# macOS system files
+.DS_Store
+
+# Editor configuration
+.vscode/
+.idea/
+
+# Log files
+*.log
+npm-debug.log*

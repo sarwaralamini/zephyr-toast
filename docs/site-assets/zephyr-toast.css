@@ -1,0 +1,212 @@
+/*!
+ * @fileoverview Core notification styles for ZephyrToast.
+ *
+ * Defines notification container positioning, notification
+ * appearance, internal content layout, close buttons,
+ * progress indicators, and responsive mobile behavior.
+ *
+ * Animation keyframes are maintained separately in
+ * zephyr-toast-animate.css.
+ *
+ * @author Md. Sarwar Alam
+ * @license MIT
+ */
+
+/* ----------------------------------------------------------
+   1. Notification Container
+   ---------------------------------------------------------- */
+
+.zephyr-toast-container {
+  position: fixed;
+  z-index: 9999;
+  padding: 15px;
+  overflow: hidden;
+  min-width: fit-content;
+  box-sizing: border-box;
+}
+
+/* ----------------------------------------------------------
+   2. Container Positions
+   ---------------------------------------------------------- */
+
+.zephyr-position-top-right {
+  top: 0px;
+  right: 0px;
+}
+
+.zephyr-position-top-left {
+  top: 0px;
+  left: 0px;
+}
+
+.zephyr-position-bottom-right {
+  bottom: 0px;
+  right: 0px;
+}
+
+.zephyr-position-bottom-left {
+  bottom: 0px;
+  left: 0px;
+}
+
+.zephyr-position-top-center {
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.zephyr-position-bottom-center {
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ----------------------------------------------------------
+   3. Notification Appearance
+   ---------------------------------------------------------- */
+
+.zephyr-toast-notification {
+  margin-bottom: 15px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: fit-content;
+  opacity: 0;
+  border-width: 1px;
+  border-style: solid;
+  pointer-events: auto;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+
+/* ----------------------------------------------------------
+   4. Notification Body and Content
+   ---------------------------------------------------------- */
+
+.zephyr-toast-notification-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.75rem;
+}
+
+.zephyr-toast-notification-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+.zephyr-toast-notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.zephyr-toast-notification-title {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+/* ----------------------------------------------------------
+   5. Close Button
+   ---------------------------------------------------------- */
+
+.zephyr-toast-notification-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: center;
+  margin-left: 0;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.zephyr-toast-notification-close:hover {
+  opacity: 1;
+}
+
+/* ----------------------------------------------------------
+   6. Standard Progress Indicator
+   ---------------------------------------------------------- */
+
+.zephyr-toast-progress-bar {
+  width: 100%;
+  height: 4px;
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.zephyr-toast-progress-bar-fill {
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  opacity: 0.8;
+  transition-property: width;
+  transition-timing-function: linear;
+  transition-duration: 0ms;
+  will-change: width;
+}
+
+/* ----------------------------------------------------------
+   7. Void Progress Indicator
+   ---------------------------------------------------------- */
+
+.zephyr-toast-progress-bar-void {
+  width: 100%;
+  height: 4px;
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.zephyr-toast-progress-bar-void-fill {
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  opacity: 0.8;
+  transition-property: width;
+  transition-timing-function: linear;
+  transition-duration: 0ms;
+  will-change: width;
+}
+
+/* ----------------------------------------------------------
+   8. Mobile Responsive Layout
+   ----------------------------------------------------------
+   On viewports at or below 576px, notification containers
+   are centered and expanded to the available viewport width,
+   regardless of their configured horizontal position.
+   ---------------------------------------------------------- */
+
+@media (max-width: 576px) {
+  .zephyr-position-top-right,
+  .zephyr-position-top-left,
+  .zephyr-position-bottom-right,
+  .zephyr-position-bottom-left,
+  .zephyr-position-top-center,
+  .zephyr-position-bottom-center {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 10px !important;
+  }
+
+  .zephyr-toast-notification {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+}

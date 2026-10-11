@@ -1,0 +1,2230 @@
+/**
+ * @fileoverview ZephyrToast demo website and interactive playground styles.
+ *
+ * Styles the public ZephyrToast website, including:
+ * - Dark and light appearance themes.
+ * - Navigation and branding.
+ * - Hero section and notification showcase.
+ * - Feature cards.
+ * - Interactive notification configuration.
+ * - Position selector, switches, and color controls.
+ * - Isolated preview and generated code display.
+ * - Responsive layouts and accessibility.
+ *
+ * All demo-specific selectors are separated from the production
+ * ZephyrToast notification styles.
+ *
+ * @module demo/css/demo
+ * @author Md. Sarwar Alam
+ * @license MIT
+ */
+
+/* ==========================================================
+   TABLE OF CONTENTS
+   ==========================================================
+
+   01. Theme Tokens
+   02. Global Reset and Typography
+   03. Accessibility and Focus
+   04. Header and Navigation
+   05. Shared Buttons
+   06. Hero Section
+   07. Hero Code Showcase
+   08. Hero Notification Examples
+   09. Section Headings
+   10. Feature Cards
+   11. Playground Layout
+   12. Playground Panels
+   13. Form Controls
+   14. Visual Position Selector
+   15. Switches and Radio Controls
+   16. Custom Theme Color Inputs
+   17. Live Notification Preview
+   18. Generated Code Editor
+   19. Playground Information
+   20. Bottom Call to Action
+   21. Footer
+   22. Light Theme Compatibility
+   23. Responsive: Smaller Desktop
+   24. Responsive: Tablet
+   25. Responsive: Mobile
+   26. Responsive: Small Mobile
+   27. Accessibility: Reduced Motion
+
+   ========================================================== */
+
+/* ==========================================================
+   01. THEME TOKENS
+   ========================================================== */
+
+/**
+ * Dark appearance is the default.
+ *
+ * Demo design tokens are prefixed with --demo- to avoid
+ * conflicts with Bootstrap and the notification library.
+ *
+ * Code editor colors remain independent of the selected
+ * website theme.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Backgrounds and surfaces */
+  --demo-bg: #0b1019;
+  --demo-surface: #151c29;
+  --demo-surface-raised: #1d2635;
+  --demo-field: #101722;
+
+  /* Borders */
+  --demo-border: #2b3647;
+  --demo-border-soft: #222d3c;
+
+  /* Typography */
+  --demo-text: #f0f4fc;
+  --demo-muted: #a9b7cb;
+  --demo-subtle: #8797ae;
+
+  /* Accent colors */
+  --demo-accent: #a5b4fc;
+  --demo-accent-strong: #818cf8;
+  --demo-accent-hover: #c7d2fe;
+  --demo-accent-text: #101526;
+  --demo-accent-soft: rgba(129, 140, 248, 0.13);
+
+  /* Status */
+  --demo-success: #4ade80;
+
+  /* Layout and elevation */
+  --demo-shadow: 0 14px 42px rgba(0, 0, 0, 0.14);
+  --demo-radius: 16px;
+  --demo-container: 1220px;
+
+  /* Code editor */
+  --code-bg: #0d1421;
+  --code-header: #151e2d;
+  --code-border: #2c394c;
+  --code-text: #e4edfc;
+  --code-muted: #a3b3cb;
+  --code-purple: #d5b8ff;
+  --code-blue: #80d2ff;
+  --code-green: #91e7ba;
+  --code-yellow: #ffe29a;
+
+  /* Bootstrap compatibility */
+  --bs-body-bg: #0b1019;
+  --bs-body-color: #f0f4fc;
+  --bs-secondary-color: #a9b7cb;
+  --bs-border-color: #2b3647;
+}
+
+/**
+ * Light theme overrides.
+ *
+ * The existing design tokens are replaced without
+ * duplicating component-level styles unnecessarily.
+ */
+
+body[data-demo-theme="light"] {
+  color-scheme: light;
+
+  /* Backgrounds and surfaces */
+  --demo-bg: #f6f8fc;
+  --demo-surface: #ffffff;
+  --demo-surface-raised: #f2f5fa;
+  --demo-field: #ffffff;
+
+  /* Borders */
+  --demo-border: #d6dfeb;
+  --demo-border-soft: #e5eaf2;
+
+  /* Typography */
+  --demo-text: #172338;
+  --demo-muted: #526178;
+  --demo-subtle: #687790;
+
+  /* Accent colors */
+  --demo-accent: #4f46e5;
+  --demo-accent-strong: #4338ca;
+  --demo-accent-hover: #3730a3;
+  --demo-accent-text: #ffffff;
+  --demo-accent-soft: rgba(79, 70, 229, 0.09);
+
+  /* Status */
+  --demo-success: #16a34a;
+
+  /* Elevation */
+  --demo-shadow: 0 10px 32px rgba(32, 48, 77, 0.055);
+
+  /* Bootstrap compatibility */
+  --bs-body-bg: #f6f8fc;
+  --bs-body-color: #172338;
+  --bs-secondary-color: #526178;
+  --bs-tertiary-color: #687790;
+  --bs-border-color: #d6dfeb;
+}
+
+/* ==========================================================
+   02. GLOBAL RESET AND TYPOGRAPHY
+   ========================================================== */
+
+/**
+ * Apply consistent box sizing to all elements and
+ * pseudo-elements.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: clip;
+
+  background: var(--demo-bg);
+  color: var(--demo-text);
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  font-size: 15px;
+  line-height: 1.65;
+
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: var(--demo-container);
+}
+
+a {
+  color: var(--demo-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--demo-accent-hover);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* ==========================================================
+   03. ACCESSIBILITY AND FOCUS
+   ========================================================== */
+
+/**
+ * Show keyboard focus clearly while avoiding unnecessary
+ * focus outlines during ordinary pointer interaction.
+ */
+
+:focus-visible {
+  outline: 3px solid var(--demo-accent-strong);
+  outline-offset: 3px;
+}
+
+/**
+ * The skip link remains outside the visible viewport
+ * until keyboard focus reaches it.
+ */
+
+.demo-skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: -100px;
+  left: 15px;
+
+  padding: 10px 16px;
+
+  border-radius: 8px;
+  background: var(--demo-surface);
+  color: var(--demo-text);
+}
+
+.demo-skip-link:focus {
+  top: 12px;
+}
+
+/* ==========================================================
+   04. HEADER AND NAVIGATION
+   ========================================================== */
+
+.demo-toolbar {
+  position: relative;
+  z-index: 10;
+
+  border-bottom: 1px solid var(--demo-border-soft);
+  background: var(--demo-bg);
+}
+
+.demo-toolbar-inner {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+/* Brand */
+
+.demo-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+
+  color: var(--demo-text);
+
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+}
+
+.demo-brand:hover {
+  color: var(--demo-text);
+}
+
+.demo-brand-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 11px;
+
+  background: var(--demo-accent-soft);
+  color: var(--demo-accent);
+}
+
+.demo-brand-accent {
+  color: var(--demo-accent);
+}
+
+/* Navigation */
+
+.demo-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.demo-nav-link {
+  color: var(--demo-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.demo-nav-link:hover {
+  color: var(--demo-accent);
+}
+
+/* Toolbar Actions */
+
+.demo-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.demo-icon-button,
+.demo-github-button,
+.demo-small-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 10px;
+
+  background: var(--demo-surface);
+  color: var(--demo-text);
+
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.demo-icon-button {
+  width: 39px;
+  height: 39px;
+}
+
+.demo-github-button {
+  min-height: 39px;
+  padding: 0 14px;
+}
+
+.demo-icon-button:hover,
+.demo-github-button:hover,
+.demo-small-button:hover {
+  border-color: var(--demo-accent-strong);
+  background: var(--demo-surface-raised);
+  color: var(--demo-text);
+}
+
+.demo-external-icon {
+  color: var(--demo-muted);
+  font-size: 10px;
+}
+
+/* ==========================================================
+   05. SHARED BUTTONS
+   ========================================================== */
+
+/**
+ * Reusable action buttons used throughout the hero,
+ * playground, and final call-to-action sections.
+ */
+
+.demo-button {
+  display: inline-flex;
+  min-height: 47px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  padding: 11px 20px;
+
+  border: 1px solid transparent;
+  border-radius: 11px;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  cursor: pointer;
+
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.demo-button:hover {
+  transform: translateY(-1px);
+}
+
+/* Primary */
+
+.demo-button-primary {
+  background: var(--demo-accent);
+  color: var(--demo-accent-text);
+}
+
+.demo-button-primary:hover {
+  background: var(--demo-accent-hover);
+  color: var(--demo-accent-text);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.18);
+}
+
+/* Secondary */
+
+.demo-button-secondary {
+  border-color: var(--demo-border);
+  background: var(--demo-surface);
+  color: var(--demo-text);
+}
+
+.demo-button-secondary:hover {
+  border-color: var(--demo-accent-strong);
+  background: var(--demo-surface-raised);
+  color: var(--demo-text);
+}
+
+/* ==========================================================
+   06. HERO SECTION
+   ========================================================== */
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+
+  padding: 100px 0;
+
+  border-bottom: 1px solid var(--demo-border-soft);
+
+  background:
+    radial-gradient(
+      ellipse at 77% 28%,
+      rgba(129, 140, 248, 0.09),
+      transparent 53%
+    ),
+    var(--demo-bg);
+}
+
+body[data-demo-theme="light"] .hero-section {
+  background:
+    radial-gradient(
+      ellipse at 78% 24%,
+      rgba(99, 102, 241, 0.075),
+      transparent 55%
+    ),
+    #f6f8fc;
+}
+
+.hero-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: 55px;
+}
+
+.hero-content {
+  min-width: 0;
+}
+
+/* Eyebrow */
+
+.demo-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  margin-bottom: 25px;
+  padding: 7px 13px;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 100px;
+
+  background: var(--demo-accent-soft);
+  color: var(--demo-accent);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Shared online/status indicator */
+
+.demo-status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+  background: var(--demo-success);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.13);
+}
+
+/* Hero Typography */
+
+.hero-content h1 {
+  max-width: 650px;
+  margin: 0 0 24px;
+
+  color: var(--demo-text);
+  font-size: clamp(42px, 5vw, 70px);
+  font-weight: 800;
+  letter-spacing: -0.065em;
+  line-height: 1.09;
+}
+
+.demo-gradient-text {
+  display: block;
+  color: var(--demo-accent);
+}
+
+.hero-description {
+  max-width: 530px;
+  margin: 0;
+
+  color: var(--demo-muted);
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+/* Hero Actions */
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  margin-top: 32px;
+}
+
+.hero-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 21px;
+
+  margin-top: 35px;
+}
+
+.hero-highlights span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  color: var(--demo-muted);
+  font-size: 12px;
+}
+
+.hero-highlights i {
+  color: var(--demo-success);
+  font-size: 11px;
+}
+
+/* ==========================================================
+   07. HERO CODE SHOWCASE
+   ========================================================== */
+
+/**
+ * The showcase editor is intentionally dark in both
+ * website themes to maintain predictable syntax contrast.
+ */
+
+.hero-visual {
+  position: relative;
+  min-width: 0;
+  padding: 25px;
+}
+
+.hero-visual-grid {
+  position: absolute;
+  inset: 0;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 22px;
+
+  background-image:
+    linear-gradient(rgba(129, 140, 248, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(129, 140, 248, 0.045) 1px, transparent 1px);
+
+  background-size: 27px 27px;
+
+  mask-image: linear-gradient(to bottom, #000, transparent 95%);
+
+  pointer-events: none;
+}
+
+.hero-showcase {
+  position: relative;
+  min-width: 0;
+  min-height: 390px;
+
+  padding: 25px;
+  overflow: hidden;
+
+  border: 1px solid #334155;
+  border-radius: 17px;
+
+  background: #111a29;
+  color: #e4edfc;
+
+  box-shadow: 0 24px 65px rgba(5, 12, 25, 0.24);
+}
+
+/* Preserve the dark editor when light mode is enabled. */
+
+body[data-demo-theme="light"] .hero-showcase {
+  border-color: #34445b;
+  background: #111a29;
+  color: #e4edfc;
+  box-shadow: 0 20px 55px rgba(37, 52, 80, 0.17);
+}
+
+.hero-showcase-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding-bottom: 20px;
+
+  border-bottom: 1px solid #303e53;
+  color: #b6c5dc;
+
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.hero-showcase-dots {
+  display: flex;
+  gap: 7px;
+}
+
+.hero-showcase-dots span {
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+  background: #64748b;
+}
+
+.hero-showcase-dots span:first-child {
+  background: #fb7185;
+}
+
+.hero-showcase-dots span:nth-child(2) {
+  background: #fbbf24;
+}
+
+.hero-showcase-dots span:nth-child(3) {
+  background: #4ade80;
+}
+
+/**
+ * The decorative hero example may contain HTML line
+ * breaks. Allow wrapping to prevent narrow-screen overflow.
+ */
+
+.hero-showcase-code {
+  padding: 25px 4px 125px;
+
+  color: #e4edfc;
+
+  font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.95;
+  letter-spacing: 0.005em;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Syntax highlighting */
+
+.hero-showcase-code .code-purple {
+  color: #d5b8ff;
+}
+
+.hero-showcase-code .code-blue {
+  color: #80d2ff;
+}
+
+.hero-showcase-code .code-green {
+  color: #91e7ba;
+}
+
+.hero-showcase-code .code-yellow {
+  color: #ffe29a;
+}
+
+/* ==========================================================
+   08. HERO NOTIFICATION EXAMPLES
+   ========================================================== */
+
+/**
+ * Decorative, non-interactive notification examples.
+ *
+ * These are separate from the actual ZephyrToast
+ * notification renderer and production CSS.
+ */
+
+.hero-toast {
+  position: absolute;
+  right: 20px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  width: min(345px, calc(100% - 40px));
+  padding: 14px 15px;
+
+  overflow: hidden;
+
+  border: 1px solid;
+  border-radius: 12px;
+
+  box-shadow: 0 10px 28px rgba(3, 9, 20, 0.24);
+}
+
+/* Success example */
+
+.hero-toast-success {
+  bottom: 112px;
+
+  border-color: #b5eace;
+  background: #e3f7ed;
+  color: #176a3d;
+}
+
+/* Information example */
+
+.hero-toast-info {
+  right: 47px;
+  bottom: 20px;
+
+  border-color: #a9d7f1;
+  background: #dff0fa;
+  color: #226b96;
+}
+
+/* Notification icon */
+
+.hero-toast-icon {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 31px;
+
+  place-items: center;
+
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+/* Notification content */
+
+.hero-toast strong,
+.hero-toast small {
+  display: block;
+}
+
+.hero-toast strong {
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.hero-toast small {
+  margin-top: 3px;
+
+  color: inherit;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* Decorative close icon */
+
+.hero-toast-close {
+  margin-left: auto;
+  align-self: flex-start;
+
+  color: inherit;
+  font-size: 11px;
+  opacity: 0.55;
+}
+
+/* Decorative progress indicator */
+
+.hero-toast-progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  height: 3px;
+  background: #42ad75;
+}
+
+/* ==========================================================
+   09. SECTION HEADINGS
+   ========================================================== */
+
+.features-section {
+  padding: 90px 0;
+}
+
+.demo-section-intro {
+  max-width: 700px;
+  margin: 0 auto 42px;
+
+  text-align: center;
+}
+
+.demo-section-label {
+  color: var(--demo-accent);
+
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+.demo-section-intro h2,
+.demo-cta-content h2 {
+  margin: 13px 0;
+
+  color: var(--demo-text);
+
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 780;
+  letter-spacing: -0.045em;
+  line-height: 1.2;
+}
+
+.demo-section-intro p,
+.demo-cta-content p {
+  margin: 0;
+
+  color: var(--demo-muted);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+/* ==========================================================
+   10. FEATURE CARDS
+   ========================================================== */
+
+.demo-features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.demo-feature-card {
+  min-width: 0;
+  padding: 25px 22px;
+
+  border: 1px solid var(--demo-border);
+  border-radius: var(--demo-radius);
+
+  background: var(--demo-surface);
+
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.demo-feature-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--demo-accent-strong);
+}
+
+.demo-feature-icon {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  margin-bottom: 20px;
+
+  place-items: center;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 12px;
+
+  background: var(--demo-accent-soft);
+  color: var(--demo-accent);
+
+  font-size: 17px;
+}
+
+.demo-feature-card h3 {
+  margin: 0 0 9px;
+
+  color: var(--demo-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.demo-feature-card p {
+  margin: 0;
+
+  color: var(--demo-muted);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+/* ==========================================================
+   11. PLAYGROUND LAYOUT
+   ========================================================== */
+
+/**
+ * The results column is slightly wider to provide
+ * sufficient space for the preview and generated code.
+ *
+ * Columns return to a single-column layout on smaller
+ * desktop and tablet viewports.
+ */
+
+.playground-section {
+  padding: 95px 0 110px;
+
+  border-top: 1px solid var(--demo-border-soft);
+  background: var(--demo-bg);
+}
+
+.playground-heading {
+  margin-bottom: 48px;
+}
+
+.playground-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.playground-settings,
+.playground-results {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 22px;
+}
+
+/* ==========================================================
+   12. PLAYGROUND PANELS
+   ========================================================== */
+
+.demo-panel {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+
+  overflow: visible;
+
+  border: 1px solid var(--demo-border);
+  border-radius: var(--demo-radius);
+
+  background: var(--demo-surface);
+  color: var(--demo-text);
+
+  box-shadow: var(--demo-shadow);
+}
+
+/* Panel header */
+
+.demo-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  min-width: 0;
+  padding: 21px 23px;
+
+  border-bottom: 1px solid var(--demo-border-soft);
+}
+
+.demo-panel-header-icon {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  flex: 0 0 39px;
+
+  place-items: center;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 11px;
+
+  background: var(--demo-accent-soft);
+  color: var(--demo-accent);
+
+  font-size: 15px;
+}
+
+.demo-panel-header h3 {
+  margin: 0;
+
+  color: var(--demo-text);
+  font-size: 15px;
+  font-weight: 720;
+  line-height: 1.4;
+}
+
+.demo-panel-header p {
+  margin: 3px 0 0;
+
+  color: var(--demo-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Header with actions */
+
+.demo-panel-header-actions {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.demo-panel-heading {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
+}
+
+/* Panel content */
+
+.demo-panel-content {
+  min-width: 0;
+  padding: 23px;
+}
+
+/* ==========================================================
+   13. FORM CONTROLS
+   ========================================================== */
+
+/**
+ * Form components extend Bootstrap's .form-control
+ * and .form-select classes using the demo theme tokens.
+ */
+
+.form-label {
+  margin-bottom: 7px;
+
+  color: var(--demo-text);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.demo-optional {
+  margin-left: 5px;
+
+  color: var(--demo-subtle);
+  font-size: 11px;
+  font-weight: 450;
+}
+
+/* Shared input appearance */
+
+.form-control,
+.form-select {
+  min-height: 43px;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 9px;
+
+  background-color: var(--demo-field);
+  color: var(--demo-text);
+
+  font-size: 13px;
+  box-shadow: none;
+}
+
+/* Textarea */
+
+textarea.form-control {
+  min-height: 95px;
+  resize: vertical;
+}
+
+/* Placeholder */
+
+.form-control::placeholder {
+  color: var(--demo-subtle);
+  opacity: 1;
+}
+
+/* Focus */
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--demo-accent-strong);
+  background-color: var(--demo-field);
+  color: var(--demo-text);
+  box-shadow: 0 0 0 3px var(--demo-accent-soft);
+}
+
+/* Disabled state */
+
+.form-control:disabled,
+.form-select:disabled {
+  opacity: 0.65;
+}
+
+/* Select dropdown */
+
+.form-select {
+  padding-right: 35px;
+}
+
+/**
+ * Customize Bootstrap's select indicator in dark mode
+ * to keep the arrow visible against dark field colors.
+ */
+
+body[data-demo-theme="dark"] .form-select {
+  --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23bbc9db' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* Light-theme form compatibility */
+
+body[data-demo-theme="light"] .form-control,
+body[data-demo-theme="light"] .form-select {
+  border-color: #cbd5e1;
+  background-color: #ffffff;
+  color: #172338;
+
+  -webkit-text-fill-color: #172338;
+}
+
+body[data-demo-theme="light"] .form-control::placeholder {
+  color: #66758e;
+  -webkit-text-fill-color: #66758e;
+}
+
+body[data-demo-theme="light"] .form-control:focus,
+body[data-demo-theme="light"] .form-select:focus {
+  border-color: #4f46e5;
+  background-color: #ffffff;
+  color: #172338;
+
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.11);
+}
+
+body[data-demo-theme="light"] .form-select option {
+  background: #ffffff;
+  color: #172338;
+}
+
+/* Field descriptions */
+
+.demo-field-hint {
+  color: var(--demo-subtle);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* ==========================================================
+   14. VISUAL POSITION SELECTOR
+   ========================================================== */
+
+/**
+ * Six interactive miniature position previews.
+ *
+ * Selection is controlled by aria-pressed attributes
+ * updated by the demo generator JavaScript.
+ */
+
+.demo-position-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+
+  margin-top: 12px;
+  padding: 12px;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 11px;
+
+  background: var(--demo-field);
+}
+
+/* Position buttons */
+
+.demo-position-grid button {
+  display: flex;
+  min-width: 0;
+  min-height: 85px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 10px 5px;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 9px;
+
+  background: var(--demo-surface);
+  color: var(--demo-text);
+
+  cursor: pointer;
+
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.demo-position-grid button:hover {
+  border-color: var(--demo-accent-strong);
+  background: var(--demo-surface-raised);
+}
+
+.demo-position-grid button[aria-pressed="true"] {
+  border-color: var(--demo-accent-strong);
+  background: var(--demo-accent-soft);
+
+  box-shadow: inset 0 0 0 1px var(--demo-accent-strong);
+}
+
+/* Miniature preview frame */
+
+.position-marker {
+  display: flex;
+
+  width: 57px;
+  max-width: 90%;
+  height: 35px;
+
+  padding: 5px;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 6px;
+
+  background: var(--demo-field);
+}
+
+/* Miniature notification marker */
+
+.position-marker span {
+  display: block;
+  width: 16px;
+  height: 5px;
+  flex: 0 0 16px;
+
+  border-radius: 3px;
+  background: var(--demo-subtle);
+}
+
+/* Top positions */
+
+.position-top-left {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.position-top-center {
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.position-top-right {
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+/* Bottom positions */
+
+.position-bottom-left {
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.position-bottom-center {
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.position-bottom-right {
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+/* Position text */
+
+.position-name {
+  color: var(--demo-muted);
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* Selected marker appearance */
+
+.demo-position-grid button[aria-pressed="true"] .position-marker {
+  border-color: var(--demo-accent-strong);
+  background: var(--demo-accent-soft);
+}
+
+.demo-position-grid button[aria-pressed="true"] .position-marker span {
+  background: var(--demo-accent);
+}
+
+.demo-position-grid button[aria-pressed="true"] .position-name {
+  color: var(--demo-accent);
+  font-weight: 700;
+}
+
+/* Keyboard focus */
+
+.demo-position-grid button:focus-visible {
+  outline: 3px solid var(--demo-accent-strong);
+  outline-offset: 3px;
+}
+
+/* ==========================================================
+   15. SWITCHES AND RADIO CONTROLS
+   ========================================================== */
+
+/* Switch group */
+
+.demo-switch-grid {
+  display: grid;
+  gap: 0;
+}
+
+/* Switch row */
+
+.demo-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 13px 0;
+
+  border-bottom: 1px solid var(--demo-border-soft);
+
+  color: var(--demo-text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.demo-switch-row:last-child {
+  border-bottom: 0;
+}
+
+/* Custom checkbox switch */
+
+.demo-switch-row input[type="checkbox"] {
+  appearance: none;
+  position: relative;
+
+  width: 36px;
+  height: 21px;
+  flex: 0 0 36px;
+
+  margin: 0;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 99px;
+
+  background: var(--demo-border);
+  cursor: pointer;
+
+  transition: background-color 160ms ease;
+}
+
+/* Switch thumb */
+
+.demo-switch-row input[type="checkbox"]::after {
+  content: "";
+
+  position: absolute;
+  top: 2px;
+  left: 2px;
+
+  width: 15px;
+  height: 15px;
+
+  border-radius: 50%;
+  background: #ffffff;
+
+  transition: transform 160ms ease;
+}
+
+/* Checked switch */
+
+.demo-switch-row input[type="checkbox"]:checked {
+  border-color: var(--demo-accent-strong);
+  background: var(--demo-accent-strong);
+}
+
+.demo-switch-row input[type="checkbox"]:checked::after {
+  transform: translateX(15px);
+}
+
+/* Switch keyboard focus */
+
+.demo-switch-row input[type="checkbox"]:focus-visible {
+  outline: 3px solid var(--demo-accent-strong);
+  outline-offset: 3px;
+}
+
+/* Radio controls */
+
+.demo-radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+}
+
+.demo-radio-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  color: var(--demo-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.demo-radio-row input {
+  accent-color: var(--demo-accent-strong);
+}
+
+/* ==========================================================
+   16. CUSTOM THEME COLOR INPUTS
+   ========================================================== */
+
+.demo-color-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Color swatch */
+
+.color-preview {
+  display: inline-block;
+  width: 35px;
+  height: 35px;
+  flex: 0 0 35px;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 9px;
+
+  background: var(--demo-field);
+}
+
+/* Allow input to shrink within small grid columns. */
+
+.demo-color-field .form-control {
+  min-width: 0;
+}
+
+/* ==========================================================
+   17. LIVE NOTIFICATION PREVIEW
+   ========================================================== */
+
+/* Small panel action buttons */
+
+.demo-small-button {
+  min-height: 34px;
+  flex: 0 0 auto;
+
+  padding: 7px 12px;
+
+  font-size: 11px;
+}
+
+/* Preview frame */
+
+.demo-preview-frame {
+  min-width: 0;
+  overflow: hidden;
+
+  border: 1px solid var(--demo-border);
+  border-radius: 12px;
+
+  background: #111b2c;
+}
+
+/* Preview frame toolbar */
+
+.demo-preview-label {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 9px;
+
+  padding: 0 15px;
+
+  border-bottom: 1px solid #2c394c;
+
+  background: #151e2d;
+  color: #bdcbe0;
+
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+}
+
+/**
+ * Notifications render inside the isolated iframe.
+ *
+ * Frame height varies by viewport size, while the
+ * parent panel maintains its own natural height.
+ */
+
+.demo-preview-frame iframe {
+  display: block;
+  width: 100%;
+  height: 460px;
+
+  border: 0;
+  background: transparent;
+}
+
+/* Preview action */
+
+.demo-generate-button {
+  width: 100%;
+  margin-top: 17px;
+}
+
+/* ==========================================================
+   18. GENERATED CODE EDITOR
+   ========================================================== */
+
+/**
+ * The generated JavaScript editor always uses a dark
+ * appearance, including when the site is in light mode.
+ */
+
+.demo-code-panel {
+  min-width: 0;
+}
+
+.code-container {
+  min-width: 0;
+  overflow: hidden;
+
+  border: 1px solid var(--code-border);
+  border-radius: 11px;
+
+  background: var(--code-bg);
+  color: var(--code-text);
+}
+
+/* Code editor toolbar */
+
+.demo-code-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 11px 15px;
+
+  border-bottom: 1px solid var(--code-border);
+  background: var(--code-header);
+}
+
+/* Toolbar labels */
+
+.demo-code-language,
+.demo-code-filename {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+}
+
+.demo-code-language {
+  color: var(--code-purple);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.demo-code-filename {
+  color: var(--code-muted);
+}
+
+/* Generated source */
+
+.code-container pre {
+  max-height: 390px;
+  margin: 0;
+  padding: 20px;
+
+  overflow: auto;
+
+  color: var(--code-text);
+
+  font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+
+  font-size: 12px;
+  line-height: 1.8;
+  tab-size: 2;
+}
+
+.code-container code {
+  color: inherit;
+  white-space: pre;
+}
+
+/* ==========================================================
+   19. PLAYGROUND INFORMATION
+   ========================================================== */
+
+.demo-playground-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  padding: 0 5px;
+
+  color: var(--demo-subtle);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.demo-playground-note i {
+  margin-top: 4px;
+  color: var(--demo-accent);
+}
+
+/* ==========================================================
+   20. BOTTOM CALL TO ACTION
+   ========================================================== */
+
+.demo-cta-section {
+  padding: 90px 0;
+
+  border-top: 1px solid var(--demo-border-soft);
+
+  background:
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(129, 140, 248, 0.07),
+      transparent 65%
+    ),
+    var(--demo-surface);
+}
+
+.demo-cta-content {
+  max-width: 600px;
+  margin: 0 auto;
+
+  text-align: center;
+}
+
+.demo-cta-content p {
+  margin-bottom: 28px;
+}
+
+/* ==========================================================
+   21. FOOTER
+   ========================================================== */
+
+.demo-footer {
+  padding: 35px 0;
+
+  border-top: 1px solid var(--demo-border-soft);
+  background: var(--demo-bg);
+}
+
+.demo-footer-inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 25px;
+}
+
+/* Footer branding */
+
+.demo-footer-brand strong,
+.demo-footer-brand span {
+  display: block;
+}
+
+.demo-footer-brand strong {
+  color: var(--demo-text);
+  font-size: 15px;
+}
+
+.demo-footer-brand span,
+.demo-footer-credit {
+  color: var(--demo-muted);
+  font-size: 11px;
+}
+
+/* Footer links */
+
+.demo-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+}
+
+.demo-footer-links a {
+  color: var(--demo-muted);
+  font-size: 12px;
+}
+
+.demo-footer-links a:hover {
+  color: var(--demo-accent);
+}
+
+/* Copyright/creator credit */
+
+.demo-footer-credit {
+  text-align: right;
+}
+
+/* ==========================================================
+   22. LIGHT THEME COMPATIBILITY
+   ========================================================== */
+
+/**
+ * These explicit overrides protect text readability and
+ * third-party component contrast in light mode.
+ *
+ * Most component colors are inherited from the variables
+ * defined in the theme tokens above.
+ */
+
+/* Panels and feature cards */
+
+body[data-demo-theme="light"] .demo-panel,
+body[data-demo-theme="light"] .demo-feature-card {
+  border-color: #d6dfeb;
+  background: #ffffff;
+  color: #172338;
+}
+
+/* Headings and labels */
+
+body[data-demo-theme="light"] .demo-panel-header h3,
+body[data-demo-theme="light"] .demo-feature-card h3,
+body[data-demo-theme="light"] .form-label,
+body[data-demo-theme="light"] .demo-switch-row,
+body[data-demo-theme="light"] .demo-section-intro h2,
+body[data-demo-theme="light"] .demo-cta-content h2,
+body[data-demo-theme="light"] .hero-content h1 {
+  color: #172338;
+}
+
+/* Supporting text */
+
+body[data-demo-theme="light"] .demo-panel-header p,
+body[data-demo-theme="light"] .demo-feature-card p,
+body[data-demo-theme="light"] .demo-section-intro p,
+body[data-demo-theme="light"] .hero-description,
+body[data-demo-theme="light"] .demo-field-hint {
+  color: #526178;
+}
+
+/* Navigation and footer links */
+
+body[data-demo-theme="light"] .demo-nav-link,
+body[data-demo-theme="light"] .demo-footer-links a {
+  color: #526178;
+}
+
+/* Position selector */
+
+body[data-demo-theme="light"] .demo-position-grid {
+  background: #f2f5fa;
+}
+
+body[data-demo-theme="light"] .demo-position-grid button {
+  background: #ffffff;
+}
+
+body[data-demo-theme="light"] .demo-position-grid button[aria-pressed="true"] {
+  background: #eef2ff;
+}
+
+body[data-demo-theme="light"] .position-marker {
+  background: #f8faff;
+}
+
+/* Toolbar action buttons */
+
+body[data-demo-theme="light"] .demo-icon-button,
+body[data-demo-theme="light"] .demo-github-button,
+body[data-demo-theme="light"] .demo-small-button {
+  background: #ffffff;
+  color: #172338;
+}
+
+body[data-demo-theme="light"] .demo-icon-button:hover,
+body[data-demo-theme="light"] .demo-github-button:hover,
+body[data-demo-theme="light"] .demo-small-button:hover {
+  background: #f0f3fa;
+}
+
+/**
+ * Keep the hero showcase and generated code editor
+ * readable regardless of the selected site theme.
+ */
+
+body[data-demo-theme="light"] .hero-showcase-code {
+  color: #e4edfc;
+}
+
+body[data-demo-theme="light"] .hero-showcase-top {
+  color: #b6c5dc;
+}
+
+body[data-demo-theme="light"] .code-container,
+body[data-demo-theme="light"] .code-container pre,
+body[data-demo-theme="light"] .code-container code {
+  color: #e4edfc;
+}
+
+body[data-demo-theme="light"] .code-container {
+  background: #0d1421;
+}
+
+body[data-demo-theme="light"] .demo-code-toolbar {
+  background: #151e2d;
+}
+
+/* ==========================================================
+   23. RESPONSIVE: SMALLER DESKTOP
+   ========================================================== */
+
+/**
+ * On smaller desktops, prioritize comfortable form and
+ * preview widths rather than compressing both columns.
+ */
+
+@media (max-width: 1100px) {
+  .hero-layout {
+    gap: 35px;
+  }
+
+  .demo-features-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .playground-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+
+  .playground-settings,
+  .playground-results {
+    gap: 18px;
+  }
+}
+
+/* ==========================================================
+   24. RESPONSIVE: TABLET
+   ========================================================== */
+
+@media (max-width: 991px) {
+  /* Hero */
+
+  .hero-section {
+    padding: 76px 0;
+  }
+
+  .hero-layout {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .hero-content {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .hero-description {
+    margin: 0 auto;
+  }
+
+  .hero-actions,
+  .hero-highlights {
+    justify-content: center;
+  }
+
+  .hero-visual {
+    width: min(100%, 600px);
+    margin: 0 auto;
+  }
+
+  /* Footer */
+
+  .demo-footer-inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .demo-footer-credit {
+    text-align: center;
+  }
+}
+
+/* ==========================================================
+   25. RESPONSIVE: MOBILE
+   ========================================================== */
+
+@media (max-width: 767px) {
+  /* Header */
+
+  .demo-toolbar-inner {
+    min-height: 66px;
+    gap: 12px;
+  }
+
+  .demo-brand {
+    font-size: 17px;
+  }
+
+  .demo-nav {
+    gap: 12px;
+  }
+
+  .demo-nav-docs {
+    display: none;
+  }
+
+  .demo-nav-link {
+    font-size: 12px;
+  }
+
+  /* Hero */
+
+  .hero-section {
+    padding: 60px 0 65px;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(38px, 7vw, 52px);
+  }
+
+  .hero-description {
+    font-size: 14px;
+  }
+
+  /* Sections */
+
+  .features-section,
+  .playground-section,
+  .demo-cta-section {
+    padding: 65px 0;
+  }
+
+  .demo-section-intro {
+    margin-bottom: 30px;
+  }
+
+  /* Panels */
+
+  .demo-panel-header,
+  .demo-panel-content {
+    padding: 18px;
+  }
+
+  /* Preview */
+
+  .demo-preview-frame iframe {
+    height: 400px;
+  }
+}
+
+/* ==========================================================
+   26. RESPONSIVE: SMALL MOBILE
+   ========================================================== */
+
+@media (max-width: 575px) {
+  /* Global */
+
+  body {
+    font-size: 14px;
+  }
+
+  /* Header */
+
+  .demo-toolbar-inner {
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .demo-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+
+    padding-top: 11px;
+
+    border-top: 1px solid var(--demo-border-soft);
+  }
+
+  .demo-github-button {
+    width: 39px;
+    padding: 0;
+  }
+
+  .demo-github-button span,
+  .demo-external-icon {
+    display: none;
+  }
+
+  /* Hero */
+
+  .hero-section {
+    padding: 50px 0;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(36px, 10vw, 45px);
+  }
+
+  .hero-highlights {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .demo-button {
+    width: 100%;
+  }
+
+  /* Hero showcase */
+
+  .hero-visual {
+    padding: 8px 0;
+  }
+
+  .hero-showcase {
+    min-height: 355px;
+    padding: 16px;
+  }
+
+  .hero-showcase-code {
+    padding-bottom: 120px;
+    font-size: 11px;
+  }
+
+  .hero-toast-success {
+    bottom: 112px;
+  }
+
+  .hero-toast-info {
+    right: 13px;
+    bottom: 22px;
+  }
+
+  /* Feature cards */
+
+  .demo-features-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .demo-feature-card {
+    padding: 22px;
+  }
+
+  /* Playground */
+
+  .playground-layout {
+    gap: 16px;
+  }
+
+  /* Panel headers */
+
+  .demo-panel-header {
+    gap: 10px;
+    padding: 16px;
+  }
+
+  .demo-panel-header h3 {
+    font-size: 14px;
+  }
+
+  .demo-panel-header p {
+    font-size: 11px;
+  }
+
+  .demo-panel-content {
+    padding: 16px;
+  }
+
+  .demo-panel-header-icon {
+    width: 35px;
+    height: 35px;
+    flex-basis: 35px;
+  }
+
+  .demo-small-button {
+    padding: 7px 9px;
+  }
+
+  /* Preview */
+
+  .demo-preview-frame iframe {
+    height: 340px;
+  }
+
+  /* Position selector */
+
+  .demo-position-grid {
+    gap: 6px;
+    padding: 9px;
+  }
+
+  .demo-position-grid button {
+    min-height: 78px;
+    padding: 8px 4px;
+  }
+
+  .position-name {
+    font-size: 9px;
+  }
+
+  /* Code editor */
+
+  .code-container pre {
+    padding: 15px;
+    font-size: 11px;
+  }
+
+  /* Footer */
+
+  .demo-footer-links {
+    gap: 12px;
+  }
+}
+
+/**
+ * Additional adjustments for very narrow mobile
+ * screens, including 320px-wide viewports.
+ */
+
+@media (max-width: 360px) {
+  .hero-toast {
+    gap: 8px;
+  }
+
+  .hero-toast small {
+    font-size: 9px;
+  }
+
+  .demo-panel-heading {
+    gap: 8px;
+  }
+
+  .demo-small-button {
+    font-size: 10px;
+  }
+}
+
+/* ==========================================================
+   27. ACCESSIBILITY: REDUCED MOTION
+   ========================================================== */
+
+/**
+ * Respect the user's reduced-motion preference.
+ *
+ * Animation and transition durations are minimized for
+ * the demo interface without changing notification
+ * configuration or the underlying JavaScript lifecycle.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

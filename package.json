@@ -1,0 +1,69 @@
+{
+  "name": "zephyr-toast",
+  "version": "1.5.0",
+  "description": "A lightweight, customizable, dependency-free JavaScript toast notification library.",
+  "type": "module",
+  "main": "./dist/zephyr-toast.es.js",
+  "module": "./dist/zephyr-toast.es.js",
+  "types": "./dist/index.d.ts",
+  "browser": "./dist/zephyr-toast.js",
+  "style": "./dist/zephyr-toast.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/zephyr-toast.es.js",
+      "default": "./dist/zephyr-toast.es.js"
+    },
+    "./browser": "./dist/zephyr-toast.js",
+    "./style.css": "./dist/zephyr-toast.css",
+    "./animations.css": "./dist/zephyr-toast-animate.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --mode module && vite build --mode browser",
+    "build:demo": "npm run build && node scripts/build-demo.mjs",
+    "verify:build": "node scripts/verify-build.mjs",
+    "check": "npm run lint && npm run format:check && npm run test:types && npm run test && npm run verify:build && npm pack --dry-run",
+    "test": "npm run build && vitest run",
+    "test:watch": "vitest",
+    "test:types": "tsc --noEmit --strict --skipLibCheck false src/index.d.ts",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sarwaralamini/zephyr-toast.git"
+  },
+  "keywords": [
+    "toast",
+    "notification",
+    "javascript",
+    "vanilla-js",
+    "toast-notification",
+    "zero-dependency"
+  ],
+  "author": {
+    "name": "Md. Sarwar Alam",
+    "url": "https://github.com/sarwaralamini"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sarwaralamini/zephyr-toast/issues"
+  },
+  "homepage": "https://github.com/sarwaralamini/zephyr-toast#readme",
+  "devDependencies": {
+    "eslint": "^10.12.0",
+    "jsdom": "^30.1.2",
+    "prettier": "^3.9.9",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}
