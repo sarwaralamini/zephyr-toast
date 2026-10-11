@@ -1,6 +1,6 @@
 {
   "name": "zephyr-toast",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "A lightweight, customizable, dependency-free JavaScript toast notification library.",
   "type": "module",
   "main": "./dist/zephyr-toast.es.js",
